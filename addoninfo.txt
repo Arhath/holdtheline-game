@@ -1,0 +1,7 @@
+"AddonInfo"
+{
+	"holdout_example"
+	{
+		"MaxPlayers"		"5"
+	}
+}

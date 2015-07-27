@@ -1,0 +1,4 @@
+"addon"
+{
+	"DOTA_TOOLTIP_MODIFIER_NETHERWORLD_BUFF" "asdasdasd"
+}
