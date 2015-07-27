@@ -63,28 +63,36 @@ function OnRadiantTeleportRightFar(event)
 	unit:Stop()
 end
 
-function BottleWaterEnter( event )
-	local trigger = event.caller
+
+
+function BottleWaterEnter(event)
 	local unit = event.activator
+	local trigger = thisEntity
 	
-	unit.moonwell = 1
+	print(trigger:GetName())
 	
-	print("bottle water enter")
+	--print(string.format("moonwellid: %d", moonwell))
+	if unit ~= nil then
+		unit.BottleWater = true
 	
-	Timers:CreateTimer(function()
-	print("refill timer")
-		GameRules.holdOut:RefillBottle(unit, trigger)
-		if unit.moonwell == 1 then
-			return 1.0
-		else
+		Timers:CreateTimer(function()
+			print("calling bottle refill")
+			GameRules.holdOut:RefillBottle(unit, trigger)
+		
+			if unit.BottleWater then
+				return 1.0
+			end
+		
 			return nil
 		end
+		)
 	end
-	)
 end
 
 function BottleWaterLeave(event)
 	local unit = event.activator
-	print("bottle water leave")
-	unit.moonwell = 0
+	
+	if unit ~= nil then
+		unit.BottleWater = false
+	end
 end
