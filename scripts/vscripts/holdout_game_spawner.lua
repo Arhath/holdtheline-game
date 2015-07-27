@@ -261,3 +261,14 @@ function CHoldoutGameSpawner:StatusReport()
 	print( string.format( "** Spawner %s", self._szNPCClassName ) )
 	print( string.format( "%d of %d spawned", self._nUnitsSpawnedThisRound, self._nTotalUnitsToSpawn ) )
 end
+
+function TestSpawn(name, spawner, player, team)
+	local entSpawn = Entities:FindByName(spawner)		
+		if entSpawn ~= nil then
+			local point = entSpawn:GetOrigin()
+			local unit = CreateUnitByName(name, point, true, nil, nil, team)
+			unit:SetControllableByPlayer(nil, player)
+		else 
+			print("Error: No Spawner found!")
+		end
+end

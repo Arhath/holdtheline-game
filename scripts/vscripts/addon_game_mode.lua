@@ -146,6 +146,8 @@ print (string.format( "InitGameMode") )
 
 	-- Register OnThink with the game engine so it is called every 0.25 seconds
 	GameRules:GetGameModeEntity():SetThink( "OnThink", self, 0.25 ) 
+	
+	TestSpawn("treant_mushroom_creature_big", "testspawner_2", 0, DOTA_TEAM_GOODGUYS)
 end
 
 
