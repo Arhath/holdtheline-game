@@ -56,6 +56,7 @@ function CMoonwell:Think()
 end
 
 function CMoonwell:GetMana()
+	print("moonwell get mana = %d", self._entMoonwell:GetMana())
 	return self._entMoonwell:GetMana()
 end
 

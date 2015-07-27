@@ -218,9 +218,12 @@ function CHoldoutGameMode:RefillBottle(unit, trigger)
 	
 			if bottle ~= nil then
 				print("refreshing bottle")
-				print(bottle:GetInitialCharges())
+				print(bottle:GetCurrentCharges())
 				if bottle:GetCurrentCharges() < 7 then
+				print("bottle charges < 7")
+				print(string.format("moonwell mana: %d", moonwell:GetMana()))
 					if moonwell:GetMana() >= 10 then
+						print("add bottle charge")
 						bottle:SetCurrentCharges(bottle:GetCurrentCharges() + 1)
 						moonwell:AddMana(-10, true)
 						PopupNumbers(unit, "gold", Vector(255, 0, 255), 1.0, 1, POPUP_SYMBOL_POST_EXCLAMATION, nil)
