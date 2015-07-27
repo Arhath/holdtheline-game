@@ -108,7 +108,7 @@
 		// Status
 		//----------------------------------------------------------------
 		"StatusHealth"				"15000"		// Base health.
-		"StatusHealthRegen"			"0.0"		// Health regeneration rate.
+		"StatusHealthRegen"			"15.0"		// Health regeneration rate.
 		"StatusMana"				"15000"		// Base mana.
 		"StatusManaRegen"			"0"			// Mana regeneration rate.
 		
@@ -139,7 +139,7 @@
 		// Bounds
 		//----------------------------------------------------------------
 		"BoundsHullName"			"DOTA_HULL_SIZE_HERO"			// Hull type used for navigation/locomotion.
-		"HealthBarOffset"			"430"
+		"HealthBarOffset"			"140"
 
 		// Movement
 		//----------------------------------------------------------------
@@ -399,7 +399,7 @@
 		 "Model"     "models\items\furion\treant\shroomling_treant\shroomling_treant.vmdl"
 		 "ModelScale"  "1.0"  
 		  
-		  "precache"
+		 "precache"
 			{
 				"particle"  "particles\test_particle\treant_orb.vpcf"
 				"particle_folder"	"particles/units/heroes/hero_elder_titan"
@@ -439,9 +439,23 @@
 	"treant_mushroom_creature_big"
 	{
 		"BaseClass"   "npc_dota_creature" 
-		"Model"    "models\items\furion\treant\shroomling_treant\shroomling_treant.vmdl"
+		"Model"    		"models\items\furion\treant\shroomling_treant\shroomling_treant.vmdl"
 		"ModelScale"  "2" 
-
+		
+		"precache"
+		{
+			"soundfile"		"soundevents/game_sounds_heroes/game_sounds_techies.vsndevts"		
+			"particle"		"particles/units/heroes/hero_techies/techies_land_mine.vpcf"
+			"particle"		"particles/units/heroes/hero_techies/techies_land_mine_explode.vpcf"
+				
+			"soundfile"			"soundevents/game_sounds_heroes/game_sounds_venomancer.vsndevts"
+			"particle"			"particles/units/heroes/hero_venomancer/venomancer_poison_nova.vpcf"
+			"particle"			"particles/units/heroes/hero_venomancer/venomancer_poison_debuff_nova.vpcf"
+			"particle"			"particles/units/heroes/hero_venomancer/venomancer_poison_nova_cast.vpcf"
+				
+			"model"			"models/heroes/techies/fx_techiesfx_mine.vmdl"
+		}
+		
 		// Status
 		//----------------------------------------------------------------
 		"StatusHealth"				"2000"		// Base health.
@@ -498,7 +512,7 @@
 		"BaseClass"   "npc_dota_creature" 
 		"Model"   	 "models\items\furion\treant_flower_1.vmdl"
 		"ModelScale"  "2"  
-		
+			
   		// Status
 		//----------------------------------------------------------------
 		"StatusHealth"				"2000"		// Base health.

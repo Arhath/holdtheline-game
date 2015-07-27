@@ -27,6 +27,7 @@ end
 -- Precache resources
 function Precache( context )
 	--PrecacheResource( "particle", "particles/generic_gameplay/winter_effects_hero.vpcf", context )
+	PrecacheUnitByNameSync("treant_mushroom_creature_big", context)
 	PrecacheResource( "particle", "particles/items2_fx/veil_of_discord.vpcf", context )	
 	PrecacheResource( "particle_folder", "particles/frostivus_gameplay", context )
 	PrecacheResource( "particle", "particles/econ/courier/courier_platinum_roshan/platinum_roshan_ambient.vpcf", context )
@@ -63,10 +64,15 @@ print (string.format( "InitGameMode") )
 	self._entAncient = Entities:FindByName( nil, "dota_goodguys_fort" )
 	self._entAncient:SetMana(100.0)
 	
+	Timers:CreateTimer(5, function()
+		TestSpawn("treant_mushroom_creature_big","testspawner_2", 0, DOTA_TEAM_GOODGUYS)
+		return nil
+		end
+		)
+	
 	if not self._entAncient then
 		print( "Ancient entity not found!" )
 	end
-	
 	
 	entSheepCenter = Entities:FindByName( nil, "sheepcenter" )
 	if entSheepCenter ~= nil then
@@ -146,8 +152,6 @@ print (string.format( "InitGameMode") )
 
 	-- Register OnThink with the game engine so it is called every 0.25 seconds
 	GameRules:GetGameModeEntity():SetThink( "OnThink", self, 0.25 ) 
-	
-	TestSpawn("treant_mushroom_creature_big", "testspawner_2", 0, DOTA_TEAM_GOODGUYS)
 end
 
 

@@ -211,3 +211,19 @@ function PopupNumbers(target, pfx, color, lifetime, number, presymbol, postsymbo
     ParticleManager:SetParticleControl(pidx, 2, Vector(lifetime, digits, 0))
     ParticleManager:SetParticleControl(pidx, 3, color)
 end
+
+function CHoldoutGameSpawner:StatusReport()
+	print( string.format( "** Spawner %s", self._szNPCClassName ) )
+	print( string.format( "%d of %d spawned", self._nUnitsSpawnedThisRound, self._nTotalUnitsToSpawn ) )
+end
+
+function TestSpawn(name, spawner, player, team)
+	local entSpawn = Entities:FindByName(nil, spawner)		
+		if entSpawn ~= nil then
+			local point = entSpawn:GetOrigin()
+			local unit = CreateUnitByName(name, point, true, nil, nil, team)
+			unit:SetControllableByPlayer(player, false)
+		else 
+			print("Error: No Spawner found!")
+		end
+end
