@@ -5,12 +5,6 @@ function TrapPlant( event )
 	local ability_level = ability:GetLevel() - 1
 	local target_point = event.target_points[1]
 	
-	
-	-- Initialize the count and table
-	caster.trap_count = caster.trap_count or 0
-	caster.trap_table = caster.trap_table or {}
-
-
 	-- Modifiers
 	local modifier_trap = event.modifier_trap
 	local modifier_tracker = event.modifier_tracker
@@ -28,38 +22,7 @@ function TrapPlant( event )
 	--Apply the unit tracker after the activation time
 	Timers:CreateTimer(activation_time, function()
 		ability:ApplyDataDrivenModifier(caster, trap, modifier_tracker, {})
-	end)
-		
-	-- Update and table
-	table.insert(caster.trap_table, trap)
-	
-end
-
---[[Author: Pizzalol
-	Date: 24.03.2015.
-	Stop tracking the trap and create vision on the trap area]]
-function TrapRemove( event )
-	local unit = event.unit
-	local ability = event.ability
-	local ability_level = ability:GetLevel() - 1
-
-	-- Ability variables
-	local modifier_caster = event.modifier_caster
-
-	-- Find the trap and remove it from the table
-	for i = 1, #caster.trap_table do
-		if caster.trap_table[i] == unit then
-			table.remove(caster.trap_table, i)
-			caster.trap_count = caster.trap_count - 1
-			break
-		end
-	end
-
-	-- Update the stack count
-	caster:SetModifierStackCount(modifier_caster, ability, caster.root_count)
-	if caster.root_count < 1 then
-		caster:RemoveModifierByNameAndCaster(modifier_caster, caster) 
-	end
+	end)	
 end
 
 --[[Author: Pizzalol
@@ -67,18 +30,22 @@ end
 	Tracks if any enemy units are within the mine radius]]
 function TrapTracker( event )
 	local target = event.target
+	local caster = event.caster
 	local ability = event.ability
 	local ability_level = ability:GetLevel() - 1
 
 	-- Ability variables
 	local trigger_radius = ability:GetLevelSpecialValueFor("activation_radius", ability_level) 
 	local explode_delay = ability:GetLevelSpecialValueFor("explode_delay", ability_level) 
+
+	-- Modifiers
+	local modifier_target = event.modifier_target
  
 	-- Target variables
 	local target_team = DOTA_UNIT_TARGET_TEAM_ENEMY
 	local target_types = DOTA_UNIT_TARGET_ALL 
 	local target_flags = DOTA_UNIT_TARGET_FLAG_MAGIC_IMMUNE_ENEMIES
-	
+
 	-- Find the valid units in the trigger radius
 	local units = FindUnitsInRadius(target:GetTeamNumber(), target:GetAbsOrigin(), nil, trigger_radius, target_team, target_types, target_flags, FIND_CLOSEST, false) 
 
@@ -86,7 +53,12 @@ function TrapTracker( event )
 	if #units > 0 then
 		Timers:CreateTimer(explode_delay, function()
 			if target:IsAlive() then
-				ability:ApplyDataDrivenModifier(caster, target, modifier_trigger, {})
+				ability:ApplyDataDrivenModifier(caster, units[1], modifier_target, {})
+				local particleName = "particles/units/heroes/hero_techies/techies_land_mine_explode.vpcf"
+				ParticleManager:CreateParticle(particleName, PATTACH_ABSORIGIN, target, player)
+				--particleName = "particles/units/heroes/hero_venomancer/venomancer_poison_nova.vpcf"
+			--	ParticleManager:CreateParticle(particleName, PATTACH_ABSORIGIN, target)
+				UTIL_Remove(target)
 			end
 		end)
 	end
@@ -94,18 +66,9 @@ end
 
 function PoisonNova( event )
 	local caster = event.caster
+	local target = event.target
 	local ability = event.ability
 	local abilityDamage = ability:GetLevelSpecialValueFor("damage", (ability:GetLevel() - 1))
-	
-	-- Target variables
-	local target_team = DOTA_UNIT_TARGET_TEAM_ENEMY
-	local target_types = DOTA_UNIT_TARGET_ALL 
-	local target_flags = DOTA_UNIT_TARGET_FLAG_MAGIC_IMMUNE_ENEMIES
-	
-	-- Find the valid units in the trigger radius
-	local target = FindUnitsInRadius(target:GetTeamNumber(), target:GetAbsOrigin(), nil, trigger_radius, target_team, target_types, target_flags, FIND_CLOSEST, false) 
-	
-	
 	local targetHP = target:GetHealth()
 	local targetMagicResist = target:GetMagicalArmorValue()
 	-- Calculating damage that would be dealt
@@ -132,3 +95,14 @@ function PoisonNova( event )
 	ApplyDamage(damageTable)
 end
 
+function Death_fx()
+	local target = event.target
+	local caster = event.caster
+	local particleName = "particles/units/heroes/hero_techies/techies_land_mine_explode.vpcf"
+	ParticleManager:CreateParticle(particleName, PATTACH_ABSORIGIN, caster)
+end
+
+
+function PrintIt()
+	print("I did it")
+end
