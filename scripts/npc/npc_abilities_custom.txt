@@ -9783,6 +9783,7 @@
 			//-------------------------------------------------------------------------------------------------------------
 
 			"AbilityCastPoint"				"0.0"
+			"AbilityCastRange"				"1000"
 			
 			// Time		
 			//-------------------------------------------------------------------------------------------------------------
@@ -9814,12 +9815,12 @@
 				"05"
 				{
 					"var_type"					"FIELD_FLOAT"
-					"explode_delay"				"0.3"
+					"explode_delay"				"0.2"
 				}
 				"06"
 				{
 					"var_type"					"FIELD_INTEGER"
-					"plant_radius"					"1000"
+					"plant_radius"				"1000"
 				}
 				"07"
 				{
@@ -9856,24 +9857,23 @@
 			{
 				"modifier_trap_datadriven"
 				{
-					"IsHidden"		"1"
-					"IsPurgable"	"0"
-					"Duration"		"10"
-					
+					"IsHidden"		"0"
+					"IsPurgable"	"0"					
 						
 					"States"
 					{
-						"MODIFIER_STATE_INVULNERABLE"		"MODIFIER_STATE_VALUE_ENABLED"
+						"MODIFIER_STATE_INVULNERABLE"			"MODIFIER_STATE_VALUE_ENABLED"
 						"MODIFIER_STATE_NO_UNIT_COLLISION"		"MODIFIER_STATE_VALUE_ENABLED"
+						"MODIFIER_STATE_NO_HEALTH_BAR"			"MODIFIER_STATE_VALUE_ENABLED"
 					}
 				
 					"OnDeath"
-					{
-						"CreateThinker"
+					{	
+						"RunScript"
 						{
-							"ModifierName"	"modifier_trap_thinker"
-							"Target" 		"UNIT"
-						}				
+							"ScriptFile"			"poison_trap.lua"
+							"Function"				"Death_Fx"
+						}			
 
 						"FireEffect"
 						{
@@ -9923,20 +9923,12 @@
 								}
 							}
 						}
-
-
-						"RunScript"
-						{
-							"ScriptFile"	"poison_trap.lua"
-							"Function"		"TrapRemove"
-							"modifier_caster"	"modifier_trap_caster_datadriven"
-						}
 					}
 				}
 				
 				"modifier_trap_tracker_datadriven"
 				{
-					"IsHidden"		"1"
+					"IsHidden"		"0"
 					"IsPurgable"	"0"
 
 					"EffectName"	"particles/units/heroes/hero_techies/techies_land_mine.vpcf"
@@ -9947,8 +9939,9 @@
 					{
 						"RunScript"
 						{
-							"ScriptFile"	"poison_trap.lua"
-							"Function"		"TrapTracker"
+							"ScriptFile"		"poison_trap.lua"
+							"Function"			"TrapTracker"
+							"modifier_target"	"modifier_poison_nova_debuff_datadriven"
 						}
 					}
 				}
@@ -9989,31 +9982,6 @@
 							"Target"		"TARGET"
 						}
 					}
-			}
-				
-			"modifier_trap_caster_datadriven"
-			{
-				{
-					"IsBuff"		"1"
-					"IsPurgable"	"0"
-				}
-
-				"modifier_trap_thinker"
-				{
-					"Duration"	"0.03"
-					"OnCreated"
-					{
-						"FireSound"
-						{
-							"EffectName"	"Hero_Techies.LandMine.Detonate"
-							"Target"
-							{
-								"Center"	"TARGET"
-								"Flags"		"DOTA_UNIT_TARGET_FLAG_DEAD"
-							}
-						}
-					}
-				}
 			}
 	}
 }
