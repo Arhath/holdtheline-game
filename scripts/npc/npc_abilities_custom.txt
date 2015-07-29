@@ -9547,6 +9547,37 @@
 						}
 					}
 				}
+
+				"OnKill"
+				{
+					"FireEffect"
+					{
+						"Target"			"TARGET"
+						"EffectName"		"particles/econ/items/abaddon/abaddon_alliance/abaddon_aphotic_shield_explosion_alliance_flash_b.vpcf"
+						"EffectAttachType"	"attach_origin"
+					}
+					
+					"Damage"
+					{
+						"Type"				"DAMAGE_TYPE_MAGICAL"
+						"Damage"			"%damage"
+						"Target"			"TARGET"
+					}
+					
+					"Damage"
+					{
+						"Type"				"DAMAGE_TYPE_MAGICAL"
+						"Damage"			"%damage"
+						"Target"
+						{	
+						
+							"Center"		"UNIT"
+							"Radius"		"%radius"
+							"Teams"			"DOTA_UNIT_TARGET_TEAM_ENEMY"
+							"Types"			"DOTA_UNIT_TARGET_ALL"
+						}
+					}
+				}
 			}
 			
 			"poison_attack_debuff_datadriven"
@@ -9568,6 +9599,36 @@
 						"Target"			"TARGET"
 						"EffectName"		"particles/econ/items/abaddon/abaddon_alliance/abaddon_aphotic_shield_explosion_alliance_flash_b.vpcf"
 						"EffectAttachType"	"follow_origin"
+					}
+					
+					"Damage"
+					{
+						"Type"				"DAMAGE_TYPE_MAGICAL"
+						"Damage"			"%damage"
+						"Target"			"TARGET"
+					}
+					
+					"Damage"
+					{
+						"Type"				"DAMAGE_TYPE_MAGICAL"
+						"Damage"			"%damage"
+						"Target"
+						{	
+						
+							"Center"		"UNIT"
+							"Radius"		"%radius"
+							"Teams"			"DOTA_UNIT_TARGET_TEAM_ENEMY"
+							"Types"			"DOTA_UNIT_TARGET_ALL"
+						}
+					}
+				}
+				"OnDeath"
+				{
+					"FireEffect"
+					{
+						"Target"			"TARGET"
+						"EffectName"		"particles/econ/items/abaddon/abaddon_alliance/abaddon_aphotic_shield_explosion_alliance_flash_b.vpcf"
+						"EffectAttachType"	"attach_origin"
 					}
 					
 					"Damage"
@@ -9873,6 +9934,7 @@
 						{
 							"ScriptFile"			"poison_trap.lua"
 							"Function"				"Death_Fx"
+							"Target"				"TARGET"
 						}			
 
 						"FireEffect"
@@ -9889,7 +9951,7 @@
 						"FireSound"
 						{
 							"EffectName"	"Hero_Venomancer.PoisonNova"
-							"Target"		"UNIT"
+							"Target"		"TARGET"
 						}
 						
 						"FireEffect"
@@ -9898,7 +9960,7 @@
 							"EffectAttachType"	"start_at_customorigin"
 							"ControlPoints"
 							{
-								"00"	"UNIT"
+								"00"	"TARGET"
 								"01"	"0 0 0"
 								"02"	"0 0 0"
 							}
@@ -9931,10 +9993,10 @@
 					"IsHidden"		"0"
 					"IsPurgable"	"0"
 
-					"EffectName"	"particles/units/heroes/hero_techies/techies_land_mine.vpcf"
+					"EffectName"		"particles/units/heroes/hero_techies/techies_land_mine.vpcf"
 					"EffectAttachType"	"follow_origin"
 
-					"ThinkInterval"  "0.1"
+					"ThinkInterval" 	 "0.1"
 					"OnIntervalThink"
 					{
 						"RunScript"

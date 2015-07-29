@@ -54,10 +54,10 @@ function TrapTracker( event )
 		Timers:CreateTimer(explode_delay, function()
 			if target:IsAlive() then
 				ability:ApplyDataDrivenModifier(caster, units[1], modifier_target, {})
-				local particleName = "particles/units/heroes/hero_techies/techies_land_mine_explode.vpcf"
-				ParticleManager:CreateParticle(particleName, PATTACH_ABSORIGIN, target, player)
+				--local particleName = "particles/units/heroes/hero_techies/techies_land_mine_explode.vpcf"
+				--ParticleManager:CreateParticle(particleName, PATTACH_ABSORIGIN, target, player)
 				--particleName = "particles/units/heroes/hero_venomancer/venomancer_poison_nova.vpcf"
-			--	ParticleManager:CreateParticle(particleName, PATTACH_ABSORIGIN, target)
+				--ParticleManager:CreateParticle(particleName, PATTACH_ABSORIGIN, target)
 				UTIL_Remove(target)
 			end
 		end)
@@ -99,10 +99,5 @@ function Death_fx()
 	local target = event.target
 	local caster = event.caster
 	local particleName = "particles/units/heroes/hero_techies/techies_land_mine_explode.vpcf"
-	ParticleManager:CreateParticle(particleName, PATTACH_ABSORIGIN, caster)
-end
-
-
-function PrintIt()
-	print("I did it")
+	ParticleManager:CreateParticle(particleName, PATTACH_ABSORIGIN, target)
 end

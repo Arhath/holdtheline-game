@@ -97,12 +97,12 @@
 		"AbilityLayout"	"6"
 		
 		//"Ability1"	"treant_root_hero"
-		"Ability2"	"treant_eat_tree"
+		"Ability2"		"treant_eat_tree"
 		"Ability1"		"treant_spawn_mushrooms"
 		"Ability4"		"treant_spawn_flowers"
-		//"Ability5"	"treant_spawn_trees"
+		"Ability5"		"treant_spawn_trees"
 		"Ability6"		"treant_raise_nature"			// Ability 6 - Extra.
-		//"Ability7"		"creature_aura_health_regen"			// Ability 7 - Extra.
+		"Ability7"		""			// Ability 7 - Extra.
 		"Ability8"		""			// Ability 8 - Extra.
 		
 		// Status
