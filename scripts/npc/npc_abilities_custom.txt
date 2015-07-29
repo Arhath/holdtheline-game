@@ -9932,16 +9932,14 @@
 					{
 						"CreateThinker"
 						{
-<<<<<<< HEAD
+
 							"ScriptFile"			"poison_trap.lua"
 							"Function"				"Death_Fx"
 							"Target"				"TARGET"
-						}			
-=======
-							"ModifierName"	"modifier_trap_thinker"
-							"Target" 		"UNIT"
-						}				
->>>>>>> origin/master
+							}			
+								"ModifierName"	"modifier_trap_thinker"
+								"Target" 		"UNIT"
+							}				
 
 						"FireEffect"
 						{
