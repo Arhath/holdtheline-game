@@ -18,6 +18,7 @@ bossTimePhase3 = 10
 vecBossArenaPos = nil
 
 function BossTreant:Init(handler, gameRound)
+	self._fPhaseTime = 0
 	self._bossHandler = handler
 	self._gameRound = gameRound
 	self._strBossUnit = "boss_treant" 
@@ -75,7 +76,7 @@ function BossTreant:Spawn()
 	self._bossOriginalHealth = entBossUnit:GetMaxHealth()
 	entBossUnit.difficultyApplier = nil
 	self:ApplyDifficultyBuff(entBossUnit)
-	behaviorSystem = AICore:CreateBehaviorSystem( { BehaviorMoveToArena, BehaviorAttack, BehaviorIdle } ) --( { BehaviorRootHero, BehaviorSpawnFlowers, BehaviorSpawnMushrooms, BehaviorSpawnTrees, BehaviorRaiseNature, BehaviorMoveToArena, BehaviorAttack } )
+	behaviorSystem = AICore:CreateBehaviorSystem( { BehaviorIdle, BehaviorEarthsplitter, BehaviorRootHero, BehaviorSpawnFlowers, BehaviorSpawnMushrooms, BehaviorSpawnTrees, BehaviorRaiseNature, BehaviorMoveToArena, BehaviorAttack } )
 	
 	self._entQuest = SpawnEntityFromTableSynchronous( "quest", {
 		name = self._strRoundTitle,
@@ -137,7 +138,7 @@ function BossTreant:Think()
 		
 		self:AIThink()
 		
-		if testcount == 5 and entBossUnit:GetHealth() >= entBossUnit:GetMaxHealth()/2 then
+		if testcount == 800 and entBossUnit:GetHealth() >= entBossUnit:GetMaxHealth()/2 then
 			entBossUnit:SetHealth(entBossUnit:GetMaxHealth()/2)
 			GameRules:SetRuneSpawnTime(testcount)
 			
@@ -196,9 +197,10 @@ end
 
 function BossTreant:PhaseThink()
 		print (string.format( "phasethink: %d", self._nPhase))
-		
+
 	if self._nPhase == 1 then
 		if self._fBossHpPercent <= 0.66 then
+			self._fPhaseTime = 0
 			self._nPhase = 2
 		end
 		
@@ -219,6 +221,9 @@ function BossTreant:PhaseThink()
 		else
 			fBossArenaDesire = 0.0
 		end
+
+	self._fPhaseTime = self._fPhaseTime + 1	
+
 	elseif self._nPhase == 2 then
 	
 		if self.bPhaseSwitch then
@@ -228,7 +233,7 @@ function BossTreant:PhaseThink()
 			self.bLocReached = false
 			self.bPhaseSwitch = false
 		end
-		
+
 		print("Phase2")
 		if self.bLocReached == false then
 		print("moving in position")
@@ -259,6 +264,9 @@ function BossTreant:PhaseThink()
 					OrderType = DOTA_UNIT_ORDER_CAST_NO_TARGET,
 					AbilityIndex = ability:entindex(),
 				}]]
+				strBossArenaName = "bossarena2"
+				self:SetArena()
+
 				local bossMaxHP = entBossUnit:GetMaxHealth()
 				local orbHP = bossMaxHP * 0.1
 				ExecuteOrderFromTable( order )
@@ -300,9 +308,6 @@ function BossTreant:PhaseThink()
 				ParticleManager:SetParticleControl(self.entOrbRight.particle, 4, Vector(shield_size,0,shield_size))
 				ParticleManager:SetParticleControl(self.entOrbRight.particle, 5, Vector(shield_size,0,0))
 				ParticleManager:SetParticleControlEnt(self.entOrbRight.particle, 0, self.entOrbRight, PATTACH_POINT_FOLLOW, "attach_hitloc", self.entOrbRight:GetAbsOrigin(), true)
-				
-				strBossArenaName = "bossarena2"
-				self:SetArena()
 			end
 		end
 		
@@ -317,9 +322,13 @@ function BossTreant:PhaseThink()
 			if not self.bOrbLeftReachedGoal or self.entOrbLeft:IsAlive() or not self.entOrbLeft:IsNull() then
 				local orbPos
 				local orbHP
-				
+
 				orbPos = self.entOrbLeft:GetAbsOrigin()
 				orbPos.z = 0
+
+				CreateUnitByName("treant_flower_creature", orbPos + Vector(RandomInt(-300, 300),RandomInt(-300, 300), 0), false, nil, nil, entBossUnit:GetTeamNumber())
+				CreateUnitByName("treant_mushroom_creature", orbPos + Vector(RandomInt(-300, 300),RandomInt(-300, 300), 0), false, nil, nil, entBossUnit:GetTeamNumber())
+				CreateUnitByName("npc_dota_furion_treant", orbPos + Vector(RandomInt(-300, 300),RandomInt(-300, 300), 0), false, nil, nil, entBossUnit:GetTeamNumber())
 		
 				orbDistArenaLeft = ( vecBossArenaPos - orbPos):Length()
 				orbHP = self.entOrbLeft:GetHealth()
@@ -337,10 +346,14 @@ function BossTreant:PhaseThink()
 			if not self.bOrbRightReachedGoal or self.entOrbRight:IsAlive() or not self.entOrbRight:IsNull() then
 				local orbPos
 				local orbHP
-				
+
 				orbPos = self.entOrbRight:GetAbsOrigin()
 				orbPos.z = 0
-		
+						
+				CreateUnitByName("treant_flower_creature", orbPos + Vector(RandomInt(-300, 300),RandomInt(-300, 300), 0), false, nil, nil, entBossUnit:GetTeamNumber())
+				CreateUnitByName("treant_mushroom_creature", orbPos + Vector(RandomInt(-300, 300),RandomInt(-300, 300), 0), false, nil, nil, entBossUnit:GetTeamNumber())
+				CreateUnitByName("npc_dota_furion_treant", orbPos + Vector(RandomInt(-300, 300),RandomInt(-300, 300), 0), false, nil, nil, entBossUnit:GetTeamNumber())
+
 				orbDistArenaRight = ( vecBossArenaPos - orbPos ):Length()
 				
 				orbHP = self.entOrbRight:GetHealth()
@@ -356,10 +369,13 @@ function BossTreant:PhaseThink()
 			
 			print(orbDistArenaRight)
 			print(orbDistArenaLeft)
-		
+			
+			--Phasenwechsel (von 2 nach 3)
 			if self.bOrbLeftReachedGoal and self.bOrbRightReachedGoal then
 				print("orbs rached arena 2")
 				self._nPhase = 3
+				self._fPhaseTime = 0
+
 				entBossUnit:SetHealth(entBossUnit:GetHealth() + orbHPPool)
 				
 				if self.entOrbLeft:IsAlive() or not self.entOrbLeft:IsNull() then
@@ -375,21 +391,47 @@ function BossTreant:PhaseThink()
 				FindClearSpaceForUnit(entBossUnit, point, false)
 				entBossUnit:Stop()
 				
+				entBossUnit:RemoveAbility("treant_spawn_flowers")
+				entBossUnit:RemoveAbility("treant_spawn_mushrooms")
+				entBossUnit:RemoveAbility("treant_spawn_trees")
+				entBossUnit:RemoveAbility("treant_raise_nature")
+
+				entBossUnit:AddAbility("spawn_treants")
+
 				entBossUnit:RemoveModifierByName("modifier_invulnerable")
 				self.bFreezeBoss = false
+
+				--Spawn Boss Ads
+				CreateUnitByName("treant_flower_creature_big", vecBossArenaPos + Vector(-300, -100, 0), false, nil, nil, entBossUnit:GetTeamNumber())
+				CreateUnitByName("treant_mushroom_creature_big", vecBossArenaPos + Vector(300, -100, 0), false, nil, nil, entBossUnit:GetTeamNumber())
 			end
 
 		end
-		
+
+		self._fPhaseTime = self._fPhaseTime + 1
+
 	elseif self._nPhase == 3 then
 		print("phase 3 think")
-		local ancient = self._gameRound._gameMode._entAncient
-		local vecAncientPos = ancient:GetOrigin()
-		vecAncientPos.z = 0
-		local distToAncient = (vecAncientPos - vecBossArenaPos):Length()
-		local distIncr = distToAncient / bossTimePhase3 * 0.25
+
+		local bossTimeFight = bossTimePhase3 * 0.6
+		local bossTimeWalk =  bossTimePhase3 - bossTimeFight
+
+		if self._fPhaseTime >= bossTimeFight then
+			--Walk to ancient		
+			local ancient = self._gameRound._gameMode._entAncient
+			local vecAncientPos = ancient:GetOrigin()
+			vecAncientPos.z = 0
+			local distToAncient = (vecAncientPos - vecBossArenaPos):Length()
+			local distIncr = distToAncient / bossTimeWalk * 0.25
+			
+			if vecBossArenaPos.y + distIncr < vecAncientPos.y then
+				vecBossArenaPos = vecBossArenaPos + Vector(0, distIncr, 0)
+			else
+				vecBossArenaPos = vecAncientPos
+			end
+		end
 		
-		vecBossArenaPos = vecBossArenaPos + Vector(0, distIncr, 0)
+		self._fPhaseTime = self._fPhaseTime + 1
 	end
 end
 
@@ -440,7 +482,7 @@ function BehaviorRootHero:Evaluate()
 	end
 
 	if target then
-		desire = 4
+		desire = 5
 		self.order =
 		{
 			OrderType = DOTA_UNIT_ORDER_CAST_TARGET,
@@ -467,6 +509,49 @@ function BehaviorRootHero:Think(dt)
 end
 
 
+--------------------------------------------------------------------------------------------------------
+
+
+BehaviorEarthsplitter = {}
+
+function BehaviorEarthsplitter:Evaluate()
+	self.ability = entBossUnit:FindAbilityByName("creature_earth_splitter")
+	local target
+	local desire = 0
+	
+	if self.ability and self.ability:IsFullyCastable() then
+		local allEnemies = FindUnitsInRadius( entBossUnit:GetTeamNumber(), entBossUnit:GetOrigin(), nil, 800.0, DOTA_UNIT_TARGET_TEAM_ENEMY, DOTA_UNIT_TARGET_HERO, 0, 0, false )
+		if #allEnemies > 0 then
+			target = allEnemies[RandomInt( 1, #allEnemies )]
+		end
+	end
+
+	if target then
+		desire = 4
+		self.order =
+		{
+			OrderType = DOTA_UNIT_ORDER_CAST_POSITION,
+			UnitIndex = entBossUnit:entindex(),
+			Position = target:GetAbsOrigin(),
+			AbilityIndex = self.ability:entindex()
+		}
+	end
+	print (string.format( "Earthsplitter Desire: %d", desire))
+	return desire
+end
+
+
+function BehaviorEarthsplitter:Begin()
+	self.endTime = GameRules:GetGameTime() + 1
+end
+
+BehaviorEarthsplitter.Continue = BehaviorEarthsplitter.Begin --if we re-enter this ability, we might have a different target; might as well do a full reset
+
+function BehaviorEarthsplitter:Think(dt)
+	if not self.ability:IsFullyCastable() and not self.ability:IsInAbilityPhase() then
+		self.endTime = GameRules:GetGameTime()
+	end
+end
 --------------------------------------------------------------------------------------------------------
 
 

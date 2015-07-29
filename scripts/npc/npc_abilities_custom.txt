@@ -1063,12 +1063,12 @@
 
 		// Casting
 		//-------------------------------------------------------------------------------------------------------------
-		"AbilityCastRange"				"2400"
+		"AbilityCastRange"				"1200"
 		"AbilityCastPoint"				"0.4 0.4 0.4"
 
 		// Time		
 		//-------------------------------------------------------------------------------------------------------------
-		"AbilityCooldown"				"0"
+		"AbilityCooldown"				"10"
 
 		// Cost
 		//-------------------------------------------------------------------------------------------------------------
@@ -9156,22 +9156,57 @@
 
   // Special
   //-------------------------------------------------------------------------------------------------------------
-  "AbilitySpecial"
-  {
-   "01"
-   {
-    "var_type"    "FIELD_INTEGER"
-    "number_trees"   "5"
-   }
-   "02"
-   {
-    "var_type"    "FIELD_INTEGER"
-    "spawn_radius"   "700"
-   }
-  } 
+	"AbilitySpecial"
+	{
+	   "01"
+	   {
+	    "var_type"    "FIELD_INTEGER"
+	    "number_trees"   "5"
+	   }
+	   "02"
+	   {
+	    "var_type"    "FIELD_INTEGER"
+	    "spawn_radius"   "700"
+	   }
+	} 
  }
- 
- "treant_spawn_flowers"
+	"spawn_treants"
+	{
+			// General
+		  //-------------------------------------------------------------------------------------------------------------
+		  "AbilityBehavior"    "DOTA_ABILITY_BEHAVIOR_NO_TARGET | DOTA_ABILITY_BEHAVIOR_AOE"
+		  "BaseClass"     	 	"ability_datadriven"
+		  
+		  "AbilityTextureName"    "furion_force_of_nature"
+		  "AbilityCastAnimation"   "ACT_DOTA_CAST_ABILITY_3"
+		  
+		  // Stats
+		  //-------------------------------------------------------------------------------------------------------------
+		  "AbilityCastRange"    "300"
+		  "AbilityCastPoint"    "0.3"
+		  "AbilityCooldown"    "2"
+		  "AbilityManaCost"    "20"
+		  
+
+		  // Special
+		  //-------------------------------------------------------------------------------------------------------------
+		
+		
+		"OnSpellStart"
+		{
+			"SpawnUnit"
+			{
+				"UnitName"		"npc_dota_furion_treant"
+				"Target" 		"CASTER"
+				"UnitCount"		"3"
+				"UnitLimit"		"40"
+				"SpawnRadius"	"300"
+			}
+
+		}
+	}
+
+	 "treant_spawn_flowers"
 	{
 		  // General
 		  //-------------------------------------------------------------------------------------------------------------
@@ -9330,7 +9365,7 @@
 	////////////////////////////////////
 	///////TREANT BOSS CREATURE SPELLS
 	///////////////////////////////////
-	
+
 	"creature_aura_debuff"
 	{
 		// General
@@ -9702,6 +9737,86 @@
 			}
 		}
 	}
+
+	"orb_heal"
+	{
+		// General
+		//-------------------------------------------------------------------------------------------------------------
+		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_AOE | DOTA_ABILITY_BEHAVIOR_PASSIVE"
+		"BaseClass"						"ability_datadriven"
+		"AbilityTextureName"			"witch_doctor_voodoo_restoration"
+		
+		// Special
+		//-------------------------------------------------------------------------------------------------------------
+		"AbilitySpecial"
+		{
+			"01"
+			{
+				"var_type"					"FIELD_INTEGER"
+				"heal_radius"				"450"
+			}
+			"02"
+			{
+				"var_type"					"FIELD_FLOAT"
+				"heal"						"100"
+			}
+		}
+	
+		// Modifiers
+		//-------------------------------------------------------------------------------------------------------------
+		"Modifiers"
+		{	
+			"HealThinker"
+			{	
+				"Passive"			"1"			
+			    "ThinkInterval"		"4"
+
+			    "OnIntervalThink"
+			    {
+					"Heal"
+					{
+						"Target"
+						{
+							"Center"  	"CASTER"
+							"Radius" 	"%heal_radius"
+							"Teams" 	"DOTA_UNIT_TARGET_TEAM_FRIENDLY"
+							"Types" 	"DOTA_UNIT_TARGET_HERO | DOTA_UNIT_TARGET_BASIC"
+						}
+						"HealAmount"	"%heal"
+					}
+
+					"ApplyModifier"
+					{
+						"ModifierName"	"fx_heal_aura"
+						"Target" 		"CASTER"
+						"Duration"		"1"
+					}
+			    }
+			}
+
+			"fx_heal_aura"
+			{
+				"IsHidden"				"1"
+				
+				"OnCreated"
+				{
+					"AttachEffect"
+					{
+						"Target"			"CASTER"
+						"EffectName"		"particles/units/heroes/hero_witchdoctor/witchdoctor_voodoo_restoration.vpcf"
+						"EffectAttachType"	"follow_origin"
+						
+						"ControlPoints"
+						{
+							"00"	"0 0 0"
+							"01"	"%heal_radius 0 0"
+							"02"	"0 0 -200"
+						}
+					}
+				}
+			}
+		}
+	}
 	
 	"viper_corrosive_skin_datadriven"
 	{
@@ -9997,8 +10112,8 @@
 							"Function"		"TrapRemove"
 							"modifier_caster"	"modifier_trap_caster_datadriven"
 						}
-					}
 				}
+			
 				
 				"modifier_trap_tracker_datadriven"
 				{
@@ -10055,27 +10170,28 @@
 							"Target"		"TARGET"
 						}
 					}
-			}
-				
-			"modifier_trap_caster_datadriven"
-			{
-				{
-					"IsBuff"		"1"
-					"IsPurgable"	"0"
 				}
-
-				"modifier_trap_thinker"
+				
+				"modifier_trap_caster_datadriven"
 				{
-					"Duration"	"0.03"
-					"OnCreated"
 					{
-						"FireSound"
+						"IsBuff"		"1"
+						"IsPurgable"	"0"
+					}
+
+					"modifier_trap_thinker"
+					{
+						"Duration"	"0.03"
+						"OnCreated"
 						{
-							"EffectName"	"Hero_Techies.LandMine.Detonate"
-							"Target"
+							"FireSound"
 							{
-								"Center"	"TARGET"
-								"Flags"		"DOTA_UNIT_TARGET_FLAG_DEAD"
+								"EffectName"	"Hero_Techies.LandMine.Detonate"
+								"Target"
+								{
+									"Center"	"TARGET"
+									"Flags"		"DOTA_UNIT_TARGET_FLAG_DEAD"
+								}
 							}
 						}
 					}
@@ -10083,3 +10199,4 @@
 			}
 	}
 }
+
