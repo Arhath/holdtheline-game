@@ -94,15 +94,15 @@
 		// Abilities
 		//----------------------------------------------------------------	
 		
-		"AbilityLayout"	"6"
+		"AbilityLayout"	"7"
 		
-		//"Ability1"	"treant_root_hero"
+		"Ability1"		"treant_root_hero"
 		"Ability2"		"treant_eat_tree"
 		"Ability1"		"treant_spawn_mushrooms"
 		"Ability4"		"treant_spawn_flowers"
 		"Ability5"		"treant_spawn_trees"
 		"Ability6"		"treant_raise_nature"			// Ability 6 - Extra.
-		"Ability7"		""			// Ability 7 - Extra.
+		"Ability7"		"creature_earth_splitter"			// Ability 7 - Extra.
 		"Ability8"		""			// Ability 8 - Extra.
 		
 		// Status
@@ -170,6 +170,7 @@
 			"particle"		"particles/test_particle/aura_debuff_gas.vpcf"
 			"particle"		"particles/econ/items/abaddon/abaddon_alliance/abaddon_aphotic_shield_explosion_alliance_flash_b.vpcf"
 			"particle"		"particles/units/heroes/hero_oracle/oracle_false_promise_break_heal.vpcf"
+			"particle"		"particles/test_particle/aura_debuff_status.vpcf"
 			"model"    		"models/items/furion/flowerstaff.vmdl"
 			"model"    		"models\props_nature\mushroom_wild001.vmdl"
 			"model"			"models/development/invisiblebox.vmdl"
@@ -392,55 +393,12 @@
 			}
 		}
 	}	
-	
-	"treant_orb"
-	{
-		 "BaseClass"   "npc_dota_creature" 
-		 "Model"     "models\items\furion\treant\shroomling_treant\shroomling_treant.vmdl"
-		 "ModelScale"  "1.0"  
-		  
-		 "precache"
-			{
-				"particle"  "particles\test_particle\treant_orb.vpcf"
-				"particle_folder"	"particles/units/heroes/hero_elder_titan"
-				"particle"		"particles/units/heroes/hero_viper/viper_poison_debuff.vpcf"
-			}
-
-		  "Ability1"		"fx_treant_orb"
-		   "Ability2"		"creature_earth_splitter"
-		   "Ability3"		"holdout_poison_nova"
-		   "Ability3"		"viper_corrosive_skin_datadriven"
-		  
-			// Status
-		  //----------------------------------------------------------------
-		  "StatusHealth"    "1000"  // Base health.
-		  "StatusHealthRegen"   "0"  // Health regeneration rate.
-		  "StatusMana"    "2000"   // Base mana.
-		  "StatusManaRegen"   "0"   // Mana regeneration rate.
-		  
-		  // Armor
-		  //----------------------------------------------------------------
-		  "ArmorPhysical"    "20"   // Physical protection.
-		  "MagicalResistance"   "25"  // Magical protection.
-
-		  // Bounds
-		  //----------------------------------------------------------------
-		  "BoundsHullName"   "DOTA_HULL_SIZE_HERO"   // Hull type used for navigation/locomotion.
-		  "HealthBarOffset"   "140"
-
-		  // Movement
-		  //----------------------------------------------------------------
-		  "MovementCapabilities"  "DOTA_UNIT_CAP_MOVE_GROUND"   // Type of locomotion - ground, air
-		  "MovementSpeed"    "500"  // Speed
-		  "MovementTurnRate"   "0.5"  // Turning rate.
-
-	}
-	
+		
 	"treant_mushroom_creature_big"
 	{
 		"BaseClass"   "npc_dota_creature" 
 		"Model"    		"models\items\furion\treant\shroomling_treant\shroomling_treant.vmdl"
-		"ModelScale"  "2" 
+		"ModelScale"  "2.5" 
 		
 		"precache"
 		{
@@ -501,6 +459,7 @@
 		"Ability1"		"mushroom_poison_attack"
 		"Ability2"		"viper_corrosive_skin_datadriven"
 		"Ability3"		"poison_trap"
+		"Ability4"		"orb_heal"
 		
 		"precache"
 		{
