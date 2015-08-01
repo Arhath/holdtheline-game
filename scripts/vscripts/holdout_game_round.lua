@@ -36,7 +36,7 @@ function CHoldoutGameRound:ReadConfiguration( kv, gameMode, roundNumber )
 					if not v.IsBoss then
 						local spawners = self._gameMode:GetSpawnerList()
 						for _, sp in pairs(spawners) do
-							print ( string.format( "spawner : %d name: %s",#self._vSpawners, sp.szSpawnerName ) )
+							--print ( string.format( "spawner : %d name: %s",#self._vSpawners, sp.szSpawnerName ) )
 							local spawner = CHoldoutGameSpawner()
 							v.SpawnerName = sp.szSpawnerName
 							v.Waypoint = sp.szFirstWaypoint
@@ -204,7 +204,7 @@ end
 
 
 function CHoldoutGameRound:Think()
-	print (self._bIsBoss) 
+	----print (self._bIsBoss) 
 	if self._bIsBoss == 0 then
 		for _, spawner in pairs( self._vSpawners ) do
 			spawner:Think()
@@ -233,7 +233,7 @@ function CHoldoutGameRound:IsFinished()
 	
 	if not self._lastEnemiesRemaining == nEnemiesRemaining then
 		self._lastEnemiesRemaining = nEnemiesRemaining
-		print ( string.format( "%d enemies remaining in the round...", #self._vEnemiesRemaining ) )
+		--print ( string.format( "%d enemies remaining in the round...", #self._vEnemiesRemaining ) )
 	end
 	return true
 end
@@ -263,7 +263,7 @@ function CHoldoutGameRound:OnNPCSpawned( event )
 		spawnedUnit:SetDeathXP( 0 )
 		spawnedUnit.unitName = spawnedUnit:GetUnitName()
 		self._nCoreUnitsSpawned = self._nCoreUnitsSpawned + 1
-		print( string.format( "Enemies Spawned: %d", self._nCoreUnitsSpawned ) )
+		----print( string.format( "Enemies Spawned: %d", self._nCoreUnitsSpawned ) )
 	
 		if self._entKillCountSubquest then
 			self._entKillCountSubquest:SetTextReplaceValue( QUEST_TEXT_REPLACE_VALUE_CURRENT_VALUE, self._nCoreUnitsSpawned)
@@ -361,15 +361,15 @@ end
 
 
 function CHoldoutGameRound:StatusReport( )
-	print( string.format( "Enemies remaining: %d", #self._vEnemiesRemaining ) )
+	--print( string.format( "Enemies remaining: %d", #self._vEnemiesRemaining ) )
 	for _,e in pairs( self._vEnemiesRemaining ) do
 		if e:IsNull() then
-			print( string.format( "<Unit %s Deleted from C++>", e.unitName ) )
+			--print( string.format( "<Unit %s Deleted from C++>", e.unitName ) )
 		else
-			print( e:GetUnitName() )
+			--print( e:GetUnitName() )
 		end
 	end
-	print( string.format( "Spawners: %d", #self._vSpawners ) )
+	--print( string.format( "Spawners: %d", #self._vSpawners ) )
 	for _,s in pairs( self._vSpawners ) do
 		s:StatusReport()
 	end

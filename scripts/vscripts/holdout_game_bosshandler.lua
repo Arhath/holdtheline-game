@@ -24,7 +24,7 @@ function CHoldoutGameBossHandler:Init( gameRound, nBoss )
 	if self._nBoss == 1 then
 		self._bossObj = BossTreant()
 		self._bossObj:Init(self, self._gameRound)
-		print("Boss: 1")
+		--print("Boss: 1")
 	end
 	
 end
@@ -33,7 +33,7 @@ end
 function CHoldoutGameBossHandler:Begin()
 	self._bossObj:Begin()
 	self._gamestate = INPROGRESS
-	print("Begin Boss")
+	--print("Begin Boss")
 end
 
 function CHoldoutGameBossHandler:UpdateBossDifficulty()
@@ -43,7 +43,7 @@ end
 function CHoldoutGameBossHandler:Prepare()
 	self._bossObj:Prepare()
 	self._gamestate = PREPARE
-	print("Prepare Boss")
+	--print("Prepare Boss")
 end
 
 
@@ -54,7 +54,7 @@ end
 
 
 function CHoldoutGameBossHandler:Think()
-	print("Think")
+	--print("Think")
 	if self._gamestate == PREPARE then
 		self:Begin()
 	end

@@ -17,10 +17,11 @@ require( "timers" )
 require( "holdout_game_bosshandler" )
 require( "utility_functions" )
 require( "holdout_game_moonwell" )
+require( "movement_system" )
 
 if CHoldoutGameMode == nil then
 	CHoldoutGameMode = class({})
-	print (string.format( "Create Class") )
+	--print (string.format( "Create Class") )
 end
 
 
@@ -47,14 +48,14 @@ end
 -- Actually make the game mode when we activate
 function Activate()
 		GameRules.holdOut = CHoldoutGameMode()
-		print (string.format( "Activated") )
+		--print (string.format( "Activated") )
 		GameRules.holdOut:InitGameMode()
 end
 
 TREE_HEALTH = 10
 
 function CHoldoutGameMode:InitGameMode()
-print (string.format( "InitGameMode") )
+--print (string.format( "InitGameMode") )
 	self._nRoundNumber = 1
 	self._vCoreUnitsReachedGoal =  {}
 	self._vCoreUnitsReachedGoal[DOTA_TEAM_GOODGUYS] = 0
@@ -64,6 +65,10 @@ print (string.format( "InitGameMode") )
 	self._flLastThinkGameTime = nil
 	self._entAncient = Entities:FindByName( nil, "dota_goodguys_fort" )
 	self._entAncient:SetMana(100.0)
+	self._nTeam = DOTA_TEAM_GOODGUYS
+
+	self._movementSystem = CMovementSystem()
+	self._movementSystem:Init(self, DOTA_TEAM_BADGUYS)
 	
 	Timers:CreateTimer(5, function()
 		TestSpawn("treant_mushroom_creature_big","testspawner_2", 0, DOTA_TEAM_GOODGUYS)
@@ -72,19 +77,19 @@ print (string.format( "InitGameMode") )
 		)
 	
 	if not self._entAncient then
-		print( "Ancient entity not found!" )
+		--print( "Ancient entity not found!" )
 	end
 	
 	entSheepCenter = Entities:FindByName( nil, "sheepcenter" )
 	if entSheepCenter ~= nil then
-		print("sheep center found")
+		--print("sheep center found")
 		vecSheepCenter = entSheepCenter:GetOrigin()
 		vecSheepCenter.z = 0
 	end
 
 	entShopSheep = Entities:FindByName(nil, "shopsheep")
 	if entShopSheep ~= nil then
-		print("shepfound")
+		--print("shepfound")
 	end
 	entShopSheep:AddNewModifier( entShopSheep, nil, "modifier_invulnerable", {} )
 
@@ -146,10 +151,12 @@ print (string.format( "InitGameMode") )
 	ListenToGameEvent( "entity_killed", Dynamic_Wrap( CHoldoutGameMode, 'OnEntityKilled' ), self )
 	ListenToGameEvent( "dota_item_picked_up", Dynamic_Wrap( CHoldoutGameMode, 'OnItemPickedUp' ), self )
 	ListenToGameEvent( "dota_holdout_revive_complete", Dynamic_Wrap( CHoldoutGameMode, 'OnHoldoutReviveComplete' ), self )
-	print (string.format( "hookentity") )
+	--print (string.format( "hookentity") )
 	ListenToGameEvent( "game_rules_state_change", Dynamic_Wrap( CHoldoutGameMode, "OnGameRulesStateChange" ), self )
 	ListenToGameEvent('dota_rune_activated_server', Dynamic_Wrap(CHoldoutGameMode, 'OnRuneActivated'), self)
 	ListenToGameEvent('entity_hurt', Dynamic_Wrap(CHoldoutGameMode, 'OnEntityHurt'), self)
+
+
 
 	-- Register OnThink with the game engine so it is called every 0.25 seconds
 	GameRules:GetGameModeEntity():SetThink( "OnThink", self, 0.25 ) 
@@ -197,7 +204,7 @@ function CHoldoutGameMode:ShopSheepIdle()
 		}
 		
 		ExecuteOrderFromTable( order )
-		print("sheep idle")
+		----print("sheep idle")
 	end
 end
 
@@ -218,20 +225,20 @@ function CHoldoutGameMode:RefillBottle(unit, trigger)
 			local bottle = findItemOnUnit( unit, "item_bottle", false)
 	
 			if bottle ~= nil then
-				print("refreshing bottle")
-				print(bottle:GetCurrentCharges())
+				----print("refreshing bottle")
+				----print(bottle:GetCurrentCharges())
 				if bottle:GetCurrentCharges() < 7 then
-				print("bottle charges < 7")
-				print(string.format("moonwell mana: %d", moonwell:GetMana()))
+				----print("bottle charges < 7")
+				----print(string.format("moonwell mana: %d", moonwell:GetMana()))
 					if moonwell:GetMana() >= 10 then
-						print("add bottle charge")
+						----print("add bottle charge")
 						bottle:SetCurrentCharges(bottle:GetCurrentCharges() + 1)
 						moonwell:AddMana(-10, true)
 						PopupNumbers(unit, "gold", Vector(255, 0, 255), 1.0, 1, POPUP_SYMBOL_POST_EXCLAMATION, nil)
 					end
 				end
 			else
-				print("no bottle found")
+				----print("no bottle found")
 			end
 		end
 	end
@@ -308,7 +315,7 @@ function CHoldoutGameMode:OnGameRulesStateChange()
 end
 
 function CHoldoutGameMode:SpawnRunes()
-	print("runes Spawned")
+	--print("runes Spawned")
 	--Timers:CreateTimer(1, function()
 	--	GameRules:SetRuneSpawnTime(-1.0)
 	--end
@@ -362,21 +369,21 @@ function CHoldoutGameMode:OnThink()
 end
 
 function CHoldoutGameMode:OnEntityHurt(keys)
-  --DebugPrint("[BAREBONES] Entity Hurt")
-  --DebugPrintTable(keys)
+  --Debug--print("[BAREBONES] Entity Hurt")
+  --Debug--printTable(keys)
 
 	local damagebits = keys.damagebits -- This might always be 0 and therefore useless
 	if keys.entindex_attacker ~= nil and keys.entindex_killed ~= nil then
 		local entCause = EntIndexToHScript(keys.entindex_attacker)
 		local entVictim = EntIndexToHScript(keys.entindex_killed)
 	
-		print(string.format("damagedone: %d", damagebits))
+		----print(string.format("damagedone: %d", damagebits))
 	
 		if entVictim:IsRealHero() then
 			local trees = GridNav:GetAllTreesAroundPoint(entVictim:GetAbsOrigin(), 140, true)
 		
 			for _, tree in pairs(trees) do
-				print(string.format("tree height: %d hero height: %d", tree:GetAbsOrigin().z, entVictim:GetAbsOrigin().z))
+				----print(string.format("tree height: %d hero height: %d", tree:GetAbsOrigin().z, entVictim:GetAbsOrigin().z))
 				if tree:GetAbsOrigin().z == entVictim:GetAbsOrigin().z then
 					if tree.damage == nil then
 						tree.damage = 1
@@ -398,7 +405,7 @@ end
 
 
 function OnRadiantGoalEnter(trigger)
-	print(trigger.activator)
+	----print(trigger.activator)
 	local u = trigger.activator
 	GameRules.holdOut:OnUnitEntersGoal(u, DOTA_TEAM_GOODGUYS)
 end
@@ -407,7 +414,7 @@ end
 --[[
 function CHoldoutGameMode:_CheckForUnitInGoal()
 	self._vCoreUnitsReachedGoal[DOTA_TEAM_BADGUYS] = self._vCoreUnitsReachedGoal[DOTA_TEAM_BADGUYS] + 1
-	print (string.format( "Units Reached Goal: %d", self._vCoreUnitsReachedGoal[DOTA_TEAM_BADGUYS]  ) )
+	--print (string.format( "Units Reached Goal: %d", self._vCoreUnitsReachedGoal[DOTA_TEAM_BADGUYS]  ) )
 end
 ]]
 
@@ -419,10 +426,12 @@ function CHoldoutGameMode:OnUnitEntersGoal(u, team)
 		UTIL_RemoveImmediate( u )
 		
 		self._vCoreUnitsReachedGoal[team] = self._vCoreUnitsReachedGoal[team] + 1
-		print (string.format( "Units Reached Goal: %d", self._vCoreUnitsReachedGoal[team]  ) )
+		----print (string.format( "Units Reached Goal: %d", self._vCoreUnitsReachedGoal[team]  ) )
 		self._entAncient:SetMana(self._entAncient:GetMana() + goalValue)
-		if self._currentRound:IsBoss() == 1 then
-			self._currentRound:UpdateBossDifficulty()
+		if self._currentRound ~= nil then
+			if self._currentRound:IsBoss() == 1 then
+				self._currentRound:UpdateBossDifficulty()
+			end
 		end
 	end
 end
@@ -449,7 +458,7 @@ end
 function CHoldoutGameMode:OnUnitLeavesCleansingWater(u)
 	--[[if u.Holdout_IsCore and u.Holdout_IsSpawnBuffed then
 		u.Holdout_IsSpawnBuffed = false
-		print ("Debuff Unit.")
+		--print ("Debuff Unit.")
 	end
 	]] 
 end
@@ -583,8 +592,10 @@ function CHoldoutGameMode:OnNPCSpawned( event )
 		return
 	end
 
+	self._movementSystem:OnNPCSpawned(event)
+
 	if spawnedUnit:IsCreep() then
-		print("scaling creature")
+		----print("scaling creature")
 		spawnedUnit:SetHPGain( spawnedUnit:GetMaxHealth() * 0.3 ) -- LEVEL SCALING VALUE FOR HP
 		spawnedUnit:SetManaGain( 0 )
 		spawnedUnit:SetHPRegenGain( 0 )
@@ -631,13 +642,16 @@ end
 
 
 function CHoldoutGameMode:OnEntityKilled( event )
+
+	self._movementSystem:OnEntityKilled(event)
+
 	local killedUnit = EntIndexToHScript( event.entindex_killed )
 	if killedUnit and killedUnit:IsRealHero() then
 		local newItem = CreateItem( "item_tombstone", killedUnit, killedUnit )
 		newItem:SetPurchaseTime( 0 )
 		newItem:SetPurchaser( killedUnit )
 		local tombstone = SpawnEntityFromTableSynchronous( "dota_item_tombstone_drop", {} )
-		print (string.format( "TombstoneSpawned") )
+		----print (string.format( "TombstoneSpawned") )
 		tombstone:SetContainedItem( newItem )
 		tombstone:SetAngles( 0, RandomFloat( 0, 360 ), 0 )
 		FindClearSpaceForUnit( tombstone, killedUnit:GetAbsOrigin(), true )	
@@ -657,7 +671,7 @@ end
 
 
 function CHoldoutGameMode:OnRuneActivated( event )
-	DeepPrintTable( event ) 
+	--Deep--printTable( event ) 
 end
 
 
@@ -732,7 +746,7 @@ ROUND_EXPECTED_VALUES_TABLE = {
 -- Custom game specific console command "holdout_test_round"
 function CHoldoutGameMode:_TestRoundConsoleCommand( cmdName, roundNumber, delay )
 	local nRoundToTest = tonumber( roundNumber )
-	print (string.format( "Testing round %d", nRoundToTest ) )
+	----print (string.format( "Testing round %d", nRoundToTest ) )
 	if nRoundToTest <= 0 or nRoundToTest > #self._vRounds then
 		Msg( string.format( "Cannot test invalid round %d", nRoundToTest ) )
 		return
@@ -793,10 +807,10 @@ function CHoldoutGameMode:_GoldDropConsoleCommand( cmdName, goldToDrop )
 end
 
 function CHoldoutGameMode:_StatusReportConsoleCommand( cmdName )
-	print( "*** Holdout Status Report ***" )
-	print( string.format( "Current Round: %d", self._nRoundNumber ) )
+	--print( "*** Holdout Status Report ***" )
+	--print( string.format( "Current Round: %d", self._nRoundNumber ) )
 	if self._currentRound then
 		self._currentRound:StatusReport()
 	end
-	print( "*** Holdout Status Report End *** ")
+	--print( "*** Holdout Status Report End *** ")
 end

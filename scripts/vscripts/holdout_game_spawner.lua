@@ -38,14 +38,14 @@ end
 function CHoldoutGameSpawner:PostLoad( spawnerList )
 	self._waitForUnit = spawnerList[ self._szWaitForUnit ]
 	if self._szWaitForUnit ~= "" and not self._waitForUnit then
-		print( self._szName .. " has a wait for unit " .. self._szWaitForUnit .. " that is missing from the round data." )
+		--print( self._szName .. " has a wait for unit " .. self._szWaitForUnit .. " that is missing from the round data." )
 	elseif self._waitForUnit then
 		table.insert( self._waitForUnit._dependentSpawners, self )
 	end
 
 	self._groupWithUnit = spawnerList[ self._szGroupWithUnit ]
 	if self._szGroupWithUnit ~= "" and not self._groupWithUnit then
-		print ( self._szName .. " has a group with unit " .. self._szGroupWithUnit .. " that is missing from the round data." )
+		--print ( self._szName .. " has a group with unit " .. self._szGroupWithUnit .. " that is missing from the round data." )
 	elseif self._groupWithUnit then
 		table.insert( self._groupWithUnit._dependentSpawners, self )
 	end
@@ -69,7 +69,7 @@ function CHoldoutGameSpawner:Begin()
 	if self._szSpawnerName ~= "" then
 		local entSpawner = Entities:FindByName( nil, self._szSpawnerName )
 		if not entSpawner then
-			print( string.format( "Failed to find spawner named %s for %s\n", self._szSpawnerName, self._szName ) )
+			--print( string.format( "Failed to find spawner named %s for %s\n", self._szSpawnerName, self._szName ) )
 		end
 		self._vecSpawnLocation = entSpawner:GetAbsOrigin()
 	end
@@ -77,7 +77,7 @@ function CHoldoutGameSpawner:Begin()
 	if self._szWaypointName ~= "" and not self._bDontGiveGoal then
 		self._entWaypoint = Entities:FindByName( nil, self._szWaypointName )
 		if not self._entWaypoint then
-			print( string.format( "Failed to find waypoint named %s for %s", self._szWaypointName, self._szName ) )
+			--print( string.format( "Failed to find waypoint named %s for %s", self._szWaypointName, self._szName ) )
 		end
 	end
 
@@ -162,19 +162,19 @@ end
 
 
 function CHoldoutGameSpawner:_UpdateRandomSpawn()
-	print( "Choosing Random Spawn.")
+	--print( "Choosing Random Spawn.")
 	self._vecSpawnLocation = Vector( 0, 0, 0 )
 	self._entWaypoint = nil
 
 	local spawnInfo = self._gameRound:ChooseRandomSpawnInfo()
 	if spawnInfo == nil then
-		print( string.format( "Failed to get random spawn info for spawner %s.", self._szName ) )
+		--print( string.format( "Failed to get random spawn info for spawner %s.", self._szName ) )
 		return
 	end
 	
 	local entSpawner = Entities:FindByName( nil, spawnInfo.szSpawnerName )
 	if not entSpawner then
-		print( string.format( "Failed to find spawner named %s for %s.", spawnInfo.szSpawnerName, self._szName ) )
+		--print( string.format( "Failed to find spawner named %s for %s.", spawnInfo.szSpawnerName, self._szName ) )
 		return
 	end
 	self._vecSpawnLocation = entSpawner:GetAbsOrigin()
@@ -182,7 +182,7 @@ function CHoldoutGameSpawner:_UpdateRandomSpawn()
 	if not self._bDontGiveGoal then
 		self._entWaypoint = Entities:FindByName( nil, spawnInfo.szFirstWaypoint )
 		if not self._entWaypoint then
-			print( string.format( "Failed to find a waypoint named %s for %s.", spawnInfo.szFirstWaypoint, self._szName ) )
+			--print( string.format( "Failed to find a waypoint named %s for %s.", spawnInfo.szFirstWaypoint, self._szName ) )
 			return
 		end
 	end
@@ -195,7 +195,7 @@ function CHoldoutGameSpawner:_DoSpawn()
 	if nUnitsToSpawn <= 0 then
 		return
 	elseif self._nUnitsSpawnedThisRound == 0 then
-		print( string.format( "Started spawning %s at %.2f", self._szName, GameRules:GetGameTime() ) )
+		--print( string.format( "Started spawning %s at %.2f", self._szName, GameRules:GetGameTime() ) )
 	end
 
 	if self._szSpawnerName == "" then
@@ -237,7 +237,7 @@ function CHoldoutGameSpawner:_DoSpawn()
 
 			local entWp = self:_GetSpawnWaypoint()
 			if entWp ~= nil then
-				entUnit:SetInitialGoalEntity( entWp )
+				--entUnit:SetInitialGoalEntity( entWp )
 			end
 			self._nUnitsSpawnedThisRound = self._nUnitsSpawnedThisRound + 1
 			self._nUnitsCurrentlyAlive = self._nUnitsCurrentlyAlive + 1
@@ -258,8 +258,8 @@ end
 
 
 function CHoldoutGameSpawner:StatusReport()
-	print( string.format( "** Spawner %s", self._szNPCClassName ) )
-	print( string.format( "%d of %d spawned", self._nUnitsSpawnedThisRound, self._nTotalUnitsToSpawn ) )
+	--print( string.format( "** Spawner %s", self._szNPCClassName ) )
+	--print( string.format( "%d of %d spawned", self._nUnitsSpawnedThisRound, self._nTotalUnitsToSpawn ) )
 end
 
 function TestSpawn(name, spawner, player, team)
@@ -269,6 +269,6 @@ function TestSpawn(name, spawner, player, team)
 			local unit = CreateUnitByName(name, point, true, nil, nil, team)
 			unit:SetControllableByPlayer(nil, player)
 		else 
-			print("Error: No Spawner found!")
+			--print("Error: No Spawner found!")
 		end
 end

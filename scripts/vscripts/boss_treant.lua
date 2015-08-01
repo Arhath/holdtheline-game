@@ -35,15 +35,15 @@ function BossTreant:Init(handler, gameRound)
 	
 	self:SetArena()
 
-	print("bosshandlerinit")
-	print(fBossArenaDesire)
+	--print("bosshandlerinit")
+	--print(fBossArenaDesire)
 end
 
 function BossTreant:SetArena()
 	entBossArena = Entities:FindByName(nil, strBossArenaName)
-	print(strBossArenaName)
+	--print(strBossArenaName)
 	if entBossArena ~= nil then
-		print ("bossarenafound")
+		--print ("bossarenafound")
 		vecBossArenaPos = entBossArena:GetOrigin()
 		vecBossArenaPos.z = 0
 	end
@@ -51,24 +51,24 @@ end
 
 
 function BossTreant:Begin()
-	print("begin")
+	--print("begin")
 	self:Spawn()
 end
 
 
 function BossTreant:Prepare()
-	print("prepare")
+	--print("prepare")
 	PrecacheUnitByNameAsync( self._strBossUnit, function( sg ) self._sg = sg end )
 end
 
 
 function BossTreant:Spawn()
-	print("spawn")
+	--print("spawn")
 	local entSpawner = Entities:FindByName( nil, self._strSpawner)
 	local vecSpawnLocation = nil
 	
 	if not entSpawner then
-			print( string.format( "Failed to find spawner named %s" , self._strSpawner) )
+			--print( string.format( "Failed to find spawner named %s" , self._strSpawner) )
 	end
 	
 	vecSpawnLocation = entSpawner:GetAbsOrigin()
@@ -196,7 +196,7 @@ end
 
 
 function BossTreant:PhaseThink()
-		print (string.format( "phasethink: %d", self._nPhase))
+		--print (string.format( "phasethink: %d", self._nPhase))
 
 	if self._nPhase == 1 then
 		if self._fBossHpPercent <= 0.66 then
@@ -204,20 +204,20 @@ function BossTreant:PhaseThink()
 			self._nPhase = 2
 		end
 		
-		print("phase1think")
+		--print("phase1think")
 		
 		local bossPos = entBossUnit:GetAbsOrigin()
 		bossPos.z = 0
 		
 		local distArena = ( vecBossArenaPos - bossPos ):Length()
-		print (string.format( "dist arena: %d", distArena))
+		--print (string.format( "dist arena: %d", distArena))
 		local distDiff = distArena - fBossArenaRange
-		print (string.format( "dist diff: %d", distDiff))
-		print(distDiff)
+		--print (string.format( "dist diff: %d", distDiff))
+		--print(distDiff)
 		
 		if distDiff > 0 then
 			fBossArenaDesire = 5.0 + 0.01 * distDiff
-			print("distdiff > 0")
+			--print("distdiff > 0")
 		else
 			fBossArenaDesire = 0.0
 		end
@@ -234,9 +234,9 @@ function BossTreant:PhaseThink()
 			self.bPhaseSwitch = false
 		end
 
-		print("Phase2")
+		--print("Phase2")
 		if self.bLocReached == false then
-		print("moving in position")
+		--print("moving in position")
 		
 		
 		
@@ -257,7 +257,7 @@ function BossTreant:PhaseThink()
 				self.bLocReached = true
 				--entBossUnit:AddAbility(self.abilityPhase2)
 				--[[local ability = entBossUnit:FindAbilityByName(self.abilityPhase2)
-				print(ability)
+				--print(ability)
 				local order =
 				{
 					UnitIndex = entBossUnit:entindex(),
@@ -312,7 +312,7 @@ function BossTreant:PhaseThink()
 		end
 		
 		if self.bLocReached then
-			print("reached position")
+			--print("reached position")
 			
 			local orbDistArenaLeft
 			local orbDistArenaRight
@@ -335,7 +335,7 @@ function BossTreant:PhaseThink()
 				orbHPPool = orbHPPool + orbHP
 				
 				if orbDistArenaLeft <= 900 then
-					print("setleftarenagoal")
+					--print("setleftarenagoal")
 					self.bOrbLeftReachedGoal = true
 				end
 				
@@ -360,19 +360,19 @@ function BossTreant:PhaseThink()
 				orbHPPool = orbHPPool + orbHP
 				
 				if orbDistArenaRight <= 900 then
-					print("setrightarenagoal")
+					--print("setrightarenagoal")
 					self.bOrbRightReachedGoal = true
 				end
 			else
 				orbDistArenaRight = 0
 			end
 			
-			print(orbDistArenaRight)
-			print(orbDistArenaLeft)
+			--print(orbDistArenaRight)
+			--print(orbDistArenaLeft)
 			
 			--Phasenwechsel (von 2 nach 3)
 			if self.bOrbLeftReachedGoal and self.bOrbRightReachedGoal then
-				print("orbs rached arena 2")
+				--print("orbs rached arena 2")
 				self._nPhase = 3
 				self._fPhaseTime = 0
 
@@ -411,7 +411,7 @@ function BossTreant:PhaseThink()
 		self._fPhaseTime = self._fPhaseTime + 1
 
 	elseif self._nPhase == 3 then
-		print("phase 3 think")
+		--print("phase 3 think")
 
 		local bossTimeFight = bossTimePhase3 * 0.6
 		local bossTimeWalk =  bossTimePhase3 - bossTimeFight
@@ -449,7 +449,7 @@ function BossTreant:AIThink()
 	self._fBossHpPercent = entBossUnit:GetHealth() / entBossUnit:GetMaxHealth()
 	
 	self:PhaseThink()
-	print (string.format( "phase: %d", self._nPhase))
+	--print (string.format( "phase: %d", self._nPhase))
 	
 	if not self.bFreezeBoss then
 		behaviorSystem:Think()
@@ -491,7 +491,7 @@ function BehaviorRootHero:Evaluate()
 			AbilityIndex = self.ability:entindex()
 		}
 	end
-	print (string.format( "root Desire: %d", desire))
+	--print (string.format( "root Desire: %d", desire))
 	return desire
 end
 
@@ -536,7 +536,7 @@ function BehaviorEarthsplitter:Evaluate()
 			AbilityIndex = self.ability:entindex()
 		}
 	end
-	print (string.format( "Earthsplitter Desire: %d", desire))
+	--print (string.format( "Earthsplitter Desire: %d", desire))
 	return desire
 end
 
@@ -569,7 +569,7 @@ function BehaviorSpawnFlowers:Evaluate()
 			UnitIndex = entBossUnit:entindex(),
 			AbilityIndex = self.ability:entindex()
 		}
-		print (string.format( "flowers Desire: %d", desire))
+		--print (string.format( "flowers Desire: %d", desire))
 	end
 	return desire
 end
@@ -606,7 +606,7 @@ function BehaviorSpawnMushrooms:Evaluate()
 			AbilityIndex = self.ability:entindex()
 		}
 	
-	print (string.format( "mushroom Desire: %d", desire))
+	--print (string.format( "mushroom Desire: %d", desire))
 	end
 	return desire
 end
@@ -642,7 +642,7 @@ function BehaviorSpawnTrees:Evaluate()
 			UnitIndex = entBossUnit:entindex(),
 			AbilityIndex = self.ability:entindex()
 		}
-		print (string.format( "tree Desire: %d", desire))
+		--print (string.format( "tree Desire: %d", desire))
 	end
 	return desire
 end
@@ -686,7 +686,7 @@ function BehaviorRaiseNature:Evaluate()
 			UnitIndex = entBossUnit:entindex(),
 			AbilityIndex = self.ability:entindex()
 		}
-		print (string.format( "raise Desire: %d", desire))
+		--print (string.format( "raise Desire: %d", desire))
 	end
 	return desire
 end
@@ -713,7 +713,7 @@ BehaviorMoveToArena = {}
 function BehaviorMoveToArena:Evaluate()
 	local desire = 0
 	desire = fBossArenaDesire
-	print (string.format( "arenadesire: %d", fBossArenaDesire))
+	--print (string.format( "arenadesire: %d", fBossArenaDesire))
 	if desire > 0 then
 		self.order =
 		{
@@ -721,7 +721,7 @@ function BehaviorMoveToArena:Evaluate()
 			OrderType = DOTA_UNIT_ORDER_MOVE_TO_POSITION,
 			Position = vecBossArenaPos,
 		}
-		print (string.format( "move to arena Desire: %d", desire))
+		--print (string.format( "move to arena Desire: %d", desire))
 	end
 	return desire
 end
@@ -756,7 +756,7 @@ function BehaviorAttack:Evaluate()
 			OrderType = DOTA_UNIT_ORDER_ATTACK,
 			TargetEntindex = target:entindex(),
 		}
-		print (string.format( "attack desire: %d", desire))
+		--print (string.format( "attack desire: %d", desire))
 	end
 	return desire
 end
@@ -779,7 +779,7 @@ BehaviorIdle = {}
 function BehaviorIdle:Evaluate()
 	local desire = 0.1
 	
-	print (string.format( "idle desire: %d", desire))
+	--print (string.format( "idle desire: %d", desire))
 		self.order =
 		{
 			UnitIndex = entBossUnit:entindex(),
