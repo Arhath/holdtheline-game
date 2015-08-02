@@ -15,6 +15,7 @@ MAX_TIME_IGNORE = 5.0
 
 function CMovementSystem:OnNPCSpawned( event )
 	local spawnedUnit = EntIndexToHScript( event.entindex )
+	print(spawnedUnit:GetClassname())
 	if not spawnedUnit or spawnedUnit:GetClassname() == "npc_dota_thinker" or spawnedUnit:IsPhantom() then
 		return
 	end
