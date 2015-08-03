@@ -376,6 +376,8 @@ function CHoldoutGameMode:OnEntityHurt(keys)
 	if keys.entindex_attacker ~= nil and keys.entindex_killed ~= nil then
 		local entCause = EntIndexToHScript(keys.entindex_attacker)
 		local entVictim = EntIndexToHScript(keys.entindex_killed)
+
+		self._movementSystem:OnEntityHurt(keys)
 	
 		----print(string.format("damagedone: %d", damagebits))
 	

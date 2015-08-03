@@ -753,8 +753,8 @@ function BehaviorAttack:Evaluate()
 		self.order =
 		{
 			UnitIndex = entBossUnit:entindex(),
-			OrderType = DOTA_UNIT_ORDER_ATTACK,
-			TargetEntindex = target:entindex(),
+			OrderType = DOTA_UNIT_ORDER_ATTACK_TARGET,
+			TargetIndex = target:entindex(),
 		}
 		--print (string.format( "attack desire: %d", desire))
 	end

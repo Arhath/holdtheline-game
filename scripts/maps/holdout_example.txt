@@ -75,7 +75,7 @@
 		{
 			"NPCName"				"npc_dota_creature_kobold_tunneler"
 			"TotalUnitsToSpawn"		"100"
-			"UnitsPerSpawn"			"4"
+			"UnitsPerSpawn"			"2"
 			"SpawnInterval"			"2"
 			"SpawnerName"			"path_invader1_1"
 			"DontOffsetSpawn"		"true"

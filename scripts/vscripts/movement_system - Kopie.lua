@@ -2,26 +2,15 @@ if CMovementSystem == nil then
 	CMovementSystem = class({})
 end
 
-MAX_TARGET_TIME			= 10.0
-MIN_TARGET_TIME			= 7.0
-RANGE_NEXT_WAYPOINT 	= 400.0
-AGGRO_RANGE_MAX			= 900.0
-AGGRO_RANGE_MIN			= 400.0
-AGGRO_UNITS_MIN_RANGE	= 20
-ATTACK_AGGRO_AOE		= 400.0
+MAX_TIME_FOR_TARGET = 10.0
+RANGE_NEXT_WAYPOINT = 400.0
+AGGRO_RANGE_MAX		= 900.0
+AGGRO_RANGE_MIN		= 400.0
+AGGRO_UNITS_MIN_RANGE = 20
+ATTACK_AGGRO_AOE = 400.0
 
-MAX_TIME_IGNORE			= 5.0
+MAX_TIME_IGNORE = 5.0
 
-debugtimer = 0.0
-
-AGGRO_TYPE_DAMAGE_ENEMY	= 5
-AGGRO_TYPE_DAMAGE_OWN	= 3
-AGGRO_TYPE_DAMAGE_AOE	= 2
-AGGRO_TYPE_SIGHT		= 1
-
-AGGRO_OVERWRITE_ALL		= 10
-AGGRO_OVERWRITE_RENEW	= 2
-AGGRO_OVERWRITE_NORMAL	= 1
 
 
 
@@ -31,9 +20,9 @@ function CMovementSystem:OnNPCSpawned( event )
 		return
 	end
 
-	--print("checking unit for movement system")
+	----print("checking unit for movement system")
 	if spawnedUnit:GetTeamNumber() == self:GetTeam() then
-		--print("inserting unit to table movement system")
+		----print("inserting unit to table movement system")
 		table.insert(self._vUnits, spawnedUnit)
 		spawnedUnit.MovementSystem =
 		{
@@ -41,12 +30,10 @@ function CMovementSystem:OnNPCSpawned( event )
 			NextWaypoint = nil,
 			TargetList = {},
 			Target = nil,
-			AggroType = 0,
 			IgnoreTarget = nil,
 			IgnoreTime = 0,
 			TargetTime = 0,
 			MaxTargetTime = 0,
-			MinTargetTime = 0,
 			CanChangeTarget = true,
 		}
 	end
@@ -77,7 +64,7 @@ function CMovementSystem:OnEntityKilled( event )
 						end
 					end
 				end
-				--print("removing unit from table movement system")
+				----print("removing unit from table movement system")
 			end
 		end
 
@@ -95,7 +82,7 @@ function CMovementSystem:OnEntityHurt( keys)
 		local entCause = EntIndexToHScript(keys.entindex_attacker)
 		local entVictim = EntIndexToHScript(keys.entindex_killed)
 	
-		--print(string.format("damagedone: %d", damagebits))
+		----print(string.format("damagedone: %d", damagebits))
 		if entCause.MovementSystem == nil or entVictim.MovementSystem == nil then
 			return
 		end
@@ -114,17 +101,15 @@ function CMovementSystem:OnEntityHurt( keys)
 				false
 			)
 
-			DebugDrawCircle(entVictim:GetOrigin() + Vector(0, 0, 100), Vector(255, 255, 255), 0, ATTACK_AGGRO_AOE, false, 1)
-
 			for _, nt in pairs(newTargets) do
-				self:UnitAggroTarget(nt, entCause, MAX_TARGET_TIME, 4, AGGRO_TYPE_DAMAGE_AOE, AGGRO_OVERWRITE_RENEW)
+				self:UnitAggroTarget(nt, entCause, MAX_TIME_FOR_TARGET, false)
 			end
 
-			self:UnitAggroTarget(entVictim, entCause, MAX_TARGET_TIME, 7, AGGRO_TYPE_DAMAGE_ENEMY, AGGRO_OVERWRITE_RENEW)
+			self:UnitAggroTarget(entVictim, entCause, MAX_TIME_FOR_TARGET, true)
 		end
 
 		if entCause.MovementSystem.Type == "attacker" and entVictim.MovementSystem.Type == "defender" then
-			self:UnitAggroTarget(entCause, entVictim, MAX_TARGET_TIME, 7, AGGRO_TYPE_DAMAGE_OWN, AGGRO_OVERWRITE_RENEW)
+			self:UnitAggroTarget(entCause, entVictim, MAX_TIME_FOR_TARGET, true)
 		end
 	end
 end
@@ -159,22 +144,7 @@ end
 
 function CMovementSystem:Think()
 	for _, au in pairs(self._vAggroUnits) do
-
-		for k, t in pairs(au.MovementSystem.TargetList) do
-			if t:IsNull() or not t:IsAlive() then
-				table.remove(au.MovementSystem.TargetList, k)
-			else
-				DebugDrawLine(au:GetOrigin() + Vector(0, 0, 100),t:GetOrigin() + Vector(0, 0, 100), 255, 255, 255, false, 0.25)
-				--print(t:GetName())
-			end
-		end
-
-		local aggroNum = #au.MovementSystem.TargetList
-		if #au.MovementSystem.TargetList > AGGRO_UNITS_MIN_RANGE  then
-			aggroNum = AGGRO_UNITS_MIN_RANGE
-		end
-		
-		local aggroRange = AGGRO_RANGE_MAX - (aggroNum * (AGGRO_RANGE_MAX - AGGRO_RANGE_MIN) / AGGRO_UNITS_MIN_RANGE)
+		local aggroRange = AGGRO_RANGE_MAX - (#au.MovementSystem.TargetList * (AGGRO_RANGE_MAX - AGGRO_RANGE_MIN) / AGGRO_UNITS_MIN_RANGE)
 		--print(string.format("aggrorange: %d  numtargets: %d", aggroRange, #au.MovementSystem.TargetList))
 		local pos = au:GetAbsOrigin()
 
@@ -192,11 +162,8 @@ function CMovementSystem:Think()
 			)
 
 		for _, nt in pairs(newTargets) do
-			self:UnitAggroTarget(nt, au, MAX_TARGET_TIME, 4, AGGRO_TYPE_SIGHT, AGGRO_OVERWRITE_NORMAL)
+			self:UnitAggroTarget(nt, au, MAX_TIME_FOR_TARGET, false)
 		end
-
-		DebugDrawText(au:GetOrigin() + Vector(0, 0, 100), string.format("Targets: %d", #au.MovementSystem.TargetList), false, 0.25)
-		DebugDrawCircle(au:GetOrigin() + Vector(0, 0, 100), Vector(255, 255, 255), 0, aggroRange, false, 0.25)
 	end
 
 	for _,unit in pairs(self._vUnits) do
@@ -219,7 +186,6 @@ function CMovementSystem:UnitThink( unit )
 	end
 
 	if unit.MovementSystem.Target ~= nil then
-
 		if unit.MovementSystem.TargetTime >= unit.MovementSystem.MaxTargetTime then
 
 			unit.MovementSystem.IgnoreTarget = unit.MovementSystem.Target
@@ -234,7 +200,6 @@ function CMovementSystem:UnitThink( unit )
 			unit.MovementSystem.IgnoreTarget = unit.MovementSystem.Target
 			unit.MovementSystem.IgnoreTime = 0
 			unit.MovementSystem.Target = nil
-			unit.MovementSystem.AggroType = 0
 			unit.MovementSystem.TargetTime = 0
 			unit.MovementSystem.MaxTargetTime = 0
 			unit.MovementSystem.CanChangeTarget = true
@@ -243,127 +208,63 @@ function CMovementSystem:UnitThink( unit )
 			print("max target time reached")
 			print("ignore unit: " .. unit.MovementSystem.IgnoreTarget:GetName())
 		else
-			if unit.MovementSystem.TargetTime >= unit.MovementSystem.MinTargetTime then
-				unit.MovementSystem.CanChangeTarget = true
-			end
-
-			if not unit.MovementSystem.Target:IsAlive() then
-
-				for i, t in pairs(unit.MovementSystem.Target.MovementSystem.TargetList) do
-					if unit == t then
-						table.remove(unit.MovementSystem.Target.MovementSystem.TargetList, i)
-					end
-				end
-
-				unit.MovementSystem.IgnoreTarget = nil
-				unit.MovementSystem.IgnoreTime = 0
-				unit.MovementSystem.Target = nil
-				unit.MovementSystem.AggroType = 0
-				unit.MovementSystem.TargetTime = 0
-				unit.MovementSystem.MaxTargetTime = 0
-				unit.MovementSystem.MinTargetTime = 0
-				unit.MovementSystem.CanChangeTarget = true
-				unit.MovementSystem.NextWaypoint = nil
-			end
-
-
-			print(string.format("target time: %d", unit.MovementSystem.TargetTime))
+			--print(string.format("target time: %d", unit.MovementSystem.TargetTime))
 			unit.MovementSystem.TargetTime = unit.MovementSystem.TargetTime + self:GetTickrate()
 		end
-
-		
-
 	end
 
 	if unit.MovementSystem.Target ~= nil then
 		self:UnitAttackTarget(unit, unit.MovementSystem.Target)
 		--print("unitthinkattack")
 	else
-		--print("UnitThinkMovement")
+		----print("UnitThinkMovement")
 		self:UnitThinkMovement(unit)
 	end
-
-	--if debugtimer >= 1.0 then
-
-		if unit.MovementSystem.Target ~= nil then
-			DebugDrawText(unit:GetOrigin() + Vector(0, 0, 100), string.format("Target: %d", unit.MovementSystem.TargetTime), false, 0.25)
-		elseif unit.MovementSystem.IgnoreTarget ~= nil then
-			DebugDrawText(unit:GetOrigin() + Vector(0, 0, 100), string.format("Ignore: %d", unit.MovementSystem.IgnoreTime), false, 0.25)
-		end
-
-	--	debugtimer = 0.0
-	--end
-
-	--debugtimer = debugtimer + self:GetTickrate()
 end
 
-function  CMovementSystem:UnitAggroTarget( unit, target, timeMax, timeMin, aggroType, overwrite)
+function  CMovementSystem:UnitAggroTarget( unit, target, time, always)
 	local bNewTarget = true
 
-	if unit.MovementSystem.Type == "attacker" and target.MovementSystem.Type == "defender" then
+	if not always then
 
-		if overwrite ~= AGGRO_OVERWRITE_ALL then
-
-			if unit.MovementSystem.Target ~= nil then
-				if overwrite ~= AGGRO_OVERWRITE_RENEW then
-					if not unit.MovementSystem.CanChangeTarget then
-						if unit.MovementSystem.AggroType >= aggroType then
-							--print("not setting target")
-							return
-						end
-					else
-						if unit.MovementSystem.Target == target then
-							return
-						end
-					end
-				else
-					if not unit.MovementSystem.CanChangeTarget then
-						if unit.MovementSystem.AggroType > aggroType then
-							return
-						elseif unit.MovementSystem.Target ~= target then		
-							return
-						end
-					end
-				end
-			end
-
-			if unit.MovementSystem.IgnoreTarget == target then
-				if aggroType < AGGRO_TYPE_DAMAGE_OWN then
-					return
-				end
+		if unit.MovementSystem.Target ~= nil then
+			if not unit.MovementSystem.CanChangeTarget then
+				--print("not setting target")
+				return
 			end
 		end
 
-		print("settingTarget")
-
-		if target.MovementSystem.Type == "defender" then
-			if #target.MovementSystem.TargetList > 0 then
-
-				for _, ot in pairs(target.MovementSystem.TargetList) do
-					if ot == unit then
-						bNewTarget = false
-						break
-					end
-				end
-			end
-
-			if bNewTarget then
-				table.insert(target.MovementSystem.TargetList, unit)
-			end
+		if unit.MovementSystem.IgnoreTarget == target then
+			return
 		end
-
-		unit.MovementSystem.Target = target
-		unit.MovementSystem.AggroType = aggroType
-		unit.MovementSystem.TargetTime = 0
-		unit.MovementSystem.MaxTargetTime = timeMax
-		unit.MovementSystem.MinTargetTime = timeMin
-		unit.MovementSystem.CanChangeTarget = false
-		unit.MovementSystem.IgnoreTarget = nil
-		unit.MovementSystem.IgnoreTime = 0
-		print("new aggro Target: " .. unit.MovementSystem.Target:GetName())
-
-		DebugDrawLine(unit:GetOrigin() + Vector(0, 0, 100),target:GetOrigin() + Vector(0, 0, 100), 255, 255, 255, false, 1)
 	end
+
+	--print("settingTarget")
+
+	if target.MovementSystem.Type == "defender" then
+		if #target.MovementSystem.TargetList > 0 then
+
+			for _, ot in pairs(target.MovementSystem.TargetList) do
+				if ot == unit then
+					bNewTarget = false
+					break
+				end
+			end
+
+		end
+
+		if bNewTarget then
+			table.insert(target.MovementSystem.TargetList, unit)
+		end
+	end
+
+	unit.MovementSystem.Target = target
+	unit.MovementSystem.TargetTime = 0
+	unit.MovementSystem.MaxTargetTime = time
+	unit.MovementSystem.CanChangeTarget = false
+	unit.MovementSystem.IgnoreTarget = nil
+	unit.MovementSystem.IgnoreTime = 0
+	--print("new aggro Target: " .. unit.MovementSystem.Target:GetName())
 end
 
 
@@ -383,17 +284,17 @@ function CMovementSystem:UnitThinkMovement( unit )
 	local nBest = nil
 
 	if unit.MovementSystem.NextWaypoint == nil then
-		print("finding next waypoint")
+		--print("finding next waypoint")
 		for i, str in pairs(self._vWaypoints) do
 			if str == "end" then
 				if self._vWaypoints[i + 1] == nil then
 					break
 				end
 			else
-				print("best waypoint math")
+				--print("best waypoint math")
 				local waypoint = Entities:FindByName(nil, str)
 				if waypoint ~= nil then
-					print("got a waypoint")
+					--print("got a waypoint")
 					local orig = waypoint:GetOrigin()
 					local dist = GridNav:FindPathLength(posUnit, orig)
 
@@ -401,7 +302,7 @@ function CMovementSystem:UnitThinkMovement( unit )
 						bSetBest = true
 					else
 						if dist < bestDist then
-							print("setting bool")
+							--print("setting bool")
 							bSetBest = true
 						end
 					end
@@ -411,40 +312,13 @@ function CMovementSystem:UnitThinkMovement( unit )
 						nBest = i
 
 						bSetBest = false
-						print(string.format("setting best waypoint: %d", nBest))
+						--print(string.format("setting best waypoint: %d", nBest))
 					end
 				end
 			end
 		end
 
 		if nBest ~= nil then
-			local str = self._vWaypoints[nBest + 1]
-
-			if str ~= "end" then
-				local waypoint1 = Entities:FindByName(nil, self._vWaypoints[nBest])
-				local waypoint2 = Entities:FindByName(nil, self._vWaypoints[nBest + 1])
-				local pos1 = waypoint1:GetOrigin()
-				pos1.z = 256
-				local pos2 = waypoint2:GetOrigin()
-				pos2.z = 256
-				local pos3 = unit:GetOrigin()
-				pos3.z = 256
-
-				local angletest = GetAngleBetweenVectors(pos1 - pos2, pos1 - pos3)
-				print(string.format("angletest: %d", angletest))
-
-				DebugDrawText(pos1, string.format("angle diff: %d", angletest), false, 5)
-				DebugDrawText(pos2, "waypoint 2", false, 5)
-				DebugDrawText(pos3, "Unit", false, 5)
-
-				DebugDrawLine(pos1, pos2, 255, 255, 255, false, 5)
-				DebugDrawLine(pos3, pos1, 255, 255, 255, false, 5)
-
-				if angletest < 75 then
-					nBest = nBest + 1
-				end	
-			end
-
 			unit.MovementSystem.NextWaypoint = nBest
 		end
 	end
@@ -453,17 +327,15 @@ function CMovementSystem:UnitThinkMovement( unit )
 	local entWp = Entities:FindByName(nil, self._vWaypoints[n])
 
 	if entWp ~= nil then
-		print("found waypoint")
+		--print("found waypoint")
 		local loc = entWp:GetAbsOrigin()
 		local dist = GridNav:FindPathLength(posUnit, loc)
-
-		DebugDrawCircle(loc + Vector(0, 0, 100), Vector(255, 255, 255), 0, RANGE_NEXT_WAYPOINT, false, 0.25)
 
 		self:UnitMoveToPosition(unit, loc)
 
 		if dist < RANGE_NEXT_WAYPOINT then
 			if self._vWaypoints[n + 1] ~= "end" then
-				print(string.format("waypoint reached setting next: %d", n + 1))
+				--print(string.format("waypoint reached setting next: %d", n + 1))
 				unit.MovementSystem.NextWaypoint = n + 1
 			end
 		end
@@ -472,7 +344,7 @@ end
 
 
 function CMovementSystem:UnitMoveToPosition( unit, pos )
-	print("moveunit")
+	--print("moveunit")
 	order =
 		{
 			UnitIndex = unit:entindex(),

@@ -78,6 +78,19 @@ function TableFindKey( table, val )
 	return nil
 end
 
+function GetAngleBetweenPoints(p1, p2)
+    local dX = p2.x - p1.x
+    local dY = p2.y - p1.y
+
+    return math.atan2(dY, dX) * (180 / math.pi)
+end
+
+function GetAngleBetweenVectors(v1, v2)
+    dot = v1.x * v2.x + v1.y * v2.y + v1.z * v2.z
+
+    return math.acos(dot / (v1:Length() * v2:Length())) * (180 / math.pi)
+end
+
 function CountdownTimer()
     nCOUNTDOWNTIMER = nCOUNTDOWNTIMER - 1
     local t = nCOUNTDOWNTIMER
