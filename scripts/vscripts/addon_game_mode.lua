@@ -53,6 +53,7 @@ function Activate()
 end
 
 TREE_HEALTH = 10
+START_LUMBER = 500
 
 function CHoldoutGameMode:InitGameMode()
 --print (string.format( "InitGameMode") )
@@ -155,7 +156,6 @@ function CHoldoutGameMode:InitGameMode()
 	ListenToGameEvent( "game_rules_state_change", Dynamic_Wrap( CHoldoutGameMode, "OnGameRulesStateChange" ), self )
 	ListenToGameEvent('dota_rune_activated_server', Dynamic_Wrap(CHoldoutGameMode, 'OnRuneActivated'), self)
 	ListenToGameEvent('entity_hurt', Dynamic_Wrap(CHoldoutGameMode, 'OnEntityHurt'), self)
-
 
 
 	-- Register OnThink with the game engine so it is called every 0.25 seconds
@@ -622,15 +622,38 @@ function CHoldoutGameMode:OnNPCSpawned( event )
 	end
 
 	-- Attach client side hero effects on spawning players
-	if spawnedUnit:IsRealHero() then
-		for nPlayerID = 0, DOTA_MAX_PLAYERS-1 do
-			if ( PlayerResource:IsValidPlayer( nPlayerID ) ) then
+	if spawnedUnit:IsRealHero() and spawnedUnit.bFirstSpawned == nil then
+		spawnedUnit.bFirstSpawned = true
+		self:OnHeroInGame(spawnedUnit)
+	end
+
+	for nPlayerID = 0, DOTA_MAX_PLAYERS-1 do
+		if ( PlayerResource:IsValidPlayer( nPlayerID ) ) then
 				self:_SpawnHeroClientEffects( spawnedUnit, nPlayerID )
-			end
 		end
 	end
 end
 
+function CHoldoutGameMode:OnHeroInGame( hero )
+	local player = hero:GetPlayerOwner()
+	player.lumber = 0
+
+	ModifyLumber(player, START_LUMBER)
+
+end
+
+function ModifyLumber( player, lumber_value )
+	if lumber_value == 0 then return end
+	if lumber_value > 0 then
+		player.lumber = player.lumber + lumber_value
+	    CustomGameEventManager:Send_ServerToPlayer(player, "player_lumber_changed", { lumber = math.floor(player.lumber) })
+	else
+		if PlayerHasEnoughLumber( player, math.abs(lumber_value) ) then
+			player.lumber = player.lumber + lumber_value
+		    CustomGameEventManager:Send_ServerToPlayer(player, "player_lumber_changed", { lumber = math.floor(player.lumber) })
+		end
+	end
+end
 
 -- Attach client-side hero effects for a reconnecting player
 function CHoldoutGameMode:OnPlayerReconnected( event )
@@ -665,6 +688,16 @@ function CHoldoutGameMode:OnEntityKilled( event )
 end
 
 function CHoldoutGameMode:OnItemPickedUp( event )
+	if event.itemname == "item_bag_of_gold" then
+
+		local item = EntIndexToHScript(event.ItemEntityIndex)
+		local hero = EntIndexToHScript(event.HeroEntityIndex)
+		local player = hero:GetPlayerOwner()
+		local lumber = item:GetPurchaseTime()
+
+		PopupNumbers(hero, "gold", Vector(0, 255, 0), 2.0, math.floor(lumber), POPUP_SYMBOL_POST_EXCLAMATION, nil)
+		ModifyLumber(player, lumber)
+	end
 end
 
 function CHoldoutGameMode:OnHoldoutReviveComplete( event )

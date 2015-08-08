@@ -11,6 +11,7 @@ AGGRO_UNITS_MIN_RANGE	= 20
 ATTACK_AGGRO_AOE		= 400.0
 
 MAX_TIME_IGNORE			= 5.0
+MAX_TIME_FOLLOW_NO_VISION = 4.0
 
 debugtimer = 0.0
 
@@ -45,6 +46,7 @@ function CMovementSystem:OnNPCSpawned( event )
 			IgnoreTarget = nil,
 			IgnoreTime = 0,
 			TargetTime = 0,
+			NoVisionTime = 0,
 			MaxTargetTime = 0,
 			MinTargetTime = 0,
 			CanChangeTarget = true,
@@ -124,6 +126,26 @@ function CMovementSystem:OnEntityHurt( keys)
 		end
 
 		if entCause.MovementSystem.Type == "attacker" and entVictim.MovementSystem.Type == "defender" then
+
+			local newTargets =
+			FindUnitsInRadius(
+				entCause:GetTeamNumber(),
+				entCause:GetAbsOrigin(),
+				nil,
+				ATTACK_AGGRO_AOE,
+				self._nTeamEnemy,
+				DOTA_UNIT_TARGET_ALL,
+				DOTA_UNIT_TARGET_FLAG_NONE,
+				FIND_CLOSEST,
+				false
+			)
+
+			DebugDrawCircle(entCause:GetOrigin() + Vector(0, 0, 100), Vector(255, 255, 255), 0, ATTACK_AGGRO_AOE, false, 0.5)
+
+			for _, nt in pairs(newTargets) do
+				self:UnitAggroTarget(nt, entVictim, MAX_TARGET_TIME, 4, AGGRO_TYPE_DAMAGE_AOE, AGGRO_OVERWRITE_NORMAL)
+			end
+
 			self:UnitAggroTarget(entCause, entVictim, MAX_TARGET_TIME, 7, AGGRO_TYPE_DAMAGE_OWN, AGGRO_OVERWRITE_RENEW)
 		end
 	end
@@ -199,8 +221,14 @@ function CMovementSystem:Think()
 		DebugDrawCircle(au:GetOrigin() + Vector(0, 0, 100), Vector(255, 255, 255), 0, aggroRange, false, 0.25)
 	end
 
-	for _,unit in pairs(self._vUnits) do
-		self:UnitThink(unit)
+	for i,unit in pairs(self._vUnits) do
+		if unit.MovementSystemActive ~= nil then
+			if unit.MovementSystemActive == false then
+				table.remove(self._vUnits, i)
+			end
+		else
+			self:UnitThink(unit)
+		end
 	end
 end
 
@@ -220,59 +248,47 @@ function CMovementSystem:UnitThink( unit )
 
 	if unit.MovementSystem.Target ~= nil then
 
-		if unit.MovementSystem.TargetTime >= unit.MovementSystem.MaxTargetTime then
-
-			unit.MovementSystem.IgnoreTarget = unit.MovementSystem.Target
-			unit.MovementSystem.IgnoreTime = 0
-
-			for i, t in pairs(unit.MovementSystem.Target.MovementSystem.TargetList) do
-				if unit == t then
-					table.remove(unit.MovementSystem.Target.MovementSystem.TargetList, i)
-				end
-			end
-
-			unit.MovementSystem.IgnoreTarget = unit.MovementSystem.Target
-			unit.MovementSystem.IgnoreTime = 0
-			unit.MovementSystem.Target = nil
-			unit.MovementSystem.AggroType = 0
-			unit.MovementSystem.TargetTime = 0
-			unit.MovementSystem.MaxTargetTime = 0
-			unit.MovementSystem.CanChangeTarget = true
-			unit.MovementSystem.NextWaypoint = nil
-
-			print("max target time reached")
-			print("ignore unit: " .. unit.MovementSystem.IgnoreTarget:GetName())
+		if not unit.MovementSystem.Target:IsAlive() then
+			self:UnitSetTarget(unit, nil, false)
 		else
-			if unit.MovementSystem.TargetTime >= unit.MovementSystem.MinTargetTime then
-				unit.MovementSystem.CanChangeTarget = true
-			end
 
-			if not unit.MovementSystem.Target:IsAlive() then
+			if unit.MovementSystem.TargetTime >= unit.MovementSystem.MaxTargetTime then
 
-				for i, t in pairs(unit.MovementSystem.Target.MovementSystem.TargetList) do
-					if unit == t then
-						table.remove(unit.MovementSystem.Target.MovementSystem.TargetList, i)
+				self:UnitSetTarget(unit, nil, true)
+
+				print("max target time reached")
+				print("ignore unit: " .. unit.MovementSystem.IgnoreTarget:GetName())
+			else
+
+				if not unit:CanEntityBeSeenByMyTeam(unit.MovementSystem.Target) then
+					if unit.MovementSystem.Target:IsInvisible() then
+						self:UnitSetTarget(unit, nil, false)
+					else
+						if unit.MovementSystem.NoVisionTime >= MAX_TIME_FOLLOW_NO_VISION then
+							self:UnitSetTarget(unit, nil, true)
+						else
+							unit.MovementSystem.NoVisionTime = unit.MovementSystem.NoVisionTime + self:GetTickrate()
+						end
 					end
+				else
+					unit.MovementSystem.NoVisionTime = 0
 				end
 
-				unit.MovementSystem.IgnoreTarget = nil
-				unit.MovementSystem.IgnoreTime = 0
-				unit.MovementSystem.Target = nil
-				unit.MovementSystem.AggroType = 0
-				unit.MovementSystem.TargetTime = 0
-				unit.MovementSystem.MaxTargetTime = 0
-				unit.MovementSystem.MinTargetTime = 0
-				unit.MovementSystem.CanChangeTarget = true
-				unit.MovementSystem.NextWaypoint = nil
+
+				if  unit.MovementSystem.Target ~= nil then
+
+					if unit.MovementSystem.TargetTime >= unit.MovementSystem.MinTargetTime then
+						unit.MovementSystem.CanChangeTarget = true
+					end
+
+					print(string.format("target time: %d", unit.MovementSystem.TargetTime))
+					unit.MovementSystem.TargetTime = unit.MovementSystem.TargetTime + self:GetTickrate()
+				end
 			end
-
-
-			print(string.format("target time: %d", unit.MovementSystem.TargetTime))
-			unit.MovementSystem.TargetTime = unit.MovementSystem.TargetTime + self:GetTickrate()
 		end
 
-		
-
+		print(string.format("target time: %d", unit.MovementSystem.TargetTime))
+		unit.MovementSystem.TargetTime = unit.MovementSystem.TargetTime + self:GetTickrate()
 	end
 
 	if unit.MovementSystem.Target ~= nil then
@@ -285,11 +301,11 @@ function CMovementSystem:UnitThink( unit )
 
 	--if debugtimer >= 1.0 then
 
-		if unit.MovementSystem.Target ~= nil then
-			DebugDrawText(unit:GetOrigin() + Vector(0, 0, 100), string.format("Target: %d", unit.MovementSystem.TargetTime), false, 0.25)
-		elseif unit.MovementSystem.IgnoreTarget ~= nil then
-			DebugDrawText(unit:GetOrigin() + Vector(0, 0, 100), string.format("Ignore: %d", unit.MovementSystem.IgnoreTime), false, 0.25)
-		end
+	if unit.MovementSystem.Target ~= nil then
+		DebugDrawText(unit:GetOrigin() + Vector(0, 0, 100), string.format("Target: %d", unit.MovementSystem.TargetTime), false, 0.25)
+	elseif unit.MovementSystem.IgnoreTarget ~= nil then
+		DebugDrawText(unit:GetOrigin() + Vector(0, 0, 100), string.format("Ignore: %d", unit.MovementSystem.IgnoreTime), false, 0.25)
+	end
 
 	--	debugtimer = 0.0
 	--end
@@ -297,10 +313,51 @@ function CMovementSystem:UnitThink( unit )
 	--debugtimer = debugtimer + self:GetTickrate()
 end
 
+
+function CMovementSystem:UnitSetTarget(unit, data, ignore)
+
+	if unit.MovementSystem.Target ~= nil then
+		for i, t in pairs(unit.MovementSystem.Target.MovementSystem.TargetList) do
+			if unit == t then
+				table.remove(unit.MovementSystem.Target.MovementSystem.TargetList, i)
+			end
+		end
+	end
+
+	if data == nil then
+		if ignore then
+			unit.MovementSystem.IgnoreTarget = unit.MovementSystem.Target
+		else
+			unit.MovementSystem.IgnoreTarget = nil
+		end
+
+		unit.MovementSystem.IgnoreTime = 0
+		unit.MovementSystem.Target = nil
+		unit.MovementSystem.AggroType = 0
+		unit.MovementSystem.TargetTime = 0
+		unit.MovementSystem.NoVisionTime = 0
+		unit.MovementSystem.MaxTargetTime = 0
+		unit.MovementSystem.MinTargetTime = 0
+		unit.MovementSystem.CanChangeTarget = true
+		unit.MovementSystem.NextWaypoint = nil
+	else
+		unit.MovementSystem.Target = data.target
+		unit.MovementSystem.AggroType = data.aggroType
+		unit.MovementSystem.TargetTime = 0
+		unit.MovementSystem.NoVisionTime = 0
+		unit.MovementSystem.MaxTargetTime = data.timeMax
+		unit.MovementSystem.MinTargetTime = data.timeMin
+		unit.MovementSystem.CanChangeTarget = false
+		unit.MovementSystem.IgnoreTarget = nil
+		unit.MovementSystem.IgnoreTime = 0
+	end
+end
+
+
 function  CMovementSystem:UnitAggroTarget( unit, target, timeMax, timeMin, aggroType, overwrite)
 	local bNewTarget = true
 
-	if unit.MovementSystem.Type == "attacker" and target.MovementSystem.Type == "defender" then
+	if unit.MovementSystem.Type == "attacker" and target.MovementSystem.Type == "defender" and unit:CanEntityBeSeenByMyTeam(target) then
 
 		if overwrite ~= AGGRO_OVERWRITE_ALL then
 
@@ -335,31 +392,30 @@ function  CMovementSystem:UnitAggroTarget( unit, target, timeMax, timeMin, aggro
 		end
 
 		print("settingTarget")
-
-		if target.MovementSystem.Type == "defender" then
-			if #target.MovementSystem.TargetList > 0 then
-
-				for _, ot in pairs(target.MovementSystem.TargetList) do
-					if ot == unit then
-						bNewTarget = false
-						break
+		if unit.MovementSystem.Target ~= nil then
+			if unit.MovementSystem.Target == target then
+				bNewTarget = false
+			else
+				for i, t in pairs(unit.MovementSystem.Target.MovementSystem.TargetList) do
+					if unit == t then
+						table.remove(unit.MovementSystem.Target.MovementSystem.TargetList, i)
 					end
 				end
 			end
-
-			if bNewTarget then
-				table.insert(target.MovementSystem.TargetList, unit)
-			end
 		end
 
-		unit.MovementSystem.Target = target
-		unit.MovementSystem.AggroType = aggroType
-		unit.MovementSystem.TargetTime = 0
-		unit.MovementSystem.MaxTargetTime = timeMax
-		unit.MovementSystem.MinTargetTime = timeMin
-		unit.MovementSystem.CanChangeTarget = false
-		unit.MovementSystem.IgnoreTarget = nil
-		unit.MovementSystem.IgnoreTime = 0
+		if bNewTarget then
+			table.insert(target.MovementSystem.TargetList, unit)
+		end
+
+		local data = {
+			target = target,
+			aggroType = aggroType,
+			timeMax = timeMax,
+			timeMin = timeMin,
+		}
+
+		self:UnitSetTarget(unit, data, false)
 		print("new aggro Target: " .. unit.MovementSystem.Target:GetName())
 
 		DebugDrawLine(unit:GetOrigin() + Vector(0, 0, 100),target:GetOrigin() + Vector(0, 0, 100), 255, 255, 255, false, 1)

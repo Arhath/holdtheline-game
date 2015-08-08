@@ -73,6 +73,7 @@ function BossTreant:Spawn()
 	
 	vecSpawnLocation = entSpawner:GetAbsOrigin()
 	entBossUnit = CreateUnitByName( self._strBossUnit, vecSpawnLocation, true, nil, nil, DOTA_TEAM_BADGUYS )
+	entBossUnit.MovementSystemActive = false
 	self._bossOriginalHealth = entBossUnit:GetMaxHealth()
 	entBossUnit.difficultyApplier = nil
 	self:ApplyDifficultyBuff(entBossUnit)
@@ -138,7 +139,7 @@ function BossTreant:Think()
 		
 		self:AIThink()
 		
-		if testcount == 800 and entBossUnit:GetHealth() >= entBossUnit:GetMaxHealth()/2 then
+		if testcount == 10 and entBossUnit:GetHealth() >= entBossUnit:GetMaxHealth()/2 then
 			entBossUnit:SetHealth(entBossUnit:GetMaxHealth()/2)
 			GameRules:SetRuneSpawnTime(testcount)
 			
@@ -285,9 +286,9 @@ function BossTreant:PhaseThink()
 				
 				local shield_size = 150
 				
-				local entWp = Entities:FindByName(nil, "path_invader1_4")
-				self.entOrbLeft:SetInitialGoalEntity( entWp)
-				self.entOrbLeft:SetMustReachEachGoalEntity(false)
+				--local entWp = Entities:FindByName(nil, "path_invader1_4")
+				--self.entOrbLeft:SetInitialGoalEntity( entWp)
+				--self.entOrbLeft:SetMustReachEachGoalEntity(false)
 				
 				
 				self.entOrbLeft.particle = ParticleManager:CreateParticle( "particles/units/heroes/hero_abaddon/abaddon_aphotic_shield.vpcf", PATTACH_ABSORIGIN_FOLLOW, self.entOrbLeft )
@@ -298,9 +299,9 @@ function BossTreant:PhaseThink()
 				ParticleManager:SetParticleControlEnt(self.entOrbLeft.particle, 0, self.entOrbLeft, PATTACH_POINT_FOLLOW, "attach_hitloc", self.entOrbLeft:GetAbsOrigin(), true)
 				
 				
-				entWp = Entities:FindByName(nil, "path_invader2_4")
-				self.entOrbRight:SetInitialGoalEntity( entWp)
-				self.entOrbRight:SetMustReachEachGoalEntity(false)
+				--entWp = Entities:FindByName(nil, "path_invader2_4")
+				--self.entOrbRight:SetInitialGoalEntity( entWp)
+				--self.entOrbRight:SetMustReachEachGoalEntity(false)
 				
 				self.entOrbRight.particle = ParticleManager:CreateParticle( "particles/units/heroes/hero_abaddon/abaddon_aphotic_shield.vpcf", PATTACH_ABSORIGIN_FOLLOW, self.entOrbRight )
 				ParticleManager:SetParticleControl(self.entOrbRight.particle, 1, Vector(shield_size,0,shield_size))

@@ -20,6 +20,13 @@
 
 "CustomEvents"
 {
+
+	"cgm_player_lumber_changed"
+	{
+		"player_ID"		"short"
+		"lumber"		"long"
+	}
+	
 	"holdout_show_round_end_summary"
 	{
 		"nRoundNumber"					"short"
