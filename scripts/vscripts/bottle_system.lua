@@ -121,8 +121,8 @@ function CBottleSystem:BottleActivate(hero, target, bottle)
 	target:RemoveModifierByName(MODIFIER_[bottle])
 	target:RemoveModifierByName(MODIFIER_FX_[bottle])
 
-	target.BottleSystem[bottle].BuffApplier:ApplyDataDrivenModifier(hero, hero, MODIFIER_[bottle], {duration=hero.BottleSystem[bottle].Think.TimeLeft})
-	target.BottleSystem[bottle].BuffApplier:ApplyDataDrivenModifier(hero, hero, MODIFIER_FX_[bottle], {duration=hero.BottleSystem[bottle].Think.TimeLeft})
+	hero.BottleSystem[bottle].BuffApplier:ApplyDataDrivenModifier(hero, target, MODIFIER_[bottle], {duration=hero.BottleSystem[bottle].Think.TimeLeft})
+	hero.BottleSystem[bottle].BuffApplier:ApplyDataDrivenModifier(hero, target, MODIFIER_FX_[bottle], {duration=hero.BottleSystem[bottle].Think.TimeLeft})
 
 	Timers:CreateTimer(function()
 		return CBottleSystem:BottleThink(hero, target, bottle)
