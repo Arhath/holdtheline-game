@@ -18,6 +18,7 @@ require( "holdout_game_bosshandler" )
 require( "utility_functions" )
 require( "holdout_game_moonwell" )
 require( "movement_system" )
+require( "bottle_system" )
 
 if CHoldoutGameMode == nil then
 	CHoldoutGameMode = class({})
@@ -70,6 +71,9 @@ function CHoldoutGameMode:InitGameMode()
 
 	self._movementSystem = CMovementSystem()
 	self._movementSystem:Init(self, DOTA_TEAM_BADGUYS)
+
+	self._bottleSystem = CBottleSystem()
+	self._bottleSystem:Init(self, DOTA_TEAM_GOODGUYS)
 	
 	Timers:CreateTimer(5, function()
 		TestSpawn("treant_mushroom_creature_big","testspawner_2", 0, DOTA_TEAM_GOODGUYS)
@@ -156,6 +160,7 @@ function CHoldoutGameMode:InitGameMode()
 	ListenToGameEvent( "game_rules_state_change", Dynamic_Wrap( CHoldoutGameMode, "OnGameRulesStateChange" ), self )
 	ListenToGameEvent('dota_rune_activated_server', Dynamic_Wrap(CHoldoutGameMode, 'OnRuneActivated'), self)
 	ListenToGameEvent('entity_hurt', Dynamic_Wrap(CHoldoutGameMode, 'OnEntityHurt'), self)
+	
 
 
 	-- Register OnThink with the game engine so it is called every 0.25 seconds
@@ -222,20 +227,22 @@ end
 function CHoldoutGameMode:RefillBottle(unit, trigger)
 	for _,moonwell in pairs(self._vMoonwells) do
 		if trigger:GetName() == moonwell._strTrigger then
-			local bottle = findItemOnUnit( unit, "item_bottle", false)
+			--local bottle = findItemOnUnit( unit, "item_bottle", false)
+
+			if unit.BottleSystem == nil then
+				print("bottle system not found")
+				return
+			end
 	
-			if bottle ~= nil then
+			if unit.BottleSystem[1].Charges < unit.BottleSystem[1].ChargesMax then
 				----print("refreshing bottle")
 				----print(bottle:GetCurrentCharges())
-				if bottle:GetCurrentCharges() < 7 then
-				----print("bottle charges < 7")
-				----print(string.format("moonwell mana: %d", moonwell:GetMana()))
-					if moonwell:GetMana() >= 10 then
-						----print("add bottle charge")
-						bottle:SetCurrentCharges(bottle:GetCurrentCharges() + 1)
-						moonwell:AddMana(-10, true)
-						PopupNumbers(unit, "gold", Vector(255, 0, 255), 1.0, 1, POPUP_SYMBOL_POST_EXCLAMATION, nil)
-					end
+				if moonwell:GetMana() >= 10 then
+					----print("add bottle charge")
+					--bottle:SetCurrentCharges(bottle:GetCurrentCharges() + 1)
+					self._bottleSystem:BottleAddCharges(unit, BOTTLE_HEALTH, 1)
+					moonwell:AddMana(-10, true)
+					PopupNumbers(unit, "gold", Vector(255, 0, 255), 1.0, 1, POPUP_SYMBOL_POST_EXCLAMATION, nil)
 				end
 			else
 				----print("no bottle found")
@@ -368,6 +375,7 @@ function CHoldoutGameMode:OnThink()
 	return 1
 end
 
+
 function CHoldoutGameMode:OnEntityHurt(keys)
   --Debug--print("[BAREBONES] Entity Hurt")
   --Debug--printTable(keys)
@@ -422,7 +430,7 @@ end
 
 
 function CHoldoutGameMode:OnUnitEntersGoal(u, team)
-	if u.Holdout_CoreNum ~= nil and u:GetTeamNumber() ~= team then
+	if u.Holdout_CoreNum ~= nil and u:GetTeamNumber() ~= team and u.CanEnterGoal ~= false then
 	local goalValue = u.goalValue
 		PopupNumbers(self._entAncient, "gold", Vector(255, 0, 0), 1.0, goalValue, POPUP_SYMBOL_PRE_PLUS, nil)
 		UTIL_RemoveImmediate( u )
@@ -627,6 +635,10 @@ function CHoldoutGameMode:OnNPCSpawned( event )
 		self:OnHeroInGame(spawnedUnit)
 	end
 
+	if spawnedUnit:IsRealHero() then
+		self._bottleSystem:OnHeroSpawned(spawnedUnit)
+	end
+
 	for nPlayerID = 0, DOTA_MAX_PLAYERS-1 do
 		if ( PlayerResource:IsValidPlayer( nPlayerID ) ) then
 				self:_SpawnHeroClientEffects( spawnedUnit, nPlayerID )
@@ -639,6 +651,7 @@ function CHoldoutGameMode:OnHeroInGame( hero )
 	player.lumber = 0
 
 	ModifyLumber(player, START_LUMBER)
+	self._bottleSystem:OnHeroInGame(hero)
 
 end
 

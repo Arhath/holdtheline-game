@@ -39,6 +39,7 @@ function BossTreant:Init(handler, gameRound)
 	--print(fBossArenaDesire)
 end
 
+
 function BossTreant:SetArena()
 	entBossArena = Entities:FindByName(nil, strBossArenaName)
 	--print(strBossArenaName)
@@ -62,6 +63,17 @@ function BossTreant:Prepare()
 end
 
 
+function BossTreant:OnNPCSpawned( event )
+	local spawnedUnit = EntIndexToHScript( event.entindex )
+
+	if spawnedUnit:GetTeamNumber() == DOTA_TEAM_BADGUYS then
+		spawnedUnit.Holdout_CoreNum = self._gameRound._nRoundNumber
+		spawnedUnit.goalValue = 1
+		--SetPhasing(spawnedUnit, 10)
+	end
+end
+
+
 function BossTreant:Spawn()
 	--print("spawn")
 	local entSpawner = Entities:FindByName( nil, self._strSpawner)
@@ -74,6 +86,7 @@ function BossTreant:Spawn()
 	vecSpawnLocation = entSpawner:GetAbsOrigin()
 	entBossUnit = CreateUnitByName( self._strBossUnit, vecSpawnLocation, true, nil, nil, DOTA_TEAM_BADGUYS )
 	entBossUnit.MovementSystemActive = false
+	entBossUnit.CanEnterGoal = false
 	self._bossOriginalHealth = entBossUnit:GetMaxHealth()
 	entBossUnit.difficultyApplier = nil
 	self:ApplyDifficultyBuff(entBossUnit)
@@ -95,9 +108,11 @@ function BossTreant:Spawn()
 	
 end
 
+
 function BossTreant:UpdateBossDifficulty()
 	self:ApplyDifficultyBuff(entBossUnit)
 end
+
 
 function BossTreant:ApplyDifficultyBuff(u)
 	local nDifficultyStacks = self._gameRound._gameMode._entAncient:GetMana()
@@ -114,16 +129,6 @@ function BossTreant:ApplyDifficultyBuff(u)
 	--entBossUnit:AddNewModifier(entBossUnit, nil, "modifier_boss_difficulty" ,nil)
 	--entBossUnit:SetModifierStackCount("modifier_boss_difficulty", nil, nDifficultyStacks)
 end
-
-function SetPhasing(unit, bool)
-	if bool then
-		local phasingApplier = CreateItem("item_phasing_applier", unit, unit)
-		phasingApplier:ApplyDataDrivenModifier(unit, unit, "modifier_phasing_passive", {duration=-1})
-	else
-		unit:RemoveModifierByName("modifier_phasing_passive")
-	end
-end
-
 
 function BossTreant:End()
 	if self._sg ~= nil then
@@ -229,7 +234,7 @@ function BossTreant:PhaseThink()
 	
 		if self.bPhaseSwitch then
 			self.bFreezeBoss = true
-			SetPhasing(entBossUnit, true)
+			SetPhasing(entBossUnit, -1)
 			entBossUnit:AddNewModifier( entBossUnit, nil, "modifier_invulnerable", {} )
 			self.bLocReached = false
 			self.bPhaseSwitch = false
@@ -272,11 +277,13 @@ function BossTreant:PhaseThink()
 				local orbHP = bossMaxHP * 0.1
 				ExecuteOrderFromTable( order )
 				self.entOrbLeft = CreateUnitByName( "treant_phase_2_orb", entBossUnit:GetOrigin() + Vector(-100, 200, 0), true, nil, nil, entBossUnit:GetTeamNumber() )
-				SetPhasing(self.entOrbLeft, true)
+				self.entOrbLeft.CanEnterGoal = false
+				SetPhasing(self.entOrbLeft, -1)
 				self.entOrbLeft:SetMaxHealth(orbHP)
 				self.entOrbLeft:SetHealth(orbHP)
 				self.entOrbRight = CreateUnitByName( "treant_phase_2_orb", entBossUnit:GetOrigin() + Vector(100, 200, 0), true, nil, nil, entBossUnit:GetTeamNumber() )
-				SetPhasing(self.entOrbRight, true)
+				self.entOrbRight.CanEnterGoal = false
+				SetPhasing(self.entOrbRight, -1)
 				self.entOrbRight:SetMaxHealth(orbHP)
 				self.entOrbRight:SetHealth(orbHP)
 				
@@ -327,9 +334,9 @@ function BossTreant:PhaseThink()
 				orbPos = self.entOrbLeft:GetAbsOrigin()
 				orbPos.z = 0
 
-				CreateUnitByName("treant_flower_creature", orbPos + Vector(RandomInt(-300, 300),RandomInt(-300, 300), 0), false, nil, nil, entBossUnit:GetTeamNumber())
-				CreateUnitByName("treant_mushroom_creature", orbPos + Vector(RandomInt(-300, 300),RandomInt(-300, 300), 0), false, nil, nil, entBossUnit:GetTeamNumber())
-				CreateUnitByName("npc_dota_furion_treant", orbPos + Vector(RandomInt(-300, 300),RandomInt(-300, 300), 0), false, nil, nil, entBossUnit:GetTeamNumber())
+				CreateUnitByName("treant_flower_creature", orbPos + Vector(RandomInt(-300, 300),RandomInt(-300, 300), 0), true, nil, nil, entBossUnit:GetTeamNumber())
+				CreateUnitByName("treant_mushroom_creature", orbPos + Vector(RandomInt(-300, 300),RandomInt(-300, 300), 0), true, nil, nil, entBossUnit:GetTeamNumber())
+				CreateUnitByName("npc_dota_furion_treant", orbPos + Vector(RandomInt(-300, 300),RandomInt(-300, 300), 0), true, nil, nil, entBossUnit:GetTeamNumber())
 		
 				orbDistArenaLeft = ( vecBossArenaPos - orbPos):Length()
 				orbHP = self.entOrbLeft:GetHealth()
@@ -351,9 +358,9 @@ function BossTreant:PhaseThink()
 				orbPos = self.entOrbRight:GetAbsOrigin()
 				orbPos.z = 0
 						
-				CreateUnitByName("treant_flower_creature", orbPos + Vector(RandomInt(-300, 300),RandomInt(-300, 300), 0), false, nil, nil, entBossUnit:GetTeamNumber())
-				CreateUnitByName("treant_mushroom_creature", orbPos + Vector(RandomInt(-300, 300),RandomInt(-300, 300), 0), false, nil, nil, entBossUnit:GetTeamNumber())
-				CreateUnitByName("npc_dota_furion_treant", orbPos + Vector(RandomInt(-300, 300),RandomInt(-300, 300), 0), false, nil, nil, entBossUnit:GetTeamNumber())
+				CreateUnitByName("treant_flower_creature", orbPos + Vector(RandomInt(-300, 300),RandomInt(-300, 300), 0), true, nil, nil, entBossUnit:GetTeamNumber())
+				CreateUnitByName("treant_mushroom_creature", orbPos + Vector(RandomInt(-300, 300),RandomInt(-300, 300), 0), true, nil, nil, entBossUnit:GetTeamNumber())
+				CreateUnitByName("npc_dota_furion_treant", orbPos + Vector(RandomInt(-300, 300),RandomInt(-300, 300), 0), true, nil, nil, entBossUnit:GetTeamNumber())
 
 				orbDistArenaRight = ( vecBossArenaPos - orbPos ):Length()
 				
@@ -403,8 +410,10 @@ function BossTreant:PhaseThink()
 				self.bFreezeBoss = false
 
 				--Spawn Boss Ads
-				CreateUnitByName("treant_flower_creature_big", vecBossArenaPos + Vector(-300, -100, 0), false, nil, nil, entBossUnit:GetTeamNumber())
-				CreateUnitByName("treant_mushroom_creature_big", vecBossArenaPos + Vector(300, -100, 0), false, nil, nil, entBossUnit:GetTeamNumber())
+				local bossFlower = CreateUnitByName("treant_flower_creature_big", vecBossArenaPos + Vector(-300, -100, 0), false, nil, nil, entBossUnit:GetTeamNumber())
+				bossFlower.CanEnterGoal = false
+				local bossMushroom = CreateUnitByName("treant_mushroom_creature_big", vecBossArenaPos + Vector(300, -100, 0), false, nil, nil, entBossUnit:GetTeamNumber())
+				bossMushroom.CanEnterGoal = false
 			end
 
 		end

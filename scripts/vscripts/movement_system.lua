@@ -10,8 +10,15 @@ AGGRO_RANGE_MIN			= 400.0
 AGGRO_UNITS_MIN_RANGE	= 20
 ATTACK_AGGRO_AOE		= 400.0
 
+WAYPOINT_ACTIVATION_RADIUS = 400.0
+WAYPOINT_ANTI_STUCK_RADIUS = 600.0
+
+WAYPOINT_ANTI_STUCK_TIME_MAX = 10.0
+
 MAX_TIME_IGNORE			= 5.0
 MAX_TIME_FOLLOW_NO_VISION = 4.0
+
+MAX_STUCK_TIME = 4.0
 
 debugtimer = 0.0
 
@@ -50,6 +57,8 @@ function CMovementSystem:OnNPCSpawned( event )
 			MaxTargetTime = 0,
 			MinTargetTime = 0,
 			CanChangeTarget = true,
+			StuckTime = 0,
+			LastPosition = spawnedUnit:GetAbsOrigin(),
 		}
 	end
 
@@ -123,6 +132,7 @@ function CMovementSystem:OnEntityHurt( keys)
 			end
 
 			self:UnitAggroTarget(entVictim, entCause, MAX_TARGET_TIME, 7, AGGRO_TYPE_DAMAGE_ENEMY, AGGRO_OVERWRITE_RENEW)
+			--entVictim.MovementSystem.StuckTime = 0
 		end
 
 		if entCause.MovementSystem.Type == "attacker" and entVictim.MovementSystem.Type == "defender" then
@@ -147,6 +157,7 @@ function CMovementSystem:OnEntityHurt( keys)
 			end
 
 			self:UnitAggroTarget(entCause, entVictim, MAX_TARGET_TIME, 7, AGGRO_TYPE_DAMAGE_OWN, AGGRO_OVERWRITE_RENEW)
+			entCause.MovementSystem.StuckTime = 0
 		end
 	end
 end
@@ -167,8 +178,8 @@ function CMovementSystem:Init( gameMode, team)
 
 	self._vWaypoints =
 	{
-	"path_invader1_1", "path_invader1_2", "path_invader1_3", "path_invader1_4", "path_invader1_5", "path_invader1_6", "path_invader1_7", "path_invader1_8", "end",
-	"path_invader2_1", "path_invader2_2", "path_invader2_3", "path_invader2_4", "path_invader2_5", "path_invader2_6", "path_invader1_7", "path_invader1_8", "end"
+	"path_invader1_1", "path_invader1_2", "path_invader1_3", "path_invader1_4", "path_invader1_5", "path_invader1_5.5", "path_invader1_6", "path_invader1_7", "path_invader1_8", "path_invader1_9", "end",
+	"path_invader2_1", "path_invader2_2", "path_invader2_3", "path_invader2_4", "path_invader2_5", "path_invader2_5.5", "path_invader2_6", "path_invader2_7", "path_invader1_8", "path_invader1_9", "end"
 	}
 
 	Timers:CreateTimer(function()
@@ -234,6 +245,22 @@ end
 
 function CMovementSystem:UnitThink( unit )
 	--local system = unit.MovementSystem
+	if unit:IsNull() or not unit:IsAlive() then
+		return
+	end
+
+	if unit.MovementSystem.StuckTime >= MAX_STUCK_TIME then
+		SetPhasing(unit, 2)
+		unit.MovementSystem.StuckTime = 0
+	else
+		if (unit:GetAbsOrigin() - unit.MovementSystem.LastPosition):Length() == 0 then
+			unit.MovementSystem.StuckTime = unit.MovementSystem.StuckTime + self:GetTickrate()
+		else
+			unit.MovementSystem.StuckTime = 0
+		end
+
+		unit.MovementSystem.LastPosition = unit:GetAbsOrigin()
+	end
 
 	if unit.MovementSystem.IgnoreTarget ~= nil then
 		if unit.MovementSystem.IgnoreTime >= MAX_TIME_IGNORE then
@@ -286,9 +313,6 @@ function CMovementSystem:UnitThink( unit )
 				end
 			end
 		end
-
-		print(string.format("target time: %d", unit.MovementSystem.TargetTime))
-		unit.MovementSystem.TargetTime = unit.MovementSystem.TargetTime + self:GetTickrate()
 	end
 
 	if unit.MovementSystem.Target ~= nil then
@@ -340,6 +364,7 @@ function CMovementSystem:UnitSetTarget(unit, data, ignore)
 		unit.MovementSystem.MinTargetTime = 0
 		unit.MovementSystem.CanChangeTarget = true
 		unit.MovementSystem.NextWaypoint = nil
+		unit.MovementSystem.StuckTime = 0
 	else
 		unit.MovementSystem.Target = data.target
 		unit.MovementSystem.AggroType = data.aggroType
@@ -350,6 +375,7 @@ function CMovementSystem:UnitSetTarget(unit, data, ignore)
 		unit.MovementSystem.CanChangeTarget = false
 		unit.MovementSystem.IgnoreTarget = nil
 		unit.MovementSystem.IgnoreTime = 0
+		unit.MovementSystem.StuckTime = 0
 	end
 end
 
@@ -434,8 +460,7 @@ function CMovementSystem:UnitThinkMovement( unit )
 	end
 
 	local posUnit = unit:GetAbsOrigin()
-	local bSetBest = true
-	local bestDist = nil
+	local bestDist = 999999
 	local nBest = nil
 
 	if unit.MovementSystem.NextWaypoint == nil then
@@ -451,23 +476,17 @@ function CMovementSystem:UnitThinkMovement( unit )
 				if waypoint ~= nil then
 					print("got a waypoint")
 					local orig = waypoint:GetOrigin()
-					local dist = GridNav:FindPathLength(posUnit, orig)
+					orig.z = GetGroundHeight(orig, nil)
+					local dist = GridNav:FindPathLength(posUnit, orig) --(orig - posUnit):Length()
 
-					if nBest == nil then
-						bSetBest = true
-					else
+
+					if dist ~= -1 then
 						if dist < bestDist then
 							print("setting bool")
-							bSetBest = true
+							bestDist = dist
+							nBest = i
+							print(string.format("setting best waypoint: %d", nBest))
 						end
-					end
-
-					if bSetBest then
-						bestDist = dist
-						nBest = i
-
-						bSetBest = false
-						print(string.format("setting best waypoint: %d", nBest))
 					end
 				end
 			end
@@ -477,28 +496,34 @@ function CMovementSystem:UnitThinkMovement( unit )
 			local str = self._vWaypoints[nBest + 1]
 
 			if str ~= "end" then
-				local waypoint1 = Entities:FindByName(nil, self._vWaypoints[nBest])
-				local waypoint2 = Entities:FindByName(nil, self._vWaypoints[nBest + 1])
-				local pos1 = waypoint1:GetOrigin()
-				pos1.z = 256
-				local pos2 = waypoint2:GetOrigin()
-				pos2.z = 256
-				local pos3 = unit:GetOrigin()
-				pos3.z = 256
+				if self._vWaypoints[nBest + 1] ~= "end" then
+					local waypoint1 = Entities:FindByName(nil, self._vWaypoints[nBest])
+					local waypoint2 = Entities:FindByName(nil, self._vWaypoints[nBest + 1])
+					local pos1 = waypoint1:GetOrigin()
+					pos1.z = 256
+					local pos2 = waypoint2:GetOrigin()
+					pos2.z = 256
+					local pos3 = unit:GetOrigin()
+					pos3.z = 256
 
-				local angletest = GetAngleBetweenVectors(pos1 - pos2, pos1 - pos3)
-				print(string.format("angletest: %d", angletest))
+					if pos3 == pos1 then
+						nBest = nBest + 1
+					end
 
-				DebugDrawText(pos1, string.format("angle diff: %d", angletest), false, 5)
-				DebugDrawText(pos2, "waypoint 2", false, 5)
-				DebugDrawText(pos3, "Unit", false, 5)
+					local angletest = GetAngleBetweenVectors(pos1 - pos2, pos1 - pos3)
+					print(string.format("angletest: %d", angletest))
 
-				DebugDrawLine(pos1, pos2, 255, 255, 255, false, 5)
-				DebugDrawLine(pos3, pos1, 255, 255, 255, false, 5)
+					DebugDrawText(pos1, string.format("angle diff: %d", angletest), false, 5)
+					DebugDrawText(pos2, "waypoint 2", false, 5)
+					DebugDrawText(pos3, "Unit", false, 5)
 
-				if angletest < 75 then
-					nBest = nBest + 1
-				end	
+					DebugDrawLine(pos1, pos2, 0, 255, 255, false, 1)
+					DebugDrawLine(pos3, pos1, 0, 255, 0, false, 1)
+
+					if angletest < 75 	then
+						nBest = nBest + 1
+					end
+				end
 			end
 
 			unit.MovementSystem.NextWaypoint = nBest
@@ -517,7 +542,7 @@ function CMovementSystem:UnitThinkMovement( unit )
 
 		self:UnitMoveToPosition(unit, loc)
 
-		if dist < RANGE_NEXT_WAYPOINT then
+		if dist <= RANGE_NEXT_WAYPOINT then
 			if self._vWaypoints[n + 1] ~= "end" then
 				print(string.format("waypoint reached setting next: %d", n + 1))
 				unit.MovementSystem.NextWaypoint = n + 1

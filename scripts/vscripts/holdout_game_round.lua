@@ -22,7 +22,7 @@ function CHoldoutGameRound:ReadConfiguration( kv, gameMode, roundNumber )
 	self._flPrepTime = tonumber( kv.PrepTime or gameMode._flPrepTimeBetweenRounds or 0 )
 	self._nBoss = tonumber( kv.BossNumber or 0 )
 	
-	if self._bIsBoss then
+	if self._bIsBoss == 1 then
 		self._bossHandler = CHoldoutGameBossHandler()
 		self._bossHandler:Init(self, self._nBoss)
 	end
@@ -61,7 +61,7 @@ function CHoldoutGameRound:ReadConfiguration( kv, gameMode, roundNumber )
 end
 
 function CHoldoutGameRound:Prepare()
-	if self._bIsBoss then
+	if self._bIsBoss == 1 then
 		self._bossHandler:Prepare()
 	end
 	self._gameMode._flPrepTimeBetweenRounds = self._flPrepTime
@@ -73,7 +73,7 @@ function CHoldoutGameRound:IsBoss()
 end
 
 function CHoldoutGameRound:UpdateBossDifficulty()
-	if self._bIsBoss then
+	if self._bIsBoss == 1 then
 		self._bossHandler:UpdateBossDifficulty()
 	end
 end
@@ -255,6 +255,10 @@ function CHoldoutGameRound:OnNPCSpawned( event )
 	local spawnedUnit = EntIndexToHScript( event.entindex )
 	if not spawnedUnit or spawnedUnit:IsPhantom() or spawnedUnit:GetClassname() == "npc_dota_thinker" or spawnedUnit:GetUnitName() == "" then
 		return
+	end
+
+	if self._bIsBoss == 1 then
+		self._bossHandler:OnNPCSpawned(event)
 	end
 
 	if spawnedUnit:GetTeamNumber() == DOTA_TEAM_BADGUYS then

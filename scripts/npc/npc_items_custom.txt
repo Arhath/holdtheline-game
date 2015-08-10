@@ -1,6 +1,54 @@
 "DOTAAbilities"
 {
 
+	"item_bottle_health_applier"
+	{
+		"ID"							"1904"
+
+		// General
+		//---------------------------------------------------------------------------------------------------------
+		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_PASSIVE"
+		"BaseClass"                     "item_datadriven"
+		"AbilityTextureName"			"item_flask"
+	    "ItemBaseLevel"                 "1"
+
+	    // Stats
+	    //---------------------------------------------------------------------------------------------------------
+	    "AbilityCastRange"              "9999"
+	    "AbilityCastPoint"              "0.0"
+	
+		"Modifiers"
+		{
+			"modifier_bottle_health_passive"
+			{
+				"Passive"				"1"
+				"IsHidden"				"0"
+				"IsDebuff"				"0"
+				"TextureName"			"item_flask"
+				
+				"EffectName"			"particles/items_fx/healing_flask.vpcf"
+				"EffectAttachType"		"follow_absorigin"
+			}
+			"modifier_bottle_health_fx"
+			{
+				"Passive"				"1"
+				"IsHidden"				"1"
+				"IsDebuff"				"0"
+				
+				"EffectName"			"particles/items_fx/healing_flask_b.vpcf"
+				"EffectAttachType"		"follow_overhead"
+			}
+			
+			"modifier_bottle_health_stacks"
+			{
+				"Passive"				"1"
+				"IsHidden"				"0"
+				"IsDebuff"				"0"
+				"TextureName"			"item_flask"
+			}
+		}				
+	}
+	
 	"item_nether_buff_applier"
 	{
 		"ID"							"1903"

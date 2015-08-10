@@ -4,6 +4,44 @@
 {
 	"Version"		"1"
 	
+	"bottle_health"
+	{
+		// General
+		//-------------------------------------------------------------------------------------------------------------
+		"AbilityName"					"bottle_health"
+		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_UNIT_TARGET | DOTA_ABILITY_BEHAVIOR_IMMEDIATE | DOTA_ABILITY_BEHAVIOR_DONT_RESUME_ATTACK"
+		"AbilityUnitTargetTeam"			"DOTA_UNIT_TARGET_TEAM_FRIENDLY"
+		"AbilityUnitTargetType"			"DOTA_UNIT_TARGET_HERO | DOTA_UNIT_TARGET_CREEP"
+		"BaseClass" 					"ability_lua"
+		"ScriptFile"					"ability_bottle_health"
+		"AbilityTextureName"            "alchemist_unstable_concoction"
+
+		// Stats		
+		//-------------------------------------------------------------------------------------------------------------
+		"AbilityCooldown"				"0.2"
+
+		// Item Info
+		//-------------------------------------------------------------------------------------------------------------
+		"AbilityManaCost"				"0"
+		
+		"Modifiers"
+		{
+			"modifier_bottle_health"
+			{
+				"EffectName" "particles/items2_fx/mask_of_madness.vpcf"
+
+			}
+			"Passive" "0" 
+            "IsHidden" "0" 
+			"IsBuff"	"1"
+			"Properties"
+				{
+					"MODIFIER_PROPERTY_ATTACKSPEED_BONUS_CONSTANT" "1000.0"
+					"MODIFIER_PROPERTY_MOVESPEED_BONUS_PERCENTAGE" "200.0" 
+				}
+		}
+	}
+	
 	"fx_test_ability"
 	{
 		// General

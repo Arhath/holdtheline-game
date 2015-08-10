@@ -11,6 +11,7 @@ function BroadcastMessage( sMessage, fDuration )
     FireGameEvent( "show_center_message", centerMessage )
 end
 
+
 function PickRandomShuffle( reference_list, bucket )
     if ( #reference_list == 0 ) then
         return nil
@@ -30,6 +31,7 @@ function PickRandomShuffle( reference_list, bucket )
     return result
 end
 
+
 function shallowcopy(orig)
     local orig_type = type(orig)
     local copy
@@ -44,6 +46,7 @@ function shallowcopy(orig)
     return copy
 end
 
+
 function ShuffledList( orig_list )
 	local list = shallowcopy( orig_list )
 	local result = {}
@@ -56,6 +59,7 @@ function ShuffledList( orig_list )
 	return result
 end
 
+
 function TableCount( t )
 	local n = 0
 	for _ in pairs( t ) do
@@ -63,6 +67,7 @@ function TableCount( t )
 	end
 	return n
 end
+
 
 function TableFindKey( table, val )
 	if table == nil then
@@ -78,6 +83,7 @@ function TableFindKey( table, val )
 	return nil
 end
 
+
 function GetAngleBetweenPoints(p1, p2)
     local dX = p2.x - p1.x
     local dY = p2.y - p1.y
@@ -85,11 +91,16 @@ function GetAngleBetweenPoints(p1, p2)
     return math.atan2(dY, dX) * (180 / math.pi)
 end
 
+
 function GetAngleBetweenVectors(v1, v2)
-    dot = v1.x * v2.x + v1.y * v2.y + v1.z * v2.z
+    v1.z = 0
+    v2.z = 0
+    
+    dot = v1.x * v2.x + v1.y * v2.y
 
     return math.acos(dot / (v1:Length() * v2:Length())) * (180 / math.pi)
 end
+
 
 function CountdownTimer()
     nCOUNTDOWNTIMER = nCOUNTDOWNTIMER - 1
@@ -174,15 +185,18 @@ function PopupHealing(target, amount)
     PopupNumbers(target, "heal", Vector(0, 255, 0), 1.0, amount, POPUP_SYMBOL_PRE_PLUS, nil)
 end
 
+
 -- e.g. the popup you get when you suddenly take a large portion of your health pool in damage at once
 function PopupDamage(target, amount)
     PopupNumbers(target, "damage", Vector(255, 0, 0), 1.0, amount, nil, POPUP_SYMBOL_POST_DROP)
 end
 
+
 -- e.g. when dealing critical damage
 function PopupCriticalDamage(target, amount)
     PopupNumbers(target, "crit", Vector(255, 0, 0), 1.0, amount, nil, POPUP_SYMBOL_POST_LIGHTNING)
 end
+
 
 -- e.g. when taking damage over time from a poison type spell
 function PopupDamageOverTime(target, amount)
@@ -194,15 +208,18 @@ function PopupDamageBlock(target, amount)
     PopupNumbers(target, "block", Vector(255, 255, 255), 1.0, amount, POPUP_SYMBOL_PRE_MINUS, nil)
 end
 
+
 -- e.g. when last-hitting a creep
 function PopupGoldGain(target, amount)
     PopupNumbers(target, "gold", Vector(255, 200, 33), 1.0, amount, POPUP_SYMBOL_PRE_PLUS, nil)
 end
 
+
 -- e.g. when missing uphill
 function PopupMiss(target)
     PopupNumbers(target, "miss", Vector(255, 0, 0), 1.0, nil, POPUP_SYMBOL_PRE_MISS, nil)
 end
+
 
 -- Customizable version.
 function PopupNumbers(target, pfx, color, lifetime, number, presymbol, postsymbol)
@@ -225,18 +242,40 @@ function PopupNumbers(target, pfx, color, lifetime, number, presymbol, postsymbo
     ParticleManager:SetParticleControl(pidx, 3, color)
 end
 
+
 function CHoldoutGameSpawner:StatusReport()
 	print( string.format( "** Spawner %s", self._szNPCClassName ) )
 	print( string.format( "%d of %d spawned", self._nUnitsSpawnedThisRound, self._nTotalUnitsToSpawn ) )
 end
 
+
 function TestSpawn(name, spawner, player, team)
-	local entSpawn = Entities:FindByName(nil, spawner)		
-		if entSpawn ~= nil then
-			local point = entSpawn:GetOrigin()
-			local unit = CreateUnitByName(name, point, true, nil, nil, team)
-			unit:SetControllableByPlayer(player, false)
-		else 
-			print("Error: No Spawner found!")
-		end
+	local entSpawn = Entities:FindByName(nil, spawner)
+
+	if entSpawn ~= nil then
+		local point = entSpawn:GetOrigin()
+		local unit = CreateUnitByName(name, point, true, nil, nil, team)
+		unit:SetControllableByPlayer(player, false)
+	else 
+		print("Error: No Spawner found!")
+	end
+end
+
+
+function SetPhasing(unit, time)
+    if unit:IsNull() or not unit:IsAlive() then
+        return
+    end
+    
+    if time == 0 then
+
+        unit:RemoveModifierByName("modifier_phasing_passive")
+    else
+        
+        if unit.phasingApplier == nil then
+            unit.phasingApplier = CreateItem("item_phasing_applier", unit, unit)
+        end
+
+        unit.phasingApplier:ApplyDataDrivenModifier(unit, unit, "modifier_phasing_passive", {duration=time})
+    end
 end

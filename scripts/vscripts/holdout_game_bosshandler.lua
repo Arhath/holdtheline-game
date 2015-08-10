@@ -29,6 +29,10 @@ function CHoldoutGameBossHandler:Init( gameRound, nBoss )
 	
 end
 
+function CHoldoutGameBossHandler:OnNPCSpawned( event )
+	self._bossObj:OnNPCSpawned(event)
+end
+
 
 function CHoldoutGameBossHandler:Begin()
 	self._bossObj:Begin()

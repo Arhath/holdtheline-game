@@ -74,8 +74,8 @@
 		"UnitFodder_1a" // Duration 80s - Continues with UnitFodderGrouped_2a & 3a to 120s total
 		{
 			"NPCName"				"npc_dota_creature_kobold_tunneler"
-			"TotalUnitsToSpawn"		"20"
-			"UnitsPerSpawn"			"4"
+			"TotalUnitsToSpawn"		"1"
+			"UnitsPerSpawn"			"1"
 			"SpawnInterval"			"2"
 			"SpawnerName"			"path_invader1_1"
 			"DontOffsetSpawn"		"true"
