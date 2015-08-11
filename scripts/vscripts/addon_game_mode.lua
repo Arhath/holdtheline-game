@@ -16,7 +16,7 @@ require( "trigger" )
 require( "timers" )
 require( "holdout_game_bosshandler" )
 require( "utility_functions" )
-require( "holdout_game_moonwell" )
+require( "moonwell_system" )
 require( "movement_system" )
 require( "bottle_system" )
 
@@ -188,7 +188,6 @@ function CHoldoutGameMode:_ReadGameConfiguration()
 	self:_ReadRandomSpawnsConfiguration( kv["RandomSpawns"] )
 	self:_ReadLootItemDropsConfiguration( kv["ItemDrops"] )
 	self:_ReadRoundConfigurations( kv )
-	self:_InitMoonwells()
 	
 	mode = GameRules:GetGameModeEntity()        
     mode:SetCameraDistanceOverride(1600.0)
@@ -213,43 +212,6 @@ function CHoldoutGameMode:ShopSheepIdle()
 	end
 end
 
-function CHoldoutGameMode:_InitMoonwells()
-	self._vMoonwells = {}
-	local i = 1
-	while Entities:FindByName(nil, "moonwellradiant" .. i) ~= nil do
-		local moonwellObj = CMoonwell:CreateMoonwell("moonwellradiant" .. i, "moonwellradiantwater" .. i, "triggermoonwellradiant" .. i, self)
-		moonwellObj:SetMana(0, false)
-		table.insert(self._vMoonwells, moonwellObj)
-		i = i + 1
-	end
-end
-
-function CHoldoutGameMode:RefillBottle(unit, trigger)
-	for _,moonwell in pairs(self._vMoonwells) do
-		if trigger:GetName() == moonwell._strTrigger then
-			--local bottle = findItemOnUnit( unit, "item_bottle", false)
-
-			if unit.BottleSystem == nil then
-				print("bottle system not found")
-				return
-			end
-	
-			if unit.BottleSystem[1].Charges < unit.BottleSystem[1].ChargesMax then
-				----print("refreshing bottle")
-				----print(bottle:GetCurrentCharges())
-				if moonwell:GetMana() >= 10 then
-					----print("add bottle charge")
-					--bottle:SetCurrentCharges(bottle:GetCurrentCharges() + 1)
-					self._bottleSystem:BottleAddCharges(unit, BOTTLE_HEALTH, 1)
-					moonwell:AddMana(-10, true)
-					PopupNumbers(unit, "gold", Vector(255, 0, 255), 1.0, 1, POPUP_SYMBOL_POST_EXCLAMATION, nil)
-				end
-			else
-				----print("no bottle found")
-			end
-		end
-	end
-end
 
 -- Verify spawners if random is set
 function CHoldoutGameMode:ChooseRandomSpawnInfo()

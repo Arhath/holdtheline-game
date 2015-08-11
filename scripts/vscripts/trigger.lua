@@ -1,7 +1,7 @@
 function OnEnterEnergyGate(trigger)
 	local u = trigger.activator
 	GameRules.holdOut:OnUnitEntersEnergyGate(u)
-	print("Cleansing Water")
+	--print("Cleansing Water")
 end
 
 function OnLeaveCleansingWater(trigger)
@@ -72,27 +72,22 @@ function BottleWaterEnter(event)
 	print(trigger:GetName())
 	
 	--print(string.format("moonwellid: %d", moonwell))
-	if unit ~= nil then
-		unit.BottleWater = true
-	
-		Timers:CreateTimer(function()
-			print("calling bottle refill")
-			GameRules.holdOut:RefillBottle(unit, trigger)
-		
-			if unit.BottleWater then
-				return 1.0
-			end
-		
-			return nil
+	if unit ~= nil and unit:IsRealHero() then
+		if trigger.Moonwell ~= nil then
+			print("moonwell enter")
+			trigger.Moonwell:AddBottleUnit(unit)
 		end
-		)
 	end
 end
 
 function BottleWaterLeave(event)
 	local unit = event.activator
+	local trigger = thisEntity
 	
-	if unit ~= nil then
-		unit.BottleWater = false
+	if unit ~= nil and unit:IsRealHero() then
+		if trigger.Moonwell ~= nil then
+			print("moonwell leave")
+			trigger.Moonwell:RemoveBottleUnit(unit)
+		end
 	end
 end

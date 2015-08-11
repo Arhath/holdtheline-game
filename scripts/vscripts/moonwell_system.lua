@@ -6,31 +6,42 @@ if CMoonwell == nil then
 	CMoonwell = class({})
 end
 
-function CMoonwell:CreateMoonwell(moonwell, water, trigger, gameMode)
+
+function CMoonwell:CreateMoonwell(moonwell, water, trigger, bottleSystem)
 	local moonwellObj = CMoonwell()
-	if moonwellObj:Init(moonwell, water, trigger, gameMode) then
+	if moonwellObj:Init(moonwell, water, trigger, bottleSystem) then
 		return moonwellObj
 	end
 	
 	return nil
 end
 
-function CMoonwell:Init(moonwell, water, trigger, gameMode)
+
+function CMoonwell:Init(moonwell, water, trigger, bottleSystem)
 	self._entMoonwell = Entities:FindByName(nil, moonwell)
 	if self._entMoonwell == nil then
-		print("Moonwell not found")
+		print("moonwell not found")
 		return nil
 	end
 	
 	self._entWater = Entities:FindByName(nil, water)
 	if self._entWater == nil then
-		print("Water not found")
+		print("water not found")
 		return nil
 	end
-	self._strTrigger = trigger
-	self._gameMode = gameMode
-	self._TICKRATE = 0.25
+
+	self._entTrigger = Entities:FindByName(nil, trigger)
+	if self._entWater == nil then
+		print("trigger not found")
+		return nil
+	end
+
+	self._entTrigger.Moonwell = self
+
+	self._bottleSystem = bottleSystem
+	self._TICKRATE = 0.1
 	self._fManaReg = 7.0
+	self._fRefillPerSecond = 20
 	self._fTimeNextUpdate = GameRules:GetGameTime()
 	self._fUpdateIntervall = 1.0
 	self._bIsFull = false
@@ -39,6 +50,8 @@ function CMoonwell:Init(moonwell, water, trigger, gameMode)
 	
 	self._fMaxHeight = self._entWater:GetOrigin().z
 	self._fHeightDiff = 55
+
+	self._vBottleUnits = {}
 	
 	Timers:CreateTimer(function()
 		
@@ -48,17 +61,40 @@ function CMoonwell:Init(moonwell, water, trigger, gameMode)
 	return true
 end
 
+
 function CMoonwell:Think()
 	self:AddMana(self._fManaReg * self._TICKRATE)
+	if #self._vBottleUnits > 0 then
+		self:RefillBottles()
+	end
 	self:UpdateMoonwell(true)
 	
 	return self._TICKRATE
 end
 
+function CMoonwell:RefillBottles()
+	print("refilling bottles")
+	local refillTick = self._fRefillPerSecond * self._TICKRATE
+	local manaToUse = math.min(refillTick, self:GetMana())
+
+	for n, u in pairs(self._vBottleUnits) do
+		if u.BottleSystem ~= nil then
+			local refillAmount = manaToUse / #self._vBottleUnits
+			local manaLeft = refillAmount - self._bottleSystem:BottleAddCharges(u, BOTTLE_HEALTH, refillAmount)
+
+			--manaLeft = refillUnit - self._bottleSystem:BottleAddCharges(u, BOTTLE_MANA, manaLeft)
+			self:AddMana(((refillAmount - manaLeft) * -1), true)
+			manaToUse = manaToUse - refillAmount + manaLeft
+		end
+	end
+end
+
+
 function CMoonwell:GetMana()
-	print("moonwell get mana = %d", self._entMoonwell:GetMana())
+	--print(string.format("moonwell get mana = %d", self._entMoonwell:GetMana()))
 	return self._entMoonwell:GetMana()
 end
+
 
 function CMoonwell:AddMana(n, show)
 	local maxMana = self._entMoonwell:GetMaxMana()
@@ -73,6 +109,7 @@ function CMoonwell:AddMana(n, show)
 	self:UpdateMoonwell(show)
 end
 
+
 function CMoonwell:SetMana(n, show)
 	local maxMana = self._entMoonwell:GetMaxMana()
 	local mana = self._entMoonwell:GetMana()
@@ -85,6 +122,7 @@ function CMoonwell:SetMana(n, show)
 	
 	self:UpdateMoonwell(show)
 end
+
 
 function CMoonwell:UpdateMoonwell(show)
 	local maxMana = self._entMoonwell:GetMaxMana()
@@ -126,4 +164,63 @@ function CMoonwell:UpdateMoonwell(show)
 	end
 	
 	self._fManaLastUpdate = mana
+end
+
+function CMoonwell:AddBottleUnit( unit )
+	print("adding bottle unit")
+	if unit.BottleSystem == nil then
+		return
+	end
+
+	local bSetUnit = true
+
+	for _, u in pairs(self._vBottleUnits) do
+		if u == unit then
+			bSetUnit = false
+			break
+		end
+	end
+
+	if bSetUnit then
+		print("inserting bottle unit into table")
+		table.insert(self._vBottleUnits, unit)
+	end
+end
+
+function CMoonwell:RemoveBottleUnit( unit )
+	for n, u in pairs(self._vBottleUnits) do
+		if u == unit then
+			print("removing bottle unit from table")
+			table.remove(self._vBottleUnits, n)
+			break
+		end
+	end
+end
+
+
+function CMoonwell:RefillBottle(unit, trigger)
+	for _,moonwell in pairs(self._vMoonwells) do
+		if trigger:GetName() == moonwell._strTrigger then
+			--local bottle = findItemOnUnit( unit, "item_bottle", false)
+
+			if unit.BottleSystem == nil then
+				print("bottle system not found")
+				return
+			end
+	
+			if unit.BottleSystem[1].Charges < unit.BottleSystem[1].ChargesMax then
+				----print("refreshing bottle")
+				----print(bottle:GetCurrentCharges())
+				if moonwell:GetMana() >= 20 then
+					----print("add bottle charge")
+					--bottle:SetCurrentCharges(bottle:GetCurrentCharges() + 1)
+					self._bottleSystem:BottleAddCharges(unit, BOTTLE_HEALTH, 20)
+					moonwell:AddMana(-20, true)
+					PopupNumbers(unit, "gold", Vector(255, 0, 255), 1.0, 1, POPUP_SYMBOL_POST_EXCLAMATION, nil)
+				end
+			else
+				----print("no bottle found")
+			end
+		end
+	end
 end

@@ -33,6 +33,9 @@ function CBottleSystem:Init( gameMode, team )
 	self._gameMode = gameMode
 	self._nTeam = team
 	self._vHeroes = {}
+	self._vMoonwells = {}
+	self:InitMoonwells()
+
 
 	Timers:CreateTimer(function()
 		CBottleSystem:Update()
@@ -42,6 +45,16 @@ function CBottleSystem:Init( gameMode, team )
 	)
 end
 
+function CBottleSystem:InitMoonwells()
+	local i = 1
+	while Entities:FindByName(nil, "moonwellradiant" .. i) ~= nil do
+		local moonwellObj = CMoonwell:CreateMoonwell("moonwellradiant" .. i, "moonwellradiantwater" .. i, "triggermoonwellradiant" .. i, self)
+		moonwellObj:SetMana(0, false)
+		table.insert(self._vMoonwells, moonwellObj)
+		i = i + 1
+	end
+end
+
 
 function CBottleSystem:GetTickrate()
 	return 0.25
@@ -49,7 +62,7 @@ end
 
 function CBottleSystem:OnHeroSpawned( hero )
 	hero.BottleSystem[BOTTLE_HEALTH].BuffApplier:ApplyDataDrivenModifier(hero, hero, MODIFIER_STACKS_[BOTTLE_HEALTH], {duration=-1})
-	self:BottleAddCharges(hero, BOTTLE_HEALTH, hero.BottleSystem[BOTTLE_HEALTH].Charges)
+	--self:BottleAddCharges(hero, BOTTLE_HEALTH, hero.BottleSystem[BOTTLE_HEALTH].Charges)
 end
 
 
@@ -62,7 +75,8 @@ function CBottleSystem:OnHeroInGame( hero )
 		--Health Bottle
 		{
 			Charges = 0,
-			ChargesMax = 7,
+			ChargesMax = 100,
+			ChargesCost = 25,
 			Lvl = 1,
 			Ability = hero:AddAbility("bottle_health"),
 			BuffApplier = CreateItem("item_bottle_health_applier", hero, hero),
@@ -86,7 +100,7 @@ function CBottleSystem:OnHeroInGame( hero )
 
 	hero.BottleSystem[BOTTLE_HEALTH].BuffApplier:ApplyDataDrivenModifier(hero, hero, MODIFIER_STACKS_[BOTTLE_HEALTH], {duration=-1})
 	
-	self:BottleAddCharges(hero, BOTTLE_HEALTH, 3)
+	self:BottleAddCharges(hero, BOTTLE_HEALTH, 100)
 end
 
 function CBottleSystem:Update()
@@ -96,8 +110,8 @@ end
 
 
 function CBottleSystem:HeroUseBottle( hero, target, bottle )
-	if hero.BottleSystem[bottle].Charges > 0 then
-		self:BottleAddCharges(hero, bottle, -1)
+	if hero.BottleSystem[bottle].Charges >= hero.BottleSystem[bottle].ChargesCost then
+		self:BottleAddCharges(hero, bottle, -hero.BottleSystem[bottle].ChargesCost)
 		self:BottleActivate(hero, target, bottle)
 		return true
 	end
@@ -167,35 +181,57 @@ function CBottleSystem:BottleAddCharges( hero, bottle, charges)
 		return
 	end
 
+	local chargesUsed = 0
+
+	if charges == 0 then
+		return
+	end
+
 	if charges > 0 then
 		if hero.BottleSystem[bottle].Charges + charges < hero.BottleSystem[bottle].ChargesMax then
 			hero.BottleSystem[bottle].Charges = hero.BottleSystem[bottle].Charges + charges
+			chargesUsed = charges
 		else
+			chargesUsed = hero.BottleSystem[bottle].ChargesMax - hero.BottleSystem[bottle].Charges
 			hero.BottleSystem[bottle].Charges = hero.BottleSystem[bottle].ChargesMax
 		end
 	else
 		if hero.BottleSystem[bottle].Charges + charges > 0 then
 			hero.BottleSystem[bottle].Charges = hero.BottleSystem[bottle].Charges + charges
+			chargesUsed = charges
 		else
+			chargesUsed = (hero.BottleSystem[bottle].ChargesMax - hero.BottleSystem[bottle].Charges) * -1
 			hero.BottleSystem[bottle].Charges = 0
 		end
 	end
 
 	local pctCharges = hero.BottleSystem[bottle].Charges / hero.BottleSystem[bottle].ChargesMax
 
-	if pctCharges >= 0.75 then
-		hero.BottleSystem[bottle].Ability:SetLevel(4)
+	if hero.BottleSystem[bottle].Charges < hero.BottleSystem[bottle].ChargesCost then
+		if hero.BottleSystem[bottle].Ability:GetLevel() ~= 0 then
+			hero.BottleSystem[bottle].Ability:SetLevel(0)
+		end
+	elseif pctCharges >= 0.75 then
+		if hero.BottleSystem[bottle].Ability:GetLevel() ~= 4 then
+			hero.BottleSystem[bottle].Ability:SetLevel(4)
+		end
 	elseif pctCharges >= 0.5 then
+			if hero.BottleSystem[bottle].Ability:GetLevel() ~= 3 then
 			hero.BottleSystem[bottle].Ability:SetLevel(3)
+		end
 	elseif pctCharges >= 0.25 then
-		hero.BottleSystem[bottle].Ability:SetLevel(2)
+		if hero.BottleSystem[bottle].Ability:GetLevel() ~= 2 then
+			hero.BottleSystem[bottle].Ability:SetLevel(2)
+		end
 	elseif pctCharges > 0 then
-		hero.BottleSystem[bottle].Ability:SetLevel(1)
-	else
-		hero.BottleSystem[bottle].Ability:SetLevel(0)
+		if hero.BottleSystem[bottle].Ability:GetLevel() ~= 1 then
+			hero.BottleSystem[bottle].Ability:SetLevel(1)
+		end
 	end
 
-	hero:SetModifierStackCount(MODIFIER_STACKS_[bottle], hero, hero.BottleSystem[bottle].Charges)
+	hero:SetModifierStackCount(MODIFIER_STACKS_[bottle], hero, math.floor(hero.BottleSystem[bottle].Charges))
+
+	return chargesUsed
 end
 
 

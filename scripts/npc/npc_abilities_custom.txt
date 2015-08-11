@@ -13,7 +13,7 @@
 		"AbilityUnitTargetTeam"			"DOTA_UNIT_TARGET_TEAM_FRIENDLY"
 		"AbilityUnitTargetType"			"DOTA_UNIT_TARGET_HERO | DOTA_UNIT_TARGET_CREEP"
 		"BaseClass" 					"ability_lua"
-		"ScriptFile"					"ability_bottle_health"
+		"ScriptFile"					"bottle_health"
 		"AbilityTextureName"            "alchemist_unstable_concoction"
 
 		// Stats		
