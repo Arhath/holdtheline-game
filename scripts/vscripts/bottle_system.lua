@@ -159,6 +159,16 @@ function CBottleSystem:BottleThink( hero, target, bottle )
 	return nil
 end
 
+
+function CBottleSystem:IsBottleFull( hero, bottle )
+	if hero.BottleSystem[bottle].Charges == hero.BottleSystem[bottle].ChargesMax then
+		return true
+	else
+		return false
+	end
+end
+
+
 function CBottleSystem:HeroBottleHeal( hero, bottle, amount )
 	if bottle == BOTTLE_HEALTH then
 		if hero:GetHealth() + amount < hero:GetMaxHealth() then
@@ -178,13 +188,13 @@ end
 
 function CBottleSystem:BottleAddCharges( hero, bottle, charges)
 	if hero == nil or hero.BottleSystem == nil then
-		return
+		return 0
 	end
 
 	local chargesUsed = 0
 
 	if charges == 0 then
-		return
+		return 0
 	end
 
 	if charges > 0 then
@@ -211,19 +221,19 @@ function CBottleSystem:BottleAddCharges( hero, bottle, charges)
 		if hero.BottleSystem[bottle].Ability:GetLevel() ~= 0 then
 			hero.BottleSystem[bottle].Ability:SetLevel(0)
 		end
-	elseif pctCharges >= 0.75 then
+	elseif pctCharges >= 1 then
 		if hero.BottleSystem[bottle].Ability:GetLevel() ~= 4 then
 			hero.BottleSystem[bottle].Ability:SetLevel(4)
 		end
-	elseif pctCharges >= 0.5 then
+	elseif pctCharges >= 0.75 then
 			if hero.BottleSystem[bottle].Ability:GetLevel() ~= 3 then
 			hero.BottleSystem[bottle].Ability:SetLevel(3)
 		end
-	elseif pctCharges >= 0.25 then
+	elseif pctCharges >= 0.5 then
 		if hero.BottleSystem[bottle].Ability:GetLevel() ~= 2 then
 			hero.BottleSystem[bottle].Ability:SetLevel(2)
 		end
-	elseif pctCharges > 0 then
+	elseif pctCharges >= 0.25 then
 		if hero.BottleSystem[bottle].Ability:GetLevel() ~= 1 then
 			hero.BottleSystem[bottle].Ability:SetLevel(1)
 		end

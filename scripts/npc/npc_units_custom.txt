@@ -5,6 +5,12 @@
 	
 	//=================================================================
 	
+	"dummy_unit"
+	{
+	  "BaseClass"   "npc_dota_creature" 
+	  "Model"   	"models/development/invisiblebox.vmdl"  
+	}
+
 	"shop_sheep"
 	{
 		"BaseClass"   "npc_dota_creature" 
@@ -50,7 +56,7 @@
 			"particle"  "particles/units/heroes/hero_treant/treant_leech_seed_projectile.vpcf"
 		}
 
-		"Ability1"	""
+		"Ability1"	"orb_heal"
 
   
   		// Status
@@ -79,8 +85,8 @@
 	}
 	
 	/////////////////////////////////////////////
-  //BOSS TREANT
-  /////////////////////////////////////////////
+	//BOSS TREANT
+	/////////////////////////////////////////////
   
   	"boss_treant"
 	{
@@ -164,13 +170,12 @@
 		{
 			"model"			"models/heroes/furion/treant.vmdl"
 			"particle"		"particles/econ/generic/generic_aoe_shockwave_1/generic_aoe_shockwave_1.vpcf"
-			"particle"		"particles/econ/generic/generic_aoe_shockwave_1/generic_aoe_shockwave_1.vpcf"
 			"particle"  	"particles\units\heroes\hero_treant\treant_overgrowth_vines_mid.vpcf"
 			"particle"		"particles/units/heroes/hero_witchdoctor/witchdoctor_voodoo_restoration.vpcf"
 			"particle"		"particles/test_particle/aura_debuff_gas.vpcf"
 			"particle"		"particles/econ/items/abaddon/abaddon_alliance/abaddon_aphotic_shield_explosion_alliance_flash_b.vpcf"
-			"particle"		"particles/units/heroes/hero_oracle/oracle_false_promise_break_heal.vpcf"
-			"particle"		"particles/test_particle/aura_debuff_status.vpcf"
+			"particle"		"particles/units/heroes/hero_oracle/oracle_false_promise_break_heal.vpcf" 	
+
 			"model"    		"models/items/furion/flowerstaff.vmdl"
 			"model"    		"models\props_nature\mushroom_wild001.vmdl"
 			"model"			"models/development/invisiblebox.vmdl"
@@ -221,10 +226,16 @@
  
   "treant_mushroom"
  {
-	"BaseClass"   "npc_dota_creature" 
-	"Model"    "models\props_nature\mushroom_wild001.vmdl"
-	"ModelScale"  "0.5" 
-	"Level"		"5"  
+	"BaseClass" 	"npc_dota_creature" 
+	"Model"    		"models\props_nature\mushroom_wild001.vmdl"
+	"ModelScale" 	"0.5" 
+	"Level"			"5"  
+
+	"precache"
+	{
+		"particle"		"particles/test_particle/aura_debuff_gas.vpcf"
+	}
+
 
 	"Ability1"		 "creature_aura_debuff"
  }
@@ -410,8 +421,10 @@
 			"particle"			"particles/units/heroes/hero_venomancer/venomancer_poison_nova.vpcf"
 			"particle"			"particles/units/heroes/hero_venomancer/venomancer_poison_debuff_nova.vpcf"
 			"particle"			"particles/units/heroes/hero_venomancer/venomancer_poison_nova_cast.vpcf"
+			"particle"			"particles/econ/items/abaddon/abaddon_alliance/abaddon_aphotic_shield_explosion_alliance_flash_b.vpcf"
 				
 			"model"			"models/heroes/techies/fx_techiesfx_mine.vmdl"
+			"model"    		"models/items/furion/flowerstaff.vmdl"
 		}
 		
 		// Status
@@ -430,7 +443,7 @@
 		//----------------------------------------------------------------
 		"AttackCapabilities"		"DOTA_UNIT_CAP_MELEE_ATTACK"
 		"AttackDamageMin"			"20"		// Damage range min.
-		"AttackDamageMax"			"100"		// Damage range max.
+		"AttackDamageMax"			"39"		// Damage range max.
 		"AttackDamageType"			"DAMAGE_TYPE_ArmorPhysical"
 		"AttackRate"				"1.35"		// Speed of attack.
 		"AttackAnimationPoint"		"0.5"		// Normalized time in animation cycle to attack.
@@ -459,14 +472,10 @@
 		"Ability1"		"mushroom_poison_attack"
 		"Ability2"		"viper_corrosive_skin_datadriven"
 		"Ability3"		"poison_trap"
-		"Ability4"		"orb_heal"
-		
-		"precache"
-		{
-			"particle"			"particles/econ/items/abaddon/abaddon_alliance/abaddon_aphotic_shield_explosion_alliance_flash_b.vpcf"
-		}
+		"Ability4"		"treant_root_hero"		
 	}
-	 "treant_flower_creature_big"
+
+	"treant_flower_creature_big"
 	{
 		"BaseClass"   "npc_dota_creature" 
 		"Model"   	 "models\items\furion\treant_flower_1.vmdl"
@@ -544,6 +553,15 @@
 					"Name"		"creature_single_heal"
 					"Heal"		"1"
 					"UseSelfishly"        "0"
+				}
+				"Ability2"              
+				{
+					"Name"				"spawn_flower"
+					"AOE"        		"1"
+					"Buff"				"1"
+					"Radius"       		"500"
+					"MinimumTargets"    "3"
+					"UseSelfishly"      "0"
 				}
 			}
 		}
@@ -5241,5 +5259,114 @@
 
 		//Inventory
 		"HasInventory"				"0"
+	}
+
+	/////////////////////////////////////////////
+	//BOSS NIGHTBANE
+	/////////////////////////////////////////////
+  
+  	"boss_nightbane"
+	{
+		"BaseClass"			"npc_dota_creature"	
+		"Model"				"models/heroes/bane/bane.vmdl"
+		"SoundSet"			"Hero_Bane"
+		"Level"				"25"
+		"ConsideredHero"	"1"
+		"ModelScale"		"2.0"
+		
+		// Abilities
+		//----------------------------------------------------------------	
+		
+		"AbilityLayout"	"7"
+		
+		"Ability1"		"nightbane_invis"
+		"Ability2"		"bane_enfeeble"
+		"Ability1"		"nightbane_eyes_of_night"
+		"Ability4"		"mirana_leap"
+		"Ability5"		"bane_nightmare"
+		"Ability6"		"night_stalker_darkness"			// Ability 6 - Extra.
+		"Ability7"		"nightbane_invis"			// Ability 7 - Extra.
+		"Ability8"		""			// Ability 8 - Extra.
+		
+		// Status
+		//----------------------------------------------------------------
+		"StatusHealth"				"15000"		// Base health.
+		"StatusHealthRegen"			"15.0"		// Health regeneration rate.
+		"StatusMana"				"15000"		// Base mana.
+		"StatusManaRegen"			"0"			// Mana regeneration rate.
+		
+		// Armor
+		//----------------------------------------------------------------
+		"ArmorPhysical"				"20"			// Physical protection.
+		"MagicalResistance"			"25"		// Magical protection.
+
+		// Attack
+		//----------------------------------------------------------------
+		"AttackCapabilities"		"DOTA_UNIT_CAP_MELEE_ATTACK"
+		"AttackDamageMin"			"50"		// Damage range min.
+		"AttackDamageMax"			"100"		// Damage range max.
+		"AttackDamageType"			"DAMAGE_TYPE_ArmorPhysical"
+		"AttackRate"				"1.35"		// Speed of attack.
+		"AttackAnimationPoint"		"0.5"		// Normalized time in animation cycle to attack.
+		"AttackAcquisitionRange"	"500"		// Range within a target can be acquired.
+		"AttackRange"				"100"		// Range within a target can be attacked.
+		"ProjectileModel"			""			// Particle system model for projectile.
+		"ProjectileSpeed"			""			// Speed of projectile.
+
+		// Bounty
+		//----------------------------------------------------------------
+		"BountyXP"					"350"		// Experience earn.
+		"BountyGoldMin"				"11"		// Gold earned min.
+		"BountyGoldMax"				"13"		// Gold earned max.
+
+		// Bounds
+		//----------------------------------------------------------------
+		"BoundsHullName"			"DOTA_HULL_SIZE_HERO"			// Hull type used for navigation/locomotion.
+		"HealthBarOffset"			"140"
+
+		// Movement
+		//----------------------------------------------------------------
+		"MovementCapabilities"		"DOTA_UNIT_CAP_MOVE_GROUND"			// Type of locomotion - ground, air
+		"MovementSpeed"				"500"		// Speed
+		"MovementTurnRate"			"0.5"		// Turning rate.
+
+
+		// Team
+		//----------------------------------------------------------------
+		"TeamName"					"DOTA_TEAM_GOODGUYS"			// Team name.
+		"CombatClassAttack"			"DOTA_COMBAT_CLASS_ATTACK_LIGHT"
+		"CombatClassDefend"			"DOTA_COMBAT_CLASS_DEFEND_STRONG"
+		"UnitRelationshipClass"		"DOTA_NPC_UNIT_RELATIONSHIP_TYPE_DEFAULT"
+		
+		// Vision
+		//----------------------------------------------------------------
+		"VisionDaytimeRange"		"1400"		// Range of vision during day light.
+		"VisionNighttimeRange"		"2000"		// Range of vision at night time.
+		
+		"precache"
+		{
+			"model"				"models/heroes/bane/bane.vmdl"
+			"particle_folder"	"particles/units/heroes/hero_bane"
+			"particle_folder"	"particles/units/heroes/hero_night_stalker"
+			"particle_folder"	"particles/units/heroes/hero_mirana"
+		}					
+	}
+
+
+	"nightbane_eye_of_night"
+	{
+	 	"BaseClass"   "npc_dota_creature" 
+	 	"Model"    		"models/items/wards/eye_of_avernus_ward/eye_of_avernus_ward.vmdl"
+	 	"ModelScale"  "1.0"  
+
+		"precache"
+		{
+		 	"model"		"models/items/wards/eye_of_avernus_ward/eye_of_avernus_ward.vmdl"
+		}
+  
+		// Status
+		//----------------------------------------------------------------
+			"StatusHealth"				"1000"		// Base health.
+			"StatusHealthRegen"			"0.0"		// Health regeneration rate.
 	}
 }

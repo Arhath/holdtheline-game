@@ -69,6 +69,8 @@ function treant_raise_nature:OnSpellStart()
 		end
 		
 		local entUnit = CreateUnitByName("npc_dota_furion_treant", posTree, true, nil, nil, teamCaster)
+		ParticleManager:CreateParticle("particles/units/heroes/hero_venomancer/venomancer_ward_spawn_d.vpcf", PATTACH_ABSORIGIN, entUnit)
+
 		treesSpawned = treesSpawned + 1
 	end
 	
@@ -79,8 +81,9 @@ function treant_raise_nature:OnSpellStart()
 		local posFlower = flower:GetAbsOrigin()
 
 		local entUnit = CreateUnitByName("treant_flower_creature", posFlower, true, nil, nil, teamCaster)
-		flowersSpawned = flowersSpawned + 1
-		
+		ParticleManager:CreateParticle("particles/units/heroes/hero_venomancer/venomancer_ward_spawn_d.vpcf", PATTACH_ABSORIGIN, entUnit)
+
+		flowersSpawned = flowersSpawned + 1	
 		flower:ForceKill(false)
 	end
 	
@@ -91,8 +94,9 @@ function treant_raise_nature:OnSpellStart()
 		local posMushroom = mushroom:GetAbsOrigin()
 
 		local entUnit = CreateUnitByName("treant_mushroom_creature", posMushroom, true, nil, nil, teamCaster)
+		ParticleManager:CreateParticle("particles/units/heroes/hero_venomancer/venomancer_ward_spawn_d.vpcf", PATTACH_ABSORIGIN, entUnit)
+
 		mushroomsSpawned = mushroomsSpawned + 1
-		
 		mushroom:ForceKill(false)
 	end
 end

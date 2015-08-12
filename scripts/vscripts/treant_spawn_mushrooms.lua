@@ -22,8 +22,11 @@ function MushroomsPlant(event)
 		local SpawnLocation = posCaster + RandomVector( RandomFloat( 300, radius) )
 		local mushroom = CreateUnitByName("treant_mushroom", SpawnLocation, false, nil, nil, caster:GetTeamNumber())
 		
+		ParticleManager:CreateParticle("particles/units/heroes/hero_venomancer/venomancer_ward_spawn_d.vpcf", PATTACH_ABSORIGIN, mushroom)
+
 		ability:ApplyDataDrivenModifier(caster, mushroom, modifier_mushroom, {})
-		
+		mushroom:AddNewModifier(caster, nil, "modifier_kill", {duration = 180})
+
 			-- Update the count and table
 		table.insert(caster.mushroom_table, mushroom)
 		caster.mushroom_count = caster.mushroom_count + 1

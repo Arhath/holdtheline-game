@@ -74,17 +74,23 @@ end
 
 function CMoonwell:RefillBottles()
 	print("refilling bottles")
+	local BottleUnits = shallowcopy(self._vBottleUnits)
 	local refillTick = self._fRefillPerSecond * self._TICKRATE
 	local manaToUse = math.min(refillTick, self:GetMana())
 
-	for n, u in pairs(self._vBottleUnits) do
-		if u.BottleSystem ~= nil then
-			local refillAmount = manaToUse / #self._vBottleUnits
-			local manaLeft = refillAmount - self._bottleSystem:BottleAddCharges(u, BOTTLE_HEALTH, refillAmount)
+	while manaToUse > 0 and #BottleUnits > 0 do
+		for n, u in pairs(BottleUnits) do
+			if u.BottleSystem ~= nil then
+				local refillAmount = manaToUse / #BottleUnits
+				local manaLeft = refillAmount - self._bottleSystem:BottleAddCharges(u, BOTTLE_HEALTH, refillAmount)
 
-			--manaLeft = refillUnit - self._bottleSystem:BottleAddCharges(u, BOTTLE_MANA, manaLeft)
-			self:AddMana(((refillAmount - manaLeft) * -1), true)
-			manaToUse = manaToUse - refillAmount + manaLeft
+				--manaLeft = refillUnit - self._bottleSystem:BottleAddCharges(u, BOTTLE_MANA, manaLeft)
+				if self._bottleSystem:IsBottleFull(u, BOTTLE_HEALTH) and self._bottleSystem:IsBottleFull(u, BOTTLE_MANA) then
+					table.remove(BottleUnits, n)
+				end
+				self:AddMana(((refillAmount - manaLeft) * -1), true)
+				manaToUse = manaToUse - refillAmount + manaLeft
+			end
 		end
 	end
 end

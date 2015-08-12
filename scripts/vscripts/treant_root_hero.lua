@@ -12,19 +12,17 @@ function OnSpell(event)
 	local modifier_target = event.modifier_target
 	
 	-- Plant Root	
-	local root = CreateUnitByName("treant_root", posTarget, false, nil, nil, caster:GetTeamNumber())
+	caster.root = CreateUnitByName("treant_root", posTarget, false, nil, nil, caster:GetTeamNumber())
 	
-	target.Particle = ParticleManager:CreateParticle(particle, PATTACH_ABSORIGIN, target)
+	--target.particle = ParticleManager:CreateParticle(particle, PATTACH_ABSORIGIN, target)
 	
 	--Apply Debuff
-	ability:ApplyDataDrivenModifier(caster, root, modifier_root, {})
+	ability:ApplyDataDrivenModifier(caster, caster.root, modifier_root, {})
 	ability:ApplyDataDrivenModifier(caster, target, modifier_target, {})
 	
 	--Kill root after 20 sec
-	root:AddNewModifier(caster, nil, "modifier_kill", {duration = 20})
+	caster.root:AddNewModifier(caster, nil, "modifier_kill", {duration = 20})
 end
-
-
 
 function RootDeath(event)
 	local modifier_target = event.modifier_target
@@ -32,4 +30,11 @@ function RootDeath(event)
 	local target = event.target
 	
 	caster.target:RemoveModifierByName(modifier_target)
+end
+
+function TargetDeath( event )
+	local caster = event.caster
+	target = caster.target
+
+	UTIL_RemoveImmediate(caster.root)
 end

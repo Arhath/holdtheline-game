@@ -16,6 +16,8 @@ function TrapPlant( event )
 	
 	-- Create the trap and apply the trap modifier		
     local trap = CreateUnitByName("mushroom_poison_trap", target_point, false, nil, nil, caster:GetTeamNumber())
+  	ParticleManager:CreateParticle("particles/econ/items/warlock/warlock_staff_hellborn/warlock_hellborn_grasp_staff_rope_smoke.vpcf", PATTACH_ABSORIGIN_FOLLOW, trap)
+    
 	trap:AddNewModifier(caster, ability, "modifier_kill", {Duration = duration})
     ability:ApplyDataDrivenModifier(caster, trap, modifier_trap, {})
 	
@@ -54,10 +56,6 @@ function TrapTracker( event )
 		Timers:CreateTimer(explode_delay, function()
 			if target:IsAlive() then
 				ability:ApplyDataDrivenModifier(caster, units[1], modifier_target, {})
-				--local particleName = "particles/units/heroes/hero_techies/techies_land_mine_explode.vpcf"
-				--ParticleManager:CreateParticle(particleName, PATTACH_ABSORIGIN, target, player)
-				--particleName = "particles/units/heroes/hero_venomancer/venomancer_poison_nova.vpcf"
-				--ParticleManager:CreateParticle(particleName, PATTACH_ABSORIGIN, target)
 				UTIL_Remove(target)
 			end
 		end)
@@ -93,11 +91,4 @@ function PoisonNova( event )
 	print("TARGET HEALTH: " .. tonumber(targetHP))
 	print("DEALING DAMAGE: " .. tonumber(damageTable.damage))
 	ApplyDamage(damageTable)
-end
-
-function Death_fx()
-	local target = event.target
-	local caster = event.caster
-	local particleName = "particles/units/heroes/hero_techies/techies_land_mine_explode.vpcf"
-	ParticleManager:CreateParticle(particleName, PATTACH_ABSORIGIN, target)
 end

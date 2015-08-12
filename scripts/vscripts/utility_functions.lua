@@ -101,6 +101,69 @@ function GetAngleBetweenVectors(v1, v2)
     return math.acos(dot / (v1:Length() * v2:Length())) * (180 / math.pi)
 end
 
+function GetMidpointBetweenPoints( v1, v2 )
+    local v3 = Vector((v1.x + v2.x) / 2, (v1.y + v2.y) / 2, 0)
+
+    return v3
+end
+
+function GetAllMidpointsWithMinMaxDist(list, min, max)
+    local vec = {}
+
+    for n1 = 1, #list - 1 do
+        for n2 = n1 + 1, #list do
+            local p1 = list[n1]
+            local p2 = list[n2]
+            local length = (p2 - p1):Length()
+            
+            if length >= min and length <= max then
+                local p3 = GetMidpointBetweenPoints(p1, p2)
+                table.insert(vec, p3)
+            end
+        end
+    end
+
+    return vec
+end
+
+
+function GetRandomPointInAoe( pos, aoe )
+    return pos + Vector(RandomInt(-(aoe), aoe), RandomInt(-(aoe), aoe) , 0)
+end
+
+
+function UnitFindBestPositionForSkill(unit, search, aoeMax, aoeMin, team, who)
+    local diaMax = aoeMax * 2
+    local diaMin = aoeMin * 2
+    local vEnemyPos = {}
+    local vMidpoints = {}
+    local bestPoint = nil
+    local bestNumUnits = -1
+    local vUnits = FindUnitsInRadius( unit:GetTeamNumber(), unit:GetOrigin(), nil, search, team, who, 0, 0, false )
+
+    for _, u in pairs(vUnits) do
+        table.insert(vEnemyPos, u:GetAbsOrigin())
+    end
+
+    for i = 0, 3 do
+        local mPoints = GetAllMidpointsWithMinMaxDist(vEnemyPos, diaMin, diaMax)
+        for k = 1, #mPoints do
+            table.insert(vMidpoints, mPoints[k])
+        end
+    end
+
+    for _, p in pairs(vMidpoints) do
+        unitsInAoe = FindUnitsInRadius( unit:GetTeamNumber(), p, nil, aoeMax, team, who, 0, 0, false )
+
+        if #unitsInAoe >= bestNumUnits then
+            bestPoint = p
+            bestNumUnits = #unitsInAoe
+        end
+    end
+
+    return bestPoint
+end
+
 
 function CountdownTimer()
     nCOUNTDOWNTIMER = nCOUNTDOWNTIMER - 1

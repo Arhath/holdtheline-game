@@ -6,6 +6,7 @@ function FlowersPlant(event)
 	local posCaster = caster:GetAbsOrigin()
 
 	local modifier_flower = event.modifier_flower
+	local modifier_fx = event.modifier_fx
 	local modifier_caster = event.modifier_caster
 	
 	-- Initialize the count and table
@@ -17,14 +18,17 @@ function FlowersPlant(event)
 	local number_flowers = ability:GetLevelSpecialValueFor("number_flowers", ability_level) 
 	local radius = ability:GetLevelSpecialValueFor("spawn_radius", ability_level) 
 	
-	--Plant	and add Aura
+	--Plant	Flower and add Aura
 	for n = 0, number_flowers do	
 		local SpawnLocation = posCaster + RandomVector( RandomFloat( 300, radius) )
 		local flower = CreateUnitByName("treant_flower", SpawnLocation, false, nil, nil, caster:GetTeamNumber())
 		
+		ParticleManager:CreateParticle("particles/units/heroes/hero_venomancer/venomancer_ward_spawn_d.vpcf", PATTACH_ABSORIGIN, flower)
+
 		ability:ApplyDataDrivenModifier(caster, flower, modifier_flower, {})
+		flower:AddNewModifier(caster, nil, "modifier_kill", {duration = 180})
 		
-			-- Update the count and table
+		-- Update the count and table
 		table.insert(caster.flower_table, flower)
 		caster.flower_count = caster.flower_count + 1
 		

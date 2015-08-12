@@ -41,6 +41,7 @@
 				}
 		}
 	}
+
 	
 	"fx_test_ability"
 	{
@@ -9060,7 +9061,7 @@
 				"Target"					"TARGET"
 				"modifier_target"			"modifier_root_target"
 				"modifier_root"				"modifier_root"
-				"particle"					"articles\test_particle\treant_root_hero.vpcf"
+				"particle"					"particles\test_particle\treant_root_hero.vpcf"
 			}
 		}
 			  
@@ -9072,6 +9073,9 @@
 				"IsBuff"		"1"
 				"IsHidden" 		"0"
 				
+				"EffectName"       "particles\test_particle\treant_root_hero.vpcf"
+   				"EffectAttachType"  "follow_origin"
+
 				"OnDeath"
 				{
 					"RunScript"
@@ -9124,6 +9128,15 @@
 						"Target"		"TARGET"
 					}	
 				}
+
+				"OnDeath"
+				{
+					"RunScript"
+					{
+						"ScriptFile"				"treant_root_hero.lua"
+						"Function"					"TargetDeath"
+					}
+				}
 			}
 		}
 	}
@@ -9145,6 +9158,10 @@
   "AbilityCooldown"    "10"
   "AbilityManaCost"    "20"
   
+	"precache"
+	{
+	 	"particle"  "particles/units/heroes/hero_venomancer/venomancer_ward_spawn_d.vpcf" 	//particles/econ/items/pets/pet_generic/pet_spawn_debris_small.vpcf
+	}
 
   // Special
   //-------------------------------------------------------------------------------------------------------------
@@ -9191,6 +9208,10 @@
   "AbilityCooldown"    "5"
   "AbilityManaCost"    "20"
   
+	"precache"
+	{
+		"particle"  "particles/units/heroes/hero_venomancer/venomancer_ward_spawn_d.vpcf" 	//particles/econ/items/pets/pet_generic/pet_spawn_debris_small.vpcf
+	}
 
   // Special
   //-------------------------------------------------------------------------------------------------------------
@@ -9261,6 +9282,10 @@
 		  "AbilityCooldown"    "5"
 		  "AbilityManaCost"    "20"
 		  
+		  "precache"
+		  {
+		  	"particle"  "particles/units/heroes/hero_venomancer/venomancer_ward_spawn_d.vpcf" 	//particles/econ/items/pets/pet_generic/pet_spawn_debris_small.vpcf
+		  }
 
 		  // Special
 		  //-------------------------------------------------------------------------------------------------------------
@@ -9294,13 +9319,15 @@
 				"Target"				"CASTER"
 				"modifier_flower"		"modifier_flower"
 				"modifier_caster"		"modifier_flower_caster"
+				"modifier_fx" 			"modifier_flower_fx"
 			}
 		}
 		
 		"Modifiers"
-		{
+		{	
 			"modifier_flower"
 			{
+				"IsHidden"					"1"
 				"OnDeath"
 				{
 					"RunScript"
@@ -9316,7 +9343,7 @@
 			{
 				"IsBuff"		"1"
 				"IsPurgable"	"0"
-			}							
+			}													
 		}
 	}
 	
@@ -9337,6 +9364,10 @@
 		  "AbilityCooldown"    "5"
 		  "AbilityManaCost"    "20"
 		  
+		  "precache"
+		  {
+		  	"particle"  "particles/units/heroes/hero_venomancer/venomancer_ward_spawn_d.vpcf" 	//particles/econ/items/pets/pet_generic/pet_spawn_debris_small.vpcf
+		  }
 
 		  // Special
 		  //-------------------------------------------------------------------------------------------------------------
@@ -9412,6 +9443,11 @@
 		"BaseClass"						"ability_datadriven"
 		//"AbilityTextureName"			""
 		
+		"precache"
+		{
+			"particle"		"particles/test_particle/aura_debuff_status.vpcf"
+		}
+
 		"OnSpellStart"
 		{
 			"ApplyModifier"
@@ -9421,15 +9457,10 @@
 				{
 					"Center"			"CASTER"
 					"Radius"			"%debuff_radius"
-					"Teams"				"DOTA_UNIT_TARGET_TEAM_FRIENDLY"
+					"Teams"				"DOTA_UNIT_TARGET_TEAM_ENEMY"
 					"Types"				"DOTA_UNIT_TARGET_HERO | DOTA_UNIT_TARGET_CREEP | DOTA_UNIT_TARGET_MECHANICAL | DOTA_UNIT_TARGET_OTHER"
 				}
 			}
-		}
-		
-		"precache"
-		{
-			"particle"		"particles/test_particle/aura_debuff_status.vpcf"
 		}
 		
 		// Modifiers
@@ -9476,12 +9507,13 @@
 				{
 					"MODIFIER_PROPERTY_ATTACKSPEED_BONUS_PERCENTAGE"	"%atk_speed_debuff"
 					"MODIFIER_PROPERTY_PHYSICAL_ARMOR_BONUS"			"%armor_debuff"
-					"MODIFIER_PROPERTY_MOVESPEED_BONUS_PERCENTAGE"		"%armor_debuff"
+					"MODIFIER_PROPERTY_MOVESPEED_BONUS_PERCENTAGE"		"%movement_speed_debuff"
 				}
 			}
 		}
 		
 		// Special
+
 		//-------------------------------------------------------------------------------------------------------------
 		"AbilitySpecial"
 		{
@@ -9598,6 +9630,8 @@
 		"precache"
 		{
 			"particle"			"particles/econ/items/abaddon/abaddon_alliance/abaddon_aphotic_shield_explosion_alliance_flash_b.vpcf"
+			"particle"  		"particles/units/heroes/hero_witchdoctor/witchdoctor_maledict_dot.vpcf"
+			"particle"  		"particles/status_fx/status_effect_maledict.vpcf"
 		}
 		
 		"Modifiers"
@@ -9619,47 +9653,47 @@
 							"Types"			"DOTA_UNIT_TARGET_HERO | DOTA_UNIT_TARGET_BASIC"
 						}
 					}
-				}
 
-				"OnKill"
-				{
-					"FireEffect"
+					"OnKill"
 					{
-						"Target"			"TARGET"
-						"EffectName"		"particles/econ/items/abaddon/abaddon_alliance/abaddon_aphotic_shield_explosion_alliance_flash_b.vpcf"
-						"EffectAttachType"	"attach_origin"
-					}
-					
-					"Damage"
-					{
-						"Type"				"DAMAGE_TYPE_MAGICAL"
-						"Damage"			"%damage"
-						"Target"			"TARGET"
-					}
-					
-					"Damage"
-					{
-						"Type"				"DAMAGE_TYPE_MAGICAL"
-						"Damage"			"%damage"
-						"Target"
-						{	
-						
-							"Center"		"UNIT"
-							"Radius"		"%radius"
-							"Teams"			"DOTA_UNIT_TARGET_TEAM_ENEMY"
-							"Types"			"DOTA_UNIT_TARGET_ALL"
+						"FireEffect"
+						{
+							"EffectName"        "particles/econ/items/abaddon/abaddon_alliance/abaddon_aphotic_shield_explosion_alliance_flash_b.vpcf"
+							"EffectAttachType"  "attach_hitloc"
+							"Target"			"CASTER"
+						}
+
+						"Damage"
+						{
+							"Type"				"DAMAGE_TYPE_MAGICAL"
+							"Damage"			"%damage"
+							"Target"
+							{	
+							
+								"Center"		"TARGET"
+								"Radius"		"%radius"
+								"Teams"			"DOTA_UNIT_TARGET_TEAM_ALL"
+								"Types"			"DOTA_UNIT_TARGET_ALL"
+							}
 						}
 					}
 				}
 			}
 			
+
 			"poison_attack_debuff_datadriven"
 			{
 				"IsDebuff"			"1"
 				"IsPurgable"		"0"
 				"Duration"			"%duration"
-				"Attributes" "MODIFIER_ATTRIBUTE_MULTIPLE"
-				
+				"Attributes"		 "MODIFIER_ATTRIBUTE_MULTIPLE"
+							
+			    "StatusEffectName"     "particles/status_fx/status_effect_maledict.vpcf"
+			    "StatusEffectPriority" "10"
+
+				"EffectName"        "particles/units/heroes/hero_witchdoctor/witchdoctor_maledict_dot.vpcf"
+				"EffectAttachType"  "follow_overhead"
+
 				"Properties"
 				{
 					"MODIFIER_PROPERTY_MOVESPEED_BONUS_PERCENTAGE"		"-%speed_debuff"
@@ -9671,36 +9705,6 @@
 					{
 						"Target"			"TARGET"
 						"EffectName"		"particles/econ/items/abaddon/abaddon_alliance/abaddon_aphotic_shield_explosion_alliance_flash_b.vpcf"
-						"EffectAttachType"	"follow_origin"
-					}
-					
-					"Damage"
-					{
-						"Type"				"DAMAGE_TYPE_MAGICAL"
-						"Damage"			"%damage"
-						"Target"			"TARGET"
-					}
-					
-					"Damage"
-					{
-						"Type"				"DAMAGE_TYPE_MAGICAL"
-						"Damage"			"%damage"
-						"Target"
-						{	
-						
-							"Center"		"UNIT"
-							"Radius"		"%radius"
-							"Teams"			"DOTA_UNIT_TARGET_TEAM_ENEMY"
-							"Types"			"DOTA_UNIT_TARGET_ALL"
-						}
-					}
-				}
-				"OnDeath"
-				{
-					"FireEffect"
-					{
-						"Target"			"TARGET"
-						"EffectName"		"particles/econ/items/abaddon/abaddon_alliance/abaddon_aphotic_shield_explosion_alliance_flash_b.vpcf"
 						"EffectAttachType"	"attach_origin"
 					}
 					
@@ -9708,24 +9712,36 @@
 					{
 						"Type"				"DAMAGE_TYPE_MAGICAL"
 						"Damage"			"%damage"
-						"Target"			"TARGET"
-					}
-					
-					"Damage"
-					{
-						"Type"				"DAMAGE_TYPE_MAGICAL"
-						"Damage"			"%damage"
 						"Target"
 						{	
 						
-							"Center"		"UNIT"
+							"Center"		"TARGET"
 							"Radius"		"%radius"
 							"Teams"			"DOTA_UNIT_TARGET_TEAM_ENEMY"
 							"Types"			"DOTA_UNIT_TARGET_ALL"
 						}
 					}
+
+					"Damage"
+					{
+						"Type"				"DAMAGE_TYPE_MAGICAL"
+						"Damage"			"%damage"
+						"Target"			"TARGET"
+					}
 				}
-				
+				"OnDeath"
+				{
+					"FireEffect"
+					{
+						"EffectName"        "particles/econ/items/abaddon/abaddon_alliance/abaddon_aphotic_shield_explosion_alliance_flash_b.vpcf"
+						"EffectAttachType"  "follow_hitloc"
+						"Target"
+						{
+							"Center"	"UNIT"
+							"Flags"		"DOTA_UNIT_TARGET_FLAG_DEAD"
+						}
+					}
+				}		
 			}
 		}
 	}
@@ -9965,6 +9981,96 @@
 			}
 		}
 	}
+
+	"spawn_mushroom"
+	{
+		// General
+		  //-------------------------------------------------------------------------------------------------------------
+		  "AbilityBehavior"    "DOTA_ABILITY_BEHAVIOR_POINT"
+		  "BaseClass"     	 	"ability_datadriven"
+		  
+		  "AbilityTextureName"    "furion_force_of_nature"
+		  "AbilityCastAnimation"   "ACT_DOTA_CAST_ABILITY_3"
+		  
+		  // Stats
+		  //-------------------------------------------------------------------------------------------------------------
+		  "AbilityCastRange"    "1000"
+		  "AbilityCastPoint"    "0.3"
+		  "AbilityCooldown"    "30"
+		  "AbilityManaCost"    "20"
+
+		   "precache"
+		  {
+		  	"particle"  "particles/units/heroes/hero_venomancer/venomancer_ward_spawn_d.vpcf" 	//particles/econ/items/pets/pet_generic/pet_spawn_debris_small.vpcf
+		  }
+
+		  "OnSpellStart"
+		  {
+		  	"SpawnUnit"
+		  	{
+		  		"Duration"		"30"
+		  		"UnitName"		"treant_mushroom"
+		  		"Target" 		"POINT"
+		  		"UnitCount"		"1"
+		  		"UnitLimit"		"1"
+
+		  		"OnSpawn"
+		  		{
+		  			"FireEffect"
+				  	{
+				  		"EffectName"        "particles/units/heroes/hero_venomancer/venomancer_ward_spawn_d.vpcf"
+				  		"EffectAttachType"  "follow_origin"
+				  		"Target"            "TARGET"
+				  	}
+		  		}
+		  	}
+		  }
+	}	
+
+	"spawn_flower"
+	{
+		// General
+		  //-------------------------------------------------------------------------------------------------------------
+		  "AbilityBehavior"    "DOTA_ABILITY_BEHAVIOR_POINT"
+		  "BaseClass"     	 	"ability_datadriven"
+		  
+		  "AbilityTextureName"    "furion_force_of_nature"
+		  "AbilityCastAnimation"   "ACT_DOTA_CAST_ABILITY_3"
+		  
+		  // Stats
+		  //-------------------------------------------------------------------------------------------------------------
+		  "AbilityCastRange"    "1000"
+		  "AbilityCastPoint"    "0.3"
+		  "AbilityCooldown"    "30"
+		  "AbilityManaCost"    "20"
+
+		   "precache"
+		  {
+		  	"particle"  "particles/units/heroes/hero_venomancer/venomancer_ward_spawn_d.vpcf" 	//particles/econ/items/pets/pet_generic/pet_spawn_debris_small.vpcf
+		  }
+
+		  "OnSpellStart"
+		  {
+		  	"SpawnUnit"
+		  	{
+		  		"Duration"		"30"
+		  		"UnitName"		"treant_flower"
+		  		"Target" 		"POINT"
+		  		"UnitCount"		"1"
+		  		"UnitLimit"		"1"
+
+		  		"OnSpawn"
+		  		{
+		  			"FireEffect"
+				  	{
+				  		"EffectName"        "particles/units/heroes/hero_venomancer/venomancer_ward_spawn_d.vpcf"
+				  		"EffectAttachType"  "follow_origin"
+				  		"Target"            "TARGET"
+				  	}
+		  		}
+		  	}
+		  }
+	}	
 	
 	"poison_trap"
 	{
@@ -9974,7 +10080,7 @@
 			"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_POINT_TARGET | DOTA_ABILITY_BEHAVIOR_AOE"
 			"AbilityUnitDamageType"			"DAMAGE_TYPE_MAGICAL"
 			"SpellImmunityType"				"SPELL_IMMUNITY_ENEMIES_YES"
-			"AbilityTextureName"			""
+			"AbilityTextureName"			"venomancer_poison_nova"
 			"AOERadius"						"%activation_radius"
 
 			// Precache
@@ -9984,13 +10090,16 @@
 				"soundfile"		"soundevents/game_sounds_heroes/game_sounds_techies.vsndevts"		
 				"particle"		"particles/units/heroes/hero_techies/techies_land_mine.vpcf"
 				"particle"		"particles/units/heroes/hero_techies/techies_land_mine_explode.vpcf"
+				"model"			"models/heroes/techies/fx_techiesfx_mine.vmdl"	
+
+				"particle" 		"particles/econ/items/warlock/warlock_staff_hellborn/warlock_hellborn_grasp_staff_rope_smoke.vpcf"
 				
 				"soundfile"			"soundevents/game_sounds_heroes/game_sounds_venomancer.vsndevts"
 				"particle"			"particles/units/heroes/hero_venomancer/venomancer_poison_nova.vpcf"
 				"particle"			"particles/units/heroes/hero_venomancer/venomancer_poison_debuff_nova.vpcf"
 				"particle"			"particles/units/heroes/hero_venomancer/venomancer_poison_nova_cast.vpcf"
 				
-				"model"			"models/heroes/techies/fx_techiesfx_mine.vmdl"
+				"particle"			"particles/econ/items/abaddon/abaddon_alliance/abaddon_aphotic_shield_explosion_alliance_flash_b.vpcf"
 			}
 
 			// Casting
@@ -10023,7 +10132,7 @@
 				"03"
 				{
 					"var_type"					"FIELD_FLOAT"
-					"activation_time"			"1.75"
+					"activation_time"			"0.5"
 				}
 				"05"
 				{
@@ -10033,7 +10142,7 @@
 				"06"
 				{
 					"var_type"					"FIELD_INTEGER"
-					"plant_radius"					"1000"
+					"plant_radius"				"1000"
 				}
 				"07"
 				{
@@ -10062,7 +10171,6 @@
 					"Target"				"POINT"
 					"modifier_trap"			"modifier_trap_datadriven"
 					"modifier_tracker"		"modifier_trap_tracker_datadriven"
-					"modifier_caster"		"modifier_trap_caster_datadriven"
 				}
 			}
 			
@@ -10072,31 +10180,17 @@
 				{
 					"IsHidden"		"1"
 					"IsPurgable"	"0"
-					"Duration"		"10"
-					
-						
+
 					"States"
 					{
-						"MODIFIER_STATE_INVULNERABLE"		"MODIFIER_STATE_VALUE_ENABLED"
-						"MODIFIER_STATE_NO_UNIT_COLLISION"		"MODIFIER_STATE_VALUE_ENABLED"
+						"MODIFIER_STATE_NO_UNIT_COLLISION"	"MODIFIER_STATE_VALUE_ENABLED"
 					}
-				
+
 					"OnDeath"
 					{
-						"CreateThinker"
-						{
-
-							"ScriptFile"			"poison_trap.lua"
-							"Function"				"Death_Fx"
-							"Target"				"TARGET"
-							}			
-								"ModifierName"	"modifier_trap_thinker"
-								"Target" 		"UNIT"
-							}				
-
 						"FireEffect"
 						{
-							"EffectName"        "particles/units/heroes/hero_techies/techies_land_mine_explode.vpcf"
+							"EffectName"        "particles/econ/items/abaddon/abaddon_alliance/abaddon_aphotic_shield_explosion_alliance_flash_b.vpcf"
 							"EffectAttachType"  "follow_hitloc"
 							"Target"
 							{
@@ -10104,24 +10198,6 @@
 								"Flags"		"DOTA_UNIT_TARGET_FLAG_DEAD"
 							}
 						}
-						
-						"FireSound"
-						{
-							"EffectName"	"Hero_Venomancer.PoisonNova"
-							"Target"		"TARGET"
-						}
-						
-						"FireEffect"
-						{
-							"EffectName"	"particles/units/heroes/hero_venomancer/venomancer_poison_nova.vpcf"
-							"EffectAttachType"	"start_at_customorigin"
-							"ControlPoints"
-							{
-								"00"	"TARGET"
-								"01"	"0 0 0"
-								"02"	"0 0 0"
-							}
-						}				
 
 						"ActOnTargets"
 						{
@@ -10132,7 +10208,7 @@
 								"Teams" 	"DOTA_UNIT_TARGET_TEAM_ENEMY"
 								"Types" 	"DOTA_UNIT_TARGET_BASIC | DOTA_UNIT_TARGET_HERO"
 							}
-						
+
 							"Action"    
 							{
 								"ApplyModifier"
@@ -10142,32 +10218,22 @@
 								}
 							}
 						}
-
-
-						"RunScript"
-						{
-							"ScriptFile"	"poison_trap.lua"
-							"Function"		"TrapRemove"
-							"modifier_caster"	"modifier_trap_caster_datadriven"
-						}
+					}
 				}
-			
-				
+
 				"modifier_trap_tracker_datadriven"
 				{
-					"IsHidden"		"1"
+					"IsHidden"		"0"
 					"IsPurgable"	"0"
-
-					"EffectName"		"particles/units/heroes/hero_techies/techies_land_mine.vpcf"
-					"EffectAttachType"	"follow_origin"
 
 					"ThinkInterval" 	 "0.1"
 					"OnIntervalThink"
 					{
 						"RunScript"
 						{
-							"ScriptFile"	"poison_trap.lua"
-							"Function"		"TrapTracker"
+							"ScriptFile"		"poison_trap.lua"
+							"Function"			"TrapTracker"
+							"modifier_target"	"modifier_poison_nova_debuff_datadriven"
 						}
 					}
 				}
@@ -10208,33 +10274,157 @@
 							"Target"		"TARGET"
 						}
 					}
-				}
-				
-				"modifier_trap_caster_datadriven"
-				{
-					{
-						"IsBuff"		"1"
-						"IsPurgable"	"0"
-					}
+				}		
+			}
+	}
 
-					"modifier_trap_thinker"
+	"nightbane_invis"
+	{
+			// General
+			//-------------------------------------------------------------------------------------------------------------
+			"BaseClass"						"ability_datadriven"
+			"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_PASSIVE"
+			"AbilityTextureName"			""
+
+			// Precache
+			//-------------------------------------------------------------------------------------------------------------
+			"precache"
+			{
+				"particle_folder"	"particles/status_fx/status_effect_ancestral_spirit.vpcf"
+			}
+
+			"Modifiers"
+			{
+				"invis_thinker"
+				{	
+					"Passive"		"1"
+
+					"ThinkInterval"  "5.0"
+					"OnIntervalThink"
 					{
-						"Duration"	"0.03"
-						"OnCreated"
+						"RunScript"
 						{
-							"FireSound"
-							{
-								"EffectName"	"Hero_Techies.LandMine.Detonate"
-								"Target"
-								{
-									"Center"	"TARGET"
-									"Flags"		"DOTA_UNIT_TARGET_FLAG_DEAD"
-								}
-							}
+							"ScriptFile"	"nightbane_invis.lua"
+							"Function"		"InvisTracker"
 						}
 					}
 				}
 			}
 	}
-}
 
+	"nightbane_eyes_of_night"
+	{
+			// General
+			//-------------------------------------------------------------------------------------------------------------
+			"BaseClass"						"ability_datadriven"
+			"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_NO_TARGET"
+			"AbilityTextureName"			""
+
+			// Precache
+			//-------------------------------------------------------------------------------------------------------------
+			"precache"
+			{
+				"model"				"models/items/wards/eye_of_avernus_ward/eye_of_avernus_ward.vmdl"
+				"particle_folder"	"particles/status_fx/status_effect_ancestral_spirit.vpcf"
+				"particle" 			"particles/econ/items/invoker/invoker_apex/invoker_apex_exort_eye_b.vpcf"
+				"particle" 			"particles/econ/items/spirit_breaker/spirit_breaker_iron_surge/spirit_breaker_iron_surge_eye_glow_b.vpcf"
+				"particle" 			"particles/econ/wards/portal/ward_portal_core/ward_portal_eye_sentry.vpcf"
+			}
+
+			"OnSpellStart"
+			{
+
+				"ApplyModifier"
+				{
+					"ModifierName"	"modifier_truesight_datadriven"
+					"Target" 		"CASTER"
+					"Duration"		"%duration"
+				}
+
+				"RunScript"
+				{	
+					"ScriptFile"			"nightbane_eyes_of_night.lua"
+					"Function"				"SpellStart"
+					"modifier_thinker"		"modifier_thinker"
+				}
+			}
+
+			"AbilitySpecial"
+			{
+				"01"
+				{
+					"var_type"			"FIELD_INTEGER"
+					"number_eyes"		"10"
+				}
+				"02"
+				{
+					"var_type"			"FIELD_INTEGER"
+					"duration"			"10"
+				}
+			}
+
+		"Modifiers"
+		{
+			"modifier_truesight_datadriven"
+			{
+				"IsHidden"		"0"
+				"IsDebuff"		"1"
+		
+				"ThinkInterval"  "0.03"
+				"OnIntervalThink"
+				{
+					"ActOnTargets"
+					{
+						"Target"
+						{
+							"Center"  	"TARGET"
+							"Radius" 	"3000"
+							"Teams" 	"DOTA_UNIT_TARGET_TEAM_ENEMY"
+							"Types" 	"DOTA_UNIT_TARGET_ALL"
+						}
+					
+						"Action"    
+						{
+							"RemoveModifier"
+							{
+								"ModifierName"	"modifier_truesight_reveal"
+								"Target" 		"TARGET"
+							}
+
+							"ApplyModifier"
+							{
+								"ModifierName"	"modifier_truesight_reveal"
+								"Target" 		"TARGET"
+							}
+						}
+					}			
+				}		
+			}
+
+			"modifier_truesight_reveal"
+			{
+				"IsHidden"			"0"
+				"IsDebuff"			"1"
+				"Duration"			"0.5"	//The True Sight effect lingers for 0.5 seconds.
+				"States"
+				{
+					"MODIFIER_STATE_INVISIBLE"	"MODIFIER_STATE_VALUE_DISABLED"
+				}
+			}
+		
+			"modifier_thinker"
+			{
+				"ThinkInterval"  		"3.0"
+				"OnIntervalThink"
+				{
+					"RunScript"
+					{
+						"ScriptFile"	"nightbane_eyes_of_night.lua"
+						"Function"		"SpawnUnits"
+						"Target"		"TARGET"
+					}
+				}
+			}
+		}
+	}
+}

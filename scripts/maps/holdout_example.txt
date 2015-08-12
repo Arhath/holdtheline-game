@@ -92,7 +92,7 @@
 		"FixedXP"					"3500"
 		"IsBoss"					"1"
 		"BossNumber"				"1"
-		"PrepTime"					"600"
+		"PrepTime"					"6"
 		
 		// Stage 1 ================================================
 		"UnitZombie_1a"

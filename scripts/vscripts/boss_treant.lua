@@ -4,18 +4,23 @@ if BossTreant == nil then
 	BossTreant = class({})
 end
 
-behaviorSystem = {} -- create the global so we can assign to it
+behaviorSystemBoss = {} -- create the global so we can assign to it
+behaviorSystemFlower = {}
+behaviorSystemMushroom ={}
 
 testcount = 0
 scoreshowed = false
 entBossUnit = nil
-fBossArenaDesire = 0.0
+entBossFlower = nil
+entBossMushroom = nil
 entBossArena = nil
 fBossArenaRange = 900.0
 strBossArenaName = "bossarena1"
 bossTimePhase3 = 10
 
 vecBossArenaPos = nil
+
+bMushroom = false
 
 function BossTreant:Init(handler, gameRound)
 	self._fPhaseTime = 0
@@ -90,7 +95,7 @@ function BossTreant:Spawn()
 	self._bossOriginalHealth = entBossUnit:GetMaxHealth()
 	entBossUnit.difficultyApplier = nil
 	self:ApplyDifficultyBuff(entBossUnit)
-	behaviorSystem = AICore:CreateBehaviorSystem( { BehaviorIdle, BehaviorEarthsplitter, BehaviorRootHero, BehaviorSpawnFlowers, BehaviorSpawnMushrooms, BehaviorSpawnTrees, BehaviorRaiseNature, BehaviorMoveToArena, BehaviorAttack } )
+	behaviorSystemBoss = AICore:CreateBehaviorSystem( { BehaviorIdle } )--, BehaviorEarthsplitter, BehaviorRootHero, BehaviorSpawnFlowers, BehaviorSpawnMushrooms, BehaviorSpawnTrees, BehaviorRaiseNature, BehaviorMoveToArena, BehaviorAttack } )
 	
 	self._entQuest = SpawnEntityFromTableSynchronous( "quest", {
 		name = self._strRoundTitle,
@@ -138,10 +143,31 @@ function BossTreant:End()
 end
 
 
+function UnitCalcArenaDesire( unit, pos, range, desire, incr )
+	local posUnit = unit:GetAbsOrigin()
+		posUnit.z = 0
+		pos.z = 0
+		
+		local distArena = ( pos - posUnit ):Length()
+		--print (string.format( "dist arena: %d", distArena))
+		local distDiff = distArena - range
+		--print (string.format( "dist diff: %d", distDiff))
+		--print(distDiff)
+		
+		if distDiff > 0 then
+			return desire + incr * distDiff
+			--print("distdiff > 0")
+		else
+			return 0.0
+		end
+
+end
+
+
 function BossTreant:Think()
 
 	if entBossUnit:IsAlive() or not entBossUnit:IsNull() then
-		
+
 		self:AIThink()
 		
 		if testcount == 10 and entBossUnit:GetHealth() >= entBossUnit:GetMaxHealth()/2 then
@@ -211,22 +237,6 @@ function BossTreant:PhaseThink()
 		end
 		
 		--print("phase1think")
-		
-		local bossPos = entBossUnit:GetAbsOrigin()
-		bossPos.z = 0
-		
-		local distArena = ( vecBossArenaPos - bossPos ):Length()
-		--print (string.format( "dist arena: %d", distArena))
-		local distDiff = distArena - fBossArenaRange
-		--print (string.format( "dist diff: %d", distDiff))
-		--print(distDiff)
-		
-		if distDiff > 0 then
-			fBossArenaDesire = 5.0 + 0.01 * distDiff
-			--print("distdiff > 0")
-		else
-			fBossArenaDesire = 0.0
-		end
 
 	self._fPhaseTime = self._fPhaseTime + 1	
 
@@ -410,10 +420,17 @@ function BossTreant:PhaseThink()
 				self.bFreezeBoss = false
 
 				--Spawn Boss Ads
-				local bossFlower = CreateUnitByName("treant_flower_creature_big", vecBossArenaPos + Vector(-300, -100, 0), false, nil, nil, entBossUnit:GetTeamNumber())
-				bossFlower.CanEnterGoal = false
-				local bossMushroom = CreateUnitByName("treant_mushroom_creature_big", vecBossArenaPos + Vector(300, -100, 0), false, nil, nil, entBossUnit:GetTeamNumber())
-				bossMushroom.CanEnterGoal = false
+				--entBossFlower = CreateUnitByName("treant_flower_creature_big", vecBossArenaPos + Vector(-300, -100, 0), false, nil, nil, entBossUnit:GetTeamNumber())
+				--entBossFlower.CanEnterGoal = false
+				--entBossFlower.MovementSystemActive = false
+				--behaviorSystemFlower = AICore:CreateBehaviorSystem( { BehaviorIdle, BehaviorEarthsplitter, BehaviorRootHero, BehaviorSpawnFlowers, BehaviorSpawnMushrooms, BehaviorSpawnTrees, BehaviorRaiseNature, BehaviorMoveToArena, BehaviorAttack } )
+
+				entBossMushroom = CreateUnitByName("treant_mushroom_creature_big", vecBossArenaPos + Vector(300, -100, 0), false, nil, nil, entBossUnit:GetTeamNumber())
+				entBossMushroom.CanEnterGoal = false
+				entBossMushroom.MovementSystemActive = false
+				behaviorSystemMushroom = AICore:CreateBehaviorSystem( { BehaviorMushroomIdle, BehaviorMushroomAttack, BehaviorMushroomMoveToArena, BehaviorMushroomTrap} ) --  
+				bMushroom = true
+
 			end
 
 		end
@@ -462,7 +479,10 @@ function BossTreant:AIThink()
 	--print (string.format( "phase: %d", self._nPhase))
 	
 	if not self.bFreezeBoss then
-		behaviorSystem:Think()
+		behaviorSystemBoss:Think()
+		if bMushroom then
+			behaviorSystemMushroom:Think()
+		end
 	end
 	
 end
@@ -721,13 +741,14 @@ end
 BehaviorMoveToArena = {}
 
 function BehaviorMoveToArena:Evaluate()
+	self.unit = entBossUnit
 	local desire = 0
-	desire = fBossArenaDesire
+	desire = UnitCalcArenaDesire(self.unit, vecBossArenaPos, fBossArenaRange, 5, 0.01)
 	--print (string.format( "arenadesire: %d", fBossArenaDesire))
-	if desire > 0 then
+	if desire ~= nil and desire > 0 then
 		self.order =
 		{
-			UnitIndex = entBossUnit:entindex(),
+			UnitIndex = self.unit:entindex(),
 			OrderType = DOTA_UNIT_ORDER_MOVE_TO_POSITION,
 			Position = vecBossArenaPos,
 		}
@@ -781,20 +802,23 @@ BehaviorAttack.Continue = BehaviorAttack.Begin --if we re-enter this ability, we
 function BehaviorAttack:Think(dt)
 
 end
+
+
 --------------------------------------------------------------------------------------------------------
 
 
 BehaviorIdle = {}
 
 function BehaviorIdle:Evaluate()
+	self.unit = entBossUnit
 	local desire = 0.1
 	
 	--print (string.format( "idle desire: %d", desire))
 		self.order =
 		{
-			UnitIndex = entBossUnit:entindex(),
+			UnitIndex = self.unit:entindex(),
 			OrderType = DOTA_UNIT_ORDER_MOVE_TO_POSITION,
-			Position = vecBossArenaPos + Vector(RandomInt(-(fBossArenaRange), fBossArenaRange), RandomInt(-(fBossArenaRange), fBossArenaRange) , 0),
+			Position = GetRandomPointInAoe(vecBossArenaPos, fBossArenaRange),
 		}
 	return desire
 end
@@ -808,4 +832,156 @@ BehaviorIdle.Continue = BehaviorIdle.Begin --if we re-enter this ability, we mig
 
 function BehaviorIdle:Think(dt)
 
+end
+
+
+
+--------------------------------------------------------------------------------------------------------
+---------------------------------------   MUSHROOM   ---------------------------------------------------
+--------------------------------------------------------------------------------------------------------
+
+
+BehaviorMushroomIdle = {}
+
+function BehaviorMushroomIdle:Evaluate()
+	self.unit = entBossMushroom
+	local desire = 0.1
+	
+	--print (string.format( "idle desire: %d", desire))
+		self.order =
+		{
+			UnitIndex = self.unit:entindex(),
+			OrderType = DOTA_UNIT_ORDER_MOVE_TO_POSITION,
+			Position = GetRandomPointInAoe(vecBossArenaPos, fBossArenaRange),
+		}
+	return desire
+end
+
+
+function BehaviorMushroomIdle:Begin()
+	self.endTime = GameRules:GetGameTime() + 0.9
+end
+
+BehaviorMushroomIdle.Continue = BehaviorMushroomIdle.Begin --if we re-enter this ability, we might have a different target; might as well do a full reset
+
+function BehaviorMushroomIdle:Think(dt)
+
+end
+
+
+--------------------------------------------------------------------------------------------------------
+
+
+BehaviorMushroomMoveToArena = {}
+
+function BehaviorMushroomMoveToArena:Evaluate()
+	self.unit = entBossMushroom
+	local desire = 0
+	desire = UnitCalcArenaDesire(self.unit, vecBossArenaPos, fBossArenaRange, 5, 0.01)
+	--print (string.format( "arenadesire: %d", fBossArenaDesire))
+	if desire ~= nil and desire > 0 then
+		self.order =
+		{
+			UnitIndex = self.unit:entindex(),
+			OrderType = DOTA_UNIT_ORDER_MOVE_TO_POSITION,
+			Position = vecBossArenaPos,
+		}
+		--print (string.format( "move to arena Desire: %d", desire))
+	end
+	return desire
+end
+
+
+function BehaviorMushroomMoveToArena:Begin()
+	self.endTime = GameRules:GetGameTime() + 0.9
+end
+
+BehaviorMushroomMoveToArena.Continue = BehaviorMushroomMoveToArena.Begin --if we re-enter this ability, we might have a different target; might as well do a full reset
+
+function BehaviorMushroomMoveToArena:Think(dt)
+
+end
+
+
+--------------------------------------------------------------------------------------------------------
+
+
+BehaviorMushroomAttack = {}
+
+function BehaviorMushroomAttack:Evaluate()
+	self.unit = entBossMushroom
+	local desire = 0
+	
+	local target = AICore:WeakestEnemyHeroInRange( self.unit, 700 )
+	
+	if target ~= nil then
+		desire = 0.5
+		self.order =
+		{
+			UnitIndex = self.unit:entindex(),
+			OrderType = DOTA_UNIT_ORDER_ATTACK_TARGET,
+			TargetIndex = target:entindex(),
+		}
+		--print (string.format( "attack desire: %d", desire))
+	end
+	return desire
+end
+
+
+function BehaviorMushroomAttack:Begin()
+	self.endTime = GameRules:GetGameTime() + 0.9
+end
+
+BehaviorMushroomAttack.Continue = BehaviorMushroomAttack.Begin --if we re-enter this ability, we might have a different target; might as well do a full reset
+
+function BehaviorMushroomAttack:Think(dt)
+
+end
+
+
+--------------------------------------------------------------------------------------------------------
+
+
+BehaviorMushroomTrap = {}
+
+function BehaviorMushroomTrap:Evaluate()
+	self.unit = entBossMushroom
+	self.ability = self.unit:FindAbilityByName("poison_trap")
+	local position
+	local desire = 0
+	
+	if self.ability and self.ability:IsFullyCastable() then
+		local search = self.ability:GetSpecialValueFor("plant_radius") * 1.5
+		local aoeMax = self.ability:GetSpecialValueFor("explosion_radius")
+		local aoeMin = self.ability:GetSpecialValueFor("activation_radius")
+		local team = DOTA_UNIT_TARGET_TEAM_ENEMY
+		local who = DOTA_UNIT_TARGET_HERO
+		position = UnitFindBestPositionForSkill(self.unit, search, aoeMax, aoeMin, team, who)
+	end
+
+	if position ~= nil then
+		desire = 4
+		self.order =
+		{
+			OrderType = DOTA_UNIT_ORDER_CAST_POSITION,
+			UnitIndex = self.unit:entindex(),
+			Position = position,
+			AbilityIndex = self.ability:entindex()
+		}
+	end
+	--print (string.format( "Earthsplitter Desire: %d", desire))
+	return desire
+end
+
+
+function BehaviorMushroomTrap:Begin()
+	self.endTime = GameRules:GetGameTime() + 1
+end
+
+BehaviorMushroomTrap.Continue = BehaviorMushroomTrap.Begin --if we re-enter this ability, we might have a different target; might as well do a full reset
+
+function BehaviorMushroomTrap:Think(dt)
+	if not self.ability:IsFullyCastable() and not self.ability:IsInAbilityPhase() then
+		self.endTime = GameRules:GetGameTime()
+	end
 end
