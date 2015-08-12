@@ -9581,10 +9581,81 @@
 			
 			"FireEffect"
 			{
-				"Target"			"CASTER"
+				"Target"			"TARGET"
 				"EffectName"		"particles/units/heroes/hero_oracle/oracle_false_promise_break_heal.vpcf"
-				"EffectAttachType"	"follow_origin"
+				"EffectAttachType"	"follow_overhead"
 			}			
+		}		
+	}
+
+	"creature_aoe_heal"
+	{
+		// General
+		//-------------------------------------------------------------------------------------------------------------
+		"BaseClass"     	 			"ability_datadriven"
+		"AbilityBehavior"   			"DOTA_ABILITY_BEHAVIOR_UNIT_TARGET"
+		"AbilityUnitTargetTeam"  		"DOTA_UNIT_TARGET_TEAM_FRIENDLY"
+		"AbilityUnitTargetType" 	  	"DOTA_UNIT_TARGET_ALL"
+		  
+		// "AbilityTextureName"   "chaos_knight_chaos_bolt"
+
+
+		// Casting
+		//-------------------------------------------------------------------------------------------------------------
+		"AbilityCastRange"    "500"
+		"AbilityCastPoint"    "0.4"
+		  
+		// Time  
+		//-------------------------------------------------------------------------------------------------------------
+		"AbilityCooldown"    "5"
+
+		// Cost
+		//-------------------------------------------------------------------------------------------------------------
+		"AbilityManaCost"    "10"
+
+	  
+	  	"precache"
+		{
+			"particle"				"particles/units/heroes/hero_oracle/oracle_false_promise_break_heal.vpcf"
+			"particle" 				"particles/units/heroes/hero_witchdoctor/witchdoctor_voodoo_restoration.vpcf"
+
+		}
+		
+		"OnSpellStart"
+		{
+			"Heal"
+			{
+				"HealAmount"		"200"
+				"Target"
+				{
+					"Center"  	"TARGET"
+					"Radius" 	"200"
+					"Teams" 	"DOTA_UNIT_TARGET_TEAM_FRIENDLY"
+					"Types" 	"DOTA_UNIT_TARGET_ALL"
+				}
+			}
+			
+			"FireEffect"
+			{
+				"Target"			"TARGET"
+				"EffectName"		"particles/units/heroes/hero_oracle/oracle_false_promise_break_heal.vpcf"
+				"EffectAttachType"	"follow_overhead"
+			}
+
+			"FireEffect"
+			{
+				"Target"			"TARGET"
+				"EffectName"		"particles/units/heroes/hero_witchdoctor/witchdoctor_voodoo_restoration.vpcf"
+				"EffectAttachType"	"follow_origin"
+				"Duration"			"1"
+
+				"ControlPoints"
+				{
+					"00"	"0 0 0"
+					"01"	"200 0 0"
+					"02"	"0 0 -200"
+				}
+			}					
 		}		
 	}
 	
@@ -10127,12 +10198,12 @@
 				"02"
 				{
 					"var_type"					"FIELD_INTEGER"
-					"activation_radius"			"100"
+					"activation_radius"			"140"
 				}
 				"03"
 				{
 					"var_type"					"FIELD_FLOAT"
-					"activation_time"			"0.5"
+					"activation_time"			"1.7"
 				}
 				"05"
 				{
@@ -10147,7 +10218,7 @@
 				"07"
 				{
 					"var_type"					"FIELD_INTEGER"
-					"duration"					"10"
+					"duration"					"7"
 				}
 				"08"
 				{

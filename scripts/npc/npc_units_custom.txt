@@ -248,8 +248,8 @@
   
 	// Status
 	//----------------------------------------------------------------
-		"StatusHealth"				"200"		// Base health.
-		"StatusHealthRegen"			"0.0"		// Health regeneration rate.
+	"StatusHealth"				"200"		// Base health.
+	"StatusHealthRegen"			"0.0"		// Health regeneration rate.
 		
 		
 	// Bounty
@@ -495,16 +495,16 @@
 
 		// Attack
 		//----------------------------------------------------------------
-		"AttackCapabilities"		"DOTA_UNIT_CAP_MELEE_ATTACK"
+		"AttackCapabilities"		"DOTA_UNIT_CAP_RANGED_ATTACK"
 		"AttackDamageMin"			"20"		// Damage range min.
 		"AttackDamageMax"			"100"		// Damage range max.
 		"AttackDamageType"			"DAMAGE_TYPE_ArmorPhysical"
 		"AttackRate"				"1.35"		// Speed of attack.
 		"AttackAnimationPoint"		"0.5"		// Normalized time in animation cycle to attack.
-		"AttackAcquisitionRange"	"500"		// Range within a target can be acquired.
-		"AttackRange"				"100"		// Range within a target can be attacked.
-		"ProjectileModel"			""			// Particle system model for projectile.
-		"ProjectileSpeed"			""			// Speed of projectile.
+		"AttackAcquisitionRange"	"0"		// Range within a target can be acquired.
+		"AttackRange"				"600"		// Range within a target can be attacked.
+		"ProjectileModel"			"particles/units/heroes/hero_treant/treant_leech_seed_projectile.vpcf" 	// Particle system model for projectile.
+		"ProjectileSpeed"			"1200"			// Speed of projectile.
 
 		// Bounty
 		//----------------------------------------------------------------
@@ -528,43 +528,8 @@
 			"particle"			"particles/units/heroes/hero_oracle/oracle_false_promise_break_heal.vpcf"
 		}
 				
-		"Ability1"		"creature_single_heal"
+		"Ability1"		"creature_aoe_heal"
 		"Ability2"		"spawn_flower"
-		
-		"Creature"
-		{
-			"DefaultState"       "Invade"
-			"States"
-			{
-				"Invade"
-				{
-					"Name"          "Invade"
-					"Aggression"    "70.0"
-					"Avoidance"     "50.0"
-					"Support"       "100.0"
-					"RoamDistance"  "1000.0"
-				}
-			}
-			
-			"DefensiveAbilities"
-			{
-				"Ability1"              
-				{
-					"Name"		"creature_single_heal"
-					"Heal"		"1"
-					"UseSelfishly"        "0"
-				}
-				"Ability2"              
-				{
-					"Name"				"spawn_flower"
-					"AOE"        		"1"
-					"Buff"				"1"
-					"Radius"       		"500"
-					"MinimumTargets"    "3"
-					"UseSelfishly"      "0"
-				}
-			}
-		}
 	}
 	
 	"npc_dota_moonwell"

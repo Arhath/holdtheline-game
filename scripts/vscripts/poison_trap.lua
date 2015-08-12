@@ -55,7 +55,9 @@ function TrapTracker( event )
 	if #units > 0 then
 		Timers:CreateTimer(explode_delay, function()
 			if target:IsAlive() then
-				ability:ApplyDataDrivenModifier(caster, units[1], modifier_target, {})
+				for _, unit in pairs(units) do
+					ability:ApplyDataDrivenModifier(caster, unit, modifier_target, {})
+				end
 				UTIL_Remove(target)
 			end
 		end)
