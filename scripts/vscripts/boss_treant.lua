@@ -500,12 +500,13 @@ end
 BehaviorRootHero = {}
 
 function BehaviorRootHero:Evaluate()
-	self.ability = entBossUnit:FindAbilityByName("treant_root_hero")
+	self.unit = entBossUnit
+	self.ability = self.unit:FindAbilityByName("treant_root_hero")
 	local target
 	local desire = 0
 	
 	if self.ability and self.ability:IsFullyCastable() then
-		local allEnemies = FindUnitsInRadius( entBossUnit:GetTeamNumber(), entBossUnit:GetOrigin(), nil, 700.0, DOTA_UNIT_TARGET_TEAM_ENEMY, DOTA_UNIT_TARGET_HERO, 0, 0, false )
+		local allEnemies = FindUnitsInRadius( self.unit:GetTeamNumber(), self.unit:GetOrigin(), nil, 700.0, DOTA_UNIT_TARGET_TEAM_ENEMY, DOTA_UNIT_TARGET_HERO, 0, 0, false )
 		if #allEnemies > 0 then
 			target = allEnemies[RandomInt( 1, #allEnemies )]
 		end
@@ -516,7 +517,7 @@ function BehaviorRootHero:Evaluate()
 		self.order =
 		{
 			OrderType = DOTA_UNIT_ORDER_CAST_TARGET,
-			UnitIndex = entBossUnit:entindex(),
+			UnitIndex = self.unit:entindex(),
 			TargetIndex = target:entindex(),
 			AbilityIndex = self.ability:entindex()
 		}
@@ -545,12 +546,13 @@ end
 BehaviorEarthsplitter = {}
 
 function BehaviorEarthsplitter:Evaluate()
-	self.ability = entBossUnit:FindAbilityByName("creature_earth_splitter")
+	self.unit = entBossUnit
+	self.ability = self.unit:FindAbilityByName("creature_earth_splitter")
 	local target
 	local desire = 0
 	
 	if self.ability and self.ability:IsFullyCastable() then
-		local allEnemies = FindUnitsInRadius( entBossUnit:GetTeamNumber(), entBossUnit:GetOrigin(), nil, 800.0, DOTA_UNIT_TARGET_TEAM_ENEMY, DOTA_UNIT_TARGET_HERO, 0, 0, false )
+		local allEnemies = FindUnitsInRadius( self.unit:GetTeamNumber(), self.unit:GetOrigin(), nil, 800.0, DOTA_UNIT_TARGET_TEAM_ENEMY, DOTA_UNIT_TARGET_HERO, 0, 0, false )
 		if #allEnemies > 0 then
 			target = allEnemies[RandomInt( 1, #allEnemies )]
 		end
@@ -561,7 +563,7 @@ function BehaviorEarthsplitter:Evaluate()
 		self.order =
 		{
 			OrderType = DOTA_UNIT_ORDER_CAST_POSITION,
-			UnitIndex = entBossUnit:entindex(),
+			UnitIndex = self.unit:entindex(),
 			Position = target:GetAbsOrigin(),
 			AbilityIndex = self.ability:entindex()
 		}
@@ -588,6 +590,7 @@ end
 BehaviorSpawnFlowers = {}
 
 function BehaviorSpawnFlowers:Evaluate()
+	self.unit = entBossUnit
 	self.ability = entBossUnit:FindAbilityByName("treant_spawn_flowers")
 	local desire = 0
 	
@@ -596,7 +599,7 @@ function BehaviorSpawnFlowers:Evaluate()
 		self.order =
 		{
 			OrderType = DOTA_UNIT_ORDER_CAST_NO_TARGET,
-			UnitIndex = entBossUnit:entindex(),
+			UnitIndex = self.unit :entindex(),
 			AbilityIndex = self.ability:entindex()
 		}
 		--print (string.format( "flowers Desire: %d", desire))
@@ -624,7 +627,8 @@ end
 BehaviorSpawnMushrooms = {}
 
 function BehaviorSpawnMushrooms:Evaluate()
-	self.ability = entBossUnit:FindAbilityByName("treant_spawn_mushrooms")
+	self.unit = entBossUnit
+	self.ability = self.unit:FindAbilityByName("treant_spawn_mushrooms")
 	local desire = 0
 	
 	if self.ability and self.ability:IsFullyCastable() then
@@ -632,7 +636,7 @@ function BehaviorSpawnMushrooms:Evaluate()
 		self.order =
 		{
 			OrderType = DOTA_UNIT_ORDER_CAST_NO_TARGET,
-			UnitIndex = entBossUnit:entindex(),
+			UnitIndex = self.unit:entindex(),
 			AbilityIndex = self.ability:entindex()
 		}
 	
@@ -661,6 +665,7 @@ end
 BehaviorSpawnTrees = {}
 
 function BehaviorSpawnTrees:Evaluate()
+	self.unit = entBossUnit
 	self.ability = entBossUnit:FindAbilityByName("treant_spawn_trees")
 	local desire = 0
 	
@@ -669,7 +674,7 @@ function BehaviorSpawnTrees:Evaluate()
 		self.order =
 		{
 			OrderType = DOTA_UNIT_ORDER_CAST_NO_TARGET,
-			UnitIndex = entBossUnit:entindex(),
+			UnitIndex = self.unit:entindex(),
 			AbilityIndex = self.ability:entindex()
 		}
 		--print (string.format( "tree Desire: %d", desire))
@@ -697,11 +702,12 @@ end
 BehaviorRaiseNature = {}
 
 function BehaviorRaiseNature:Evaluate()
+	self.unit = entBossUnit
 	self.ability = entBossUnit:FindAbilityByName("treant_raise_nature")
 	local desire = 0
 	
 	if self.ability and self.ability:IsFullyCastable() then
-		local allTargets = FindUnitsInRadius( entBossUnit:GetTeamNumber(), entBossUnit:GetOrigin(), nil, 700.0, DOTA_UNIT_TARGET_TEAM_FRIENDLY, DOTA_UNIT_TARGET_ALL, 0, 0, false )
+		local allTargets = FindUnitsInRadius( self.unit:GetTeamNumber(), self.unit:GetOrigin(), nil, 700.0, DOTA_UNIT_TARGET_TEAM_FRIENDLY, DOTA_UNIT_TARGET_ALL, 0, 0, false )
 		for n, u in pairs(allTargets) do
 			local uName = u:GetUnitName()
 			if not (uName == "treant_flower" or uName == "treant_mushroom" or uName == "ent_dota_tree" or uName == "dota_temp_tree") then
@@ -713,7 +719,7 @@ function BehaviorRaiseNature:Evaluate()
 		self.order =
 		{
 			OrderType = DOTA_UNIT_ORDER_CAST_NO_TARGET,
-			UnitIndex = entBossUnit:entindex(),
+			UnitIndex = self.unit:entindex(),
 			AbilityIndex = self.ability:entindex()
 		}
 		--print (string.format( "raise Desire: %d", desire))
@@ -775,15 +781,16 @@ end
 BehaviorAttack = {}
 
 function BehaviorAttack:Evaluate()
+	self.unit = entBossUnit
 	local desire = 0
 	
-	local target = AICore:WeakestEnemyHeroInRange( entBossUnit, 700 )
+	local target = AICore:WeakestEnemyHeroInRange( self.unit, 700 )
 	
 	if target ~= nil then
 		desire = 0.5
 		self.order =
 		{
-			UnitIndex = entBossUnit:entindex(),
+			UnitIndex = self.unit:entindex(),
 			OrderType = DOTA_UNIT_ORDER_ATTACK_TARGET,
 			TargetIndex = target:entindex(),
 		}
