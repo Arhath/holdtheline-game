@@ -160,7 +160,7 @@ function CBottleSystem:BottleThink( hero, target, bottle )
 end
 
 
-function CBottleSystem:IsBottleFull( hero, bottle )
+function IsBottleFull( hero, bottle )
 	if hero.BottleSystem[bottle].Charges == hero.BottleSystem[bottle].ChargesMax then
 		return true
 	else
@@ -198,6 +198,9 @@ function CBottleSystem:BottleAddCharges( hero, bottle, charges)
 	end
 
 	if charges > 0 then
+		if IsBottleFull(hero, bottle) then
+			return 0
+		end
 		if hero.BottleSystem[bottle].Charges + charges < hero.BottleSystem[bottle].ChargesMax then
 			hero.BottleSystem[bottle].Charges = hero.BottleSystem[bottle].Charges + charges
 			chargesUsed = charges
@@ -210,7 +213,7 @@ function CBottleSystem:BottleAddCharges( hero, bottle, charges)
 			hero.BottleSystem[bottle].Charges = hero.BottleSystem[bottle].Charges + charges
 			chargesUsed = charges
 		else
-			chargesUsed = (hero.BottleSystem[bottle].ChargesMax - hero.BottleSystem[bottle].Charges) * -1
+			chargesUsed = -(hero.BottleSystem[bottle].ChargesMax - hero.BottleSystem[bottle].Charges)
 			hero.BottleSystem[bottle].Charges = 0
 		end
 	end

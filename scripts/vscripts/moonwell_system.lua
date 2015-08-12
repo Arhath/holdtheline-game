@@ -77,22 +77,27 @@ function CMoonwell:RefillBottles()
 	local BottleUnits = shallowcopy(self._vBottleUnits)
 	local refillTick = self._fRefillPerSecond * self._TICKRATE
 	local manaToUse = math.min(refillTick, self:GetMana())
+	local manaUsed = 0
 
-	while manaToUse > 0 and #BottleUnits > 0 do
+	while manaToUse - manaUsed > 0 and #BottleUnits > 0 do
+		for n, u in pairs(BottleUnits) do
+			if IsBottleFull(u, BOTTLE_HEALTH) then --and self._bottleSystem:IsBottleFull(u, BOTTLE_MANA) then
+				table.remove(BottleUnits, n)
+			end
+		end
+
+		local refillAmount = manaToUse - manaUsed / #BottleUnits
+
 		for n, u in pairs(BottleUnits) do
 			if u.BottleSystem ~= nil then
-				local refillAmount = manaToUse / #BottleUnits
-				local manaLeft = refillAmount - self._bottleSystem:BottleAddCharges(u, BOTTLE_HEALTH, refillAmount)
+				manaUsed = manaUsed + self._bottleSystem:BottleAddCharges(u, BOTTLE_HEALTH, refillAmount)
 
-				--manaLeft = refillUnit - self._bottleSystem:BottleAddCharges(u, BOTTLE_MANA, manaLeft)
-				if self._bottleSystem:IsBottleFull(u, BOTTLE_HEALTH) and self._bottleSystem:IsBottleFull(u, BOTTLE_MANA) then
-					table.remove(BottleUnits, n)
-				end
-				self:AddMana(((refillAmount - manaLeft) * -1), true)
-				manaToUse = manaToUse - refillAmount + manaLeft
+					--manaLeft = refillUnit - self._bottleSystem:BottleAddCharges(u, BOTTLE_MANA, manaLeft)
 			end
 		end
 	end
+
+	self:AddMana(-manaUsed, true)
 end
 
 
@@ -152,9 +157,9 @@ function CMoonwell:UpdateMoonwell(show)
 	
 	if show then
 		if manaDiff > 0 then
-			PopupNumbers(self._entMoonwell, "gold", Vector(0, 0, 255), 1.0, math.abs(manaDiff), POPUP_SYMBOL_PRE_PLUS, nil)
+			PopupNumbers(self._entMoonwell, "gold", Vector(0, 0, 255), 1.0, math.ceil(math.abs(manaDiff)), POPUP_SYMBOL_PRE_PLUS, nil)
 		elseif manaDiff < 0 then
-			PopupNumbers(self._entMoonwell, "gold", Vector(255, 0, 0), 1.0, math.abs(manaDiff), POPUP_SYMBOL_PRE_MINUS, nil)
+			PopupNumbers(self._entMoonwell, "gold", Vector(255, 0, 0), 1.0, math.ceil(math.abs(manaDiff)), POPUP_SYMBOL_PRE_MINUS, nil)
 		end
 		
 			if GameRules:GetGameTime() >= self._fTimeNextUpdate then
@@ -164,7 +169,7 @@ function CMoonwell:UpdateMoonwell(show)
 				if self._bIsFull then
 					self._bShowedFull = true
 				end
-				PopupNumbers(self._entMoonwell, "gold", Vector(0, 255, 0), 1.0, math.ceil(mana), POPUP_SYMBOL_POST_EXCLAMATION, nil)
+				PopupNumbers(self._entMoonwell, "gold", Vector(0, 255, 0), 1.0, math.floor(mana), POPUP_SYMBOL_POST_EXCLAMATION, nil)
 			end
 		end
 	end

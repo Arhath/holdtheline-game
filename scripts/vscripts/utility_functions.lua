@@ -132,7 +132,48 @@ function GetRandomPointInAoe( pos, aoe )
 end
 
 
-function UnitFindBestPositionForSkill(unit, search, aoeMax, aoeMin, team, who)
+function UnitGetBestRetreatPositionInAoe( unit, aoe )
+    local vUnits = FindUnitsInRadius( unit:GetTeamNumber(), unit:GetOrigin(), nil, aoe, DOTA_UNIT_TARGET_TEAM_ENEMY, DOTA_UNIT_TARGET_ALL, 0, 0, false )
+    local resultVec = unit:GetAbsOrigin()
+
+    for n, u in pairs(vUnits) do
+        local vec = unit:GetAbsOrigin() -  u:GetAbsOrigin()
+        --vec = vec * aoe / (aoe - vec:Length() + 1)
+        resultVec = resultVec + vec
+        DebugDrawLine(unit:GetAbsOrigin(), u:GetAbsOrigin(), 255, 255, 255, true, 1)
+
+       -- if n == #vUnits then
+            --resultVec = resultVec / n
+       -- end
+    end
+
+    return resultVec
+end
+
+function Roate2DVector ( vec, angle )
+  local result = Vector(0, 0 ,0)
+  angle = math.rad(angle)
+
+  result.x = math.cos(angle) - vec.y * math.sin(angle);
+  result.y = math.sin(angle) + vec.y * math.cos(angle);
+
+  return result;
+end
+
+
+function GetPointWithPolarOffset( pos, angle, offset )
+    local result = Vector(0, 0, 0)
+    angle = math.rad(angle)
+
+    result.x = pos.x + math.cos(angle) * offset
+    result.y = pos.y + math.sin(angle) * offset
+    print("point with offset")
+
+    return result
+end
+
+
+function UnitFindBestTargetPositionInAoe(unit, search, aoeMax, aoeMin, team, who)
     local diaMax = aoeMax * 2
     local diaMin = aoeMin * 2
     local vEnemyPos = {}
