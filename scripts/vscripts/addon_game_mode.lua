@@ -40,6 +40,8 @@ function Precache( context )
 	PrecacheResource( "particle", "particles/units/heroes/hero_abaddon/abaddon_aphotic_shield.vpcf", context )
 	PrecacheResource( "particle", "particles/units/heroes/hero_treant/treant_leech_seed_projectile.vpcf", context )
 	PrecacheResource( "particle", "particles/econ/items/drow/drow_head_mania/mask_of_madness_active_mania.vpcf", context )
+	PrecacheResource( "particle", "particles/econ/items/tinker/boots_of_travel/teleport_start_bots_counter.vpcf", context )
+	PrecacheResource( "particle", "particles/econ/items/tinker/boots_of_travel/teleport_end_bots.vpcf", context )
 	PrecacheItemByNameSync( "item_tombstone", context )
 	PrecacheItemByNameSync( "item_bag_of_gold", context )
 	PrecacheItemByNameSync( "item_slippers_of_halcyon", context )
@@ -160,6 +162,9 @@ function CHoldoutGameMode:InitGameMode()
 	ListenToGameEvent( "game_rules_state_change", Dynamic_Wrap( CHoldoutGameMode, "OnGameRulesStateChange" ), self )
 	ListenToGameEvent('dota_rune_activated_server', Dynamic_Wrap(CHoldoutGameMode, 'OnRuneActivated'), self)
 	ListenToGameEvent('entity_hurt', Dynamic_Wrap(CHoldoutGameMode, 'OnEntityHurt'), self)
+
+
+	CustomGameEventManager:RegisterListener( "unit_right_click", Dynamic_Wrap(CHoldoutGameMode, "OnUnitRightClick"))
 	
 
 
@@ -289,6 +294,27 @@ function CHoldoutGameMode:SpawnRunes()
 	--	GameRules:SetRuneSpawnTime(-1.0)
 	--end
 	--)
+end
+
+
+function CHoldoutGameMode:OnUnitRightClick( event )
+	local pID = event.pID
+	local unit = EntIndexToHScript(event.mainSelected)
+	local mPos = Vector(0, 0, 0)
+	local eventName = event.name
+
+	mPos.x = event.mouseX
+	mPos.y = event.mouseY
+	--mPos.z = GetGroundHeight(mPos, nil)
+
+	if eventName == "doublepressed" then
+
+		--SafeSpawnCreature("npc_dota_creature_kobold_tunneler", mPos, 50, mPos.z, nil, nil, DOTA_TEAM_BADGUYS)
+		UnitTeleportToPosition(unit, mPos, true)
+		print(eventName)
+	end
+
+	--
 end
 
 

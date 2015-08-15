@@ -1,5 +1,44 @@
 "DOTAAbilities"
 {
+	"item_teleport_effect_applier"
+	{
+		"ID"							"1905"
+
+		// General
+		//---------------------------------------------------------------------------------------------------------
+		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_PASSIVE"
+		"BaseClass"                     "item_datadriven"
+		"AbilityTextureName"			"item_flask"
+	    "ItemBaseLevel"                 "1"
+
+	    // Stats
+	    //---------------------------------------------------------------------------------------------------------
+	    "AbilityCastRange"              "9999"
+	    "AbilityCastPoint"              "0.0"
+	
+		"Modifiers"
+		{
+			"modifier_teleport_start_fx"
+			{
+				"Passive"				"1"
+				"IsHidden"				"1"
+				"IsDebuff"				"0"
+				
+				"EffectName"			"particles/econ/items/tinker/boots_of_travel/teleport_start_bots_counter.vpcf"
+				"EffectAttachType"		"follow_absorigin"
+			}
+			
+			"modifier_teleport_end_fx"
+			{
+				"Passive"				"1"
+				"IsHidden"				"1"
+				"IsDebuff"				"0"
+				
+				"EffectName"			"particles/econ/items/tinker/boots_of_travel/teleport_end_bots.vpcf"
+				"EffectAttachType"		"follow_absorigin"
+			}
+		}				
+	}
 
 	"item_bottle_health_applier"
 	{

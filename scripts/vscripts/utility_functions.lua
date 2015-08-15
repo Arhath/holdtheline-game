@@ -127,6 +127,52 @@ function GetAllMidpointsWithMinMaxDist(list, min, max)
 end
 
 
+
+function UnitTeleportToPosition( unit, pos, stop )
+    unit:SetAbsOrigin(pos)
+    FindClearSpaceForUnit(unit, pos, false)
+
+    if stop then
+      unit:Stop()
+    end
+end
+
+
+
+function SafeSpawnCreature(name, pos, aoe, height, npcOwner, unitOwner, team)
+    local spawn = pos
+
+    repeat
+        local bSpawn = true
+
+        if aoe > 0 then
+            spawn = GetRandomPointInAoe(pos, aoe)
+        end
+
+        if height >= 0 then
+            local posHeight = GetGroundHeight(pos, nil)
+
+            if posHeight ~= height then
+                bSpawn = false
+            end
+        end
+
+        if bSpawn then
+             local hullsize = 35
+             local vUnits = FindUnitsInRadius( DOTA_TEAM_GOODGUYS, spawn, nil, hullsize, DOTA_UNIT_TARGET_TEAM_BOTH, DOTA_UNIT_TARGET_ALL, 0, 0, false )
+
+             if #vUnits ~= 0 then
+                 bSpawn = false
+             end
+        end
+    until bSpawn
+
+    local unit = CreateUnitByName( name, spawn, true, npcOwner, unitOwner, team )
+
+    return unit
+end
+
+
 function GetRandomPointInAoe( pos, aoe )
     return pos + Vector(RandomInt(-(aoe), aoe), RandomInt(-(aoe), aoe) , 0)
 end

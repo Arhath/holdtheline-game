@@ -262,7 +262,7 @@ function CHoldoutGameRound:OnNPCSpawned( event )
 	end
 
 	if spawnedUnit:GetTeamNumber() == DOTA_TEAM_BADGUYS then
-		spawnedUnit:SetMustReachEachGoalEntity(false)
+		--spawnedUnit:SetMustReachEachGoalEntity(false)
 		table.insert( self._vEnemiesRemaining, spawnedUnit )
 		spawnedUnit:SetDeathXP( 0 )
 		spawnedUnit.unitName = spawnedUnit:GetUnitName()

@@ -4,7 +4,7 @@ end
 
 MAX_TARGET_TIME			= 10.0
 MIN_TARGET_TIME			= 7.0
-RANGE_NEXT_WAYPOINT 	= 400.0
+RANGE_NEXT_WAYPOINT 	= 300.0
 AGGRO_RANGE_MAX			= 900.0
 AGGRO_RANGE_MIN			= 400.0
 AGGRO_UNITS_MIN_RANGE	= 20
@@ -150,7 +150,7 @@ function CMovementSystem:OnEntityHurt( keys)
 				false
 			)
 
-			DebugDrawCircle(entCause:GetOrigin() + Vector(0, 0, 100), Vector(255, 255, 255), 0, ATTACK_AGGRO_AOE, false, 0.5)
+			--DebugDrawCircle(entCause:GetOrigin() + Vector(0, 0, 100), Vector(255, 255, 255), 0, ATTACK_AGGRO_AOE, false, 0.5)
 
 			for _, nt in pairs(newTargets) do
 				self:UnitAggroTarget(nt, entVictim, MAX_TARGET_TIME, 4, AGGRO_TYPE_DAMAGE_AOE, AGGRO_OVERWRITE_NORMAL)
@@ -178,8 +178,8 @@ function CMovementSystem:Init( gameMode, team)
 
 	self._vWaypoints =
 	{
-	"path_invader1_1", "path_invader1_2", "path_invader1_3", "path_invader1_4", "path_invader1_5", "path_invader1_5.5", "path_invader1_6", "path_invader1_7", "path_invader1_8", "path_invader1_9", "end",
-	"path_invader2_1", "path_invader2_2", "path_invader2_3", "path_invader2_4", "path_invader2_5", "path_invader2_5.5", "path_invader2_6", "path_invader2_7", "path_invader1_8", "path_invader1_9", "end"
+	"path_invader1_1", "path_invader1_2", "path_invader1_3", "path_invader1_4", "path_invader1_5", "path_invader1_6", "path_invader1_7", "path_invader1_8", "path_invader1_9", "path_invader1_10", "path_invader1_11", "path_invader1_12", "path_invader1_13", "path_invader1_14", "path_invader1_15", "path_invader1_16", "path_invader1_17", "path_invader1_18", "path_invader1_19", "path_invader1_20", "path_invader1_21", "path_invader1_22", "path_invader1_23", "end",
+	"path_invader2_1", "path_invader2_2", "path_invader2_3", "path_invader2_4", "path_invader2_5", "path_invader2_6", "path_invader2_7", "path_invader2_8", "path_invader2_9", "path_invader2_10", "path_invader2_11", "path_invader2_12", "path_invader2_13", "path_invader2_14", "path_invader2_15", "path_invader2_16", "path_invader2_17", "path_invader2_18", "path_invader2_19", "path_invader2_20", "path_invader2_21", "path_invader2_22", "path_invader2_23", "end"
 	}
 
 	Timers:CreateTimer(function()
@@ -459,66 +459,87 @@ function CMovementSystem:UnitThinkMovement( unit )
 		return
 	end
 
-	local posUnit = unit:GetAbsOrigin()
-	local bestDist = 999999
 	local nBest = nil
+	local bestDist = 999999
+	
+	local posUnit = unit:GetAbsOrigin()
+	local vAbsDist = {999999, 9999999, 999999}
+	local vWP = {nil, nil, nil}
 
 	if unit.MovementSystem.NextWaypoint == nil then
 		--print("finding next waypoint")
 		for i, str in pairs(self._vWaypoints) do
 			if str == "end" then
-				if self._vWaypoints[i + 1] == nil then
-					break
-				end
 			else
-				--print("best waypoint math")
 				local waypoint = Entities:FindByName(nil, str)
 				if waypoint ~= nil then
-					--print("got a waypoint")
 					local orig = waypoint:GetOrigin()
 					orig.z = GetGroundHeight(orig, nil)
-					local dist = GridNav:FindPathLength(posUnit, orig) --(orig - posUnit):Length()
+					local dist = (orig - posUnit):Length()
 
 
-					if dist ~= -1 then
-						if dist < bestDist then
-							--print("setting bool")
-							bestDist = dist
-							nBest = i
-							--print(string.format("setting best waypoint: %d", nBest))
-						end
+					if dist < vAbsDist[1] then
+						vAbsDist[3] = vAbsDist[2]
+						vWP[3] = vWP[2]
+						vAbsDist[2] = vAbsDist[1]
+						vWP[2] = vWP[1]
+						vAbsDist[1] = dist
+						vWP[1] = i
+					elseif dist < vAbsDist[2] then
+						vAbsDist[3] = vAbsDist[2]
+						vWP[3] = vWP[2]
+						vAbsDist[2] = dist
+						vWP[2] = i
+					elseif dist < vAbsDist[3] then
+						vAbsDist[3] = dist
+						vWP[3] = i
+					end
+				end
+			end
+		end
+
+		for i = 1, 3 do
+
+			local waypoint = Entities:FindByName(nil, self._vWaypoints[vWP[i]])
+
+			if waypoint ~= nil then
+				--print("got a waypoint")
+				local orig = waypoint:GetOrigin()
+				orig.z = GetGroundHeight(orig, nil)
+				local dist = GridNav:FindPathLength(posUnit, orig)
+
+				if dist ~= -1 then
+					if dist < bestDist then
+						bestDist = dist
+						nBest = vWP[i]
 					end
 				end
 			end
 		end
 
 		if nBest ~= nil then
-			local str = self._vWaypoints[nBest + 1]
+			if  self._vWaypoints[nBest + 1] ~= "end" then
+				local waypoint1 = Entities:FindByName(nil, self._vWaypoints[nBest])
+				local waypoint2 = Entities:FindByName(nil, self._vWaypoints[nBest + 1])
+				local pos1 = waypoint1:GetOrigin()
+				pos1.z = 256
+				local pos2 = waypoint2:GetOrigin()
+				pos2.z = 256
+				local pos3 = unit:GetOrigin()
+				pos3.z = 256
 
-			if str ~= "end" then
-				if self._vWaypoints[nBest + 1] ~= "end" then
-					local waypoint1 = Entities:FindByName(nil, self._vWaypoints[nBest])
-					local waypoint2 = Entities:FindByName(nil, self._vWaypoints[nBest + 1])
-					local pos1 = waypoint1:GetOrigin()
-					pos1.z = 256
-					local pos2 = waypoint2:GetOrigin()
-					pos2.z = 256
-					local pos3 = unit:GetOrigin()
-					pos3.z = 256
-
-					if pos3 == pos1 then
-						nBest = nBest + 1
-					end
-
+				if pos3 == pos1 then
+					nBest = nBest + 1
+				else
 					local angletest = GetAngleBetweenVectors(pos1 - pos2, pos1 - pos3)
-					--print(string.format("angletest: %d", angletest))
+						--print(string.format("angletest: %d", angletest))
 
-					DebugDrawText(pos1, string.format("angle diff: %d", angletest), false, 5)
-					DebugDrawText(pos2, "waypoint 2", false, 5)
-					DebugDrawText(pos3, "Unit", false, 5)
+					DebugDrawText(pos1, string.format("angle diff: %d", angletest), false, 2)
+					--DebugDrawText(pos2, "waypoint 2", false, 20)
+					--DebugDrawText(pos3, "Unit", false, 20)
 
-					DebugDrawLine(pos1, pos2, 0, 255, 255, false, 1)
-					DebugDrawLine(pos3, pos1, 0, 255, 0, false, 1)
+					DebugDrawLine(pos1, pos2, 0, 255, 255, false, 2)
+					DebugDrawLine(pos3, pos1, 0, 255, 0, false, 2)
 
 					if angletest < 75 	then
 						nBest = nBest + 1

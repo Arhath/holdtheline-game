@@ -170,7 +170,7 @@ function BossTreant:Think()
 
 		self:AIThink()
 		
-		if testcount == 10 and entBossUnit:GetHealth() >= entBossUnit:GetMaxHealth()/2 then
+		if testcount == 2 and entBossUnit:GetHealth() >= entBossUnit:GetMaxHealth()/2 then
 			entBossUnit:SetHealth(entBossUnit:GetMaxHealth()/2)
 			GameRules:SetRuneSpawnTime(testcount)
 			
@@ -286,11 +286,13 @@ function BossTreant:PhaseThink()
 				local bossMaxHP = entBossUnit:GetMaxHealth()
 				local orbHP = bossMaxHP * 0.1
 				ExecuteOrderFromTable( order )
+
 				self.entOrbLeft = CreateUnitByName( "treant_phase_2_orb", entBossUnit:GetOrigin() + Vector(-100, 200, 0), true, nil, nil, entBossUnit:GetTeamNumber() )
 				self.entOrbLeft.CanEnterGoal = false
 				SetPhasing(self.entOrbLeft, -1)
 				self.entOrbLeft:SetMaxHealth(orbHP)
 				self.entOrbLeft:SetHealth(orbHP)
+
 				self.entOrbRight = CreateUnitByName( "treant_phase_2_orb", entBossUnit:GetOrigin() + Vector(100, 200, 0), true, nil, nil, entBossUnit:GetTeamNumber() )
 				self.entOrbRight.CanEnterGoal = false
 				SetPhasing(self.entOrbRight, -1)
@@ -303,9 +305,8 @@ function BossTreant:PhaseThink()
 				
 				local shield_size = 150
 				
-				--local entWp = Entities:FindByName(nil, "path_invader1_4")
-				--self.entOrbLeft:SetInitialGoalEntity( entWp)
-				--self.entOrbLeft:SetMustReachEachGoalEntity(false)
+				local entWp = Entities:FindByName(nil, "path_invader1_4")
+				self.entOrbLeft:SetMustReachEachGoalEntity(false)
 				
 				
 				self.entOrbLeft.particle = ParticleManager:CreateParticle( "particles/units/heroes/hero_abaddon/abaddon_aphotic_shield.vpcf", PATTACH_ABSORIGIN_FOLLOW, self.entOrbLeft )
@@ -316,9 +317,8 @@ function BossTreant:PhaseThink()
 				ParticleManager:SetParticleControlEnt(self.entOrbLeft.particle, 0, self.entOrbLeft, PATTACH_POINT_FOLLOW, "attach_hitloc", self.entOrbLeft:GetAbsOrigin(), true)
 				
 				
-				--entWp = Entities:FindByName(nil, "path_invader2_4")
-				--self.entOrbRight:SetInitialGoalEntity( entWp)
-				--self.entOrbRight:SetMustReachEachGoalEntity(false)
+				entWp = Entities:FindByName(nil, "path_invader2_4")
+				self.entOrbRight:SetMustReachEachGoalEntity(false)
 				
 				self.entOrbRight.particle = ParticleManager:CreateParticle( "particles/units/heroes/hero_abaddon/abaddon_aphotic_shield.vpcf", PATTACH_ABSORIGIN_FOLLOW, self.entOrbRight )
 				ParticleManager:SetParticleControl(self.entOrbRight.particle, 1, Vector(shield_size,0,shield_size))
@@ -340,13 +340,15 @@ function BossTreant:PhaseThink()
 			if not self.bOrbLeftReachedGoal or self.entOrbLeft:IsAlive() or not self.entOrbLeft:IsNull() then
 				local orbPos
 				local orbHP
+				local orbHeight
 
 				orbPos = self.entOrbLeft:GetAbsOrigin()
 				orbPos.z = 0
+				orbHeight = GetGroundHeight(orbPos, nil)
 
-				CreateUnitByName("treant_flower_creature", orbPos + Vector(RandomInt(-300, 300),RandomInt(-300, 300), 0), true, nil, nil, entBossUnit:GetTeamNumber())
-				CreateUnitByName("treant_mushroom_creature", orbPos + Vector(RandomInt(-300, 300),RandomInt(-300, 300), 0), true, nil, nil, entBossUnit:GetTeamNumber())
-				CreateUnitByName("npc_dota_furion_treant", orbPos + Vector(RandomInt(-300, 300),RandomInt(-300, 300), 0), true, nil, nil, entBossUnit:GetTeamNumber())
+				--SafeSpawnCreature("treant_flower_creature", orbPos, 300, orbHeight, nil, nil, entBossUnit:GetTeamNumber())
+				--SafeSpawnCreature("treant_mushroom_creature", orbPos, 300, orbHeight, nil, nil, entBossUnit:GetTeamNumber())
+				--SafeSpawnCreature("npc_dota_furion_treant", orbPos, 300, orbHeight, nil, nil, entBossUnit:GetTeamNumber())
 		
 				orbDistArenaLeft = ( vecBossArenaPos - orbPos):Length()
 				orbHP = self.entOrbLeft:GetHealth()
@@ -364,13 +366,15 @@ function BossTreant:PhaseThink()
 			if not self.bOrbRightReachedGoal or self.entOrbRight:IsAlive() or not self.entOrbRight:IsNull() then
 				local orbPos
 				local orbHP
+				local orbHeight
 
 				orbPos = self.entOrbRight:GetAbsOrigin()
 				orbPos.z = 0
+				orbHeight = GetGroundHeight(orbPos, nil)
 						
-				CreateUnitByName("treant_flower_creature", orbPos + Vector(RandomInt(-300, 300),RandomInt(-300, 300), 0), true, nil, nil, entBossUnit:GetTeamNumber())
-				CreateUnitByName("treant_mushroom_creature", orbPos + Vector(RandomInt(-300, 300),RandomInt(-300, 300), 0), true, nil, nil, entBossUnit:GetTeamNumber())
-				CreateUnitByName("npc_dota_furion_treant", orbPos + Vector(RandomInt(-300, 300),RandomInt(-300, 300), 0), true, nil, nil, entBossUnit:GetTeamNumber())
+				--SafeSpawnCreature("treant_flower_creature", orbPos, 300, orbHeight, nil, nil, entBossUnit:GetTeamNumber())
+				--SafeSpawnCreature("treant_mushroom_creature", orbPos, 300, orbHeight, nil, nil, entBossUnit:GetTeamNumber())
+				--SafeSpawnCreature("npc_dota_furion_treant", orbPos, 300, orbHeight, nil, nil, entBossUnit:GetTeamNumber())
 
 				orbDistArenaRight = ( vecBossArenaPos - orbPos ):Length()
 				
@@ -423,12 +427,12 @@ function BossTreant:PhaseThink()
 				entBossFlower = CreateUnitByName("treant_flower_creature_big", vecBossArenaPos + Vector(-300, -100, 0), false, nil, nil, entBossUnit:GetTeamNumber())
 				entBossFlower.CanEnterGoal = false
 				entBossFlower.MovementSystemActive = false
-				behaviorSystemFlower = AICore:CreateBehaviorSystem( { BehaviorFlowerAttack, BehaviorFlowerRun, BehaviorFlowerIdle} )
+				behaviorSystemFlower = AICore:CreateBehaviorSystem( { BehaviorFlowerAttack, BehaviorFlowerRun, BehaviorFlowerIdle, BehaviorFlowerWard, BehaviorFlowerMoveToArena, BehaviorFlowerHeal } )
 
-				--entBossMushroom = CreateUnitByName("treant_mushroom_creature_big", vecBossArenaPos + Vector(300, -100, 0), false, nil, nil, entBossUnit:GetTeamNumber())
-				--entBossMushroom.CanEnterGoal = false
-				--entBossMushroom.MovementSystemActive = false
-				--behaviorSystemMushroom = AICore:CreateBehaviorSystem( { BehaviorMushroomIdle, BehaviorMushroomAttack, BehaviorMushroomMoveToArena, BehaviorMushroomTrap} ) --  
+				entBossMushroom = CreateUnitByName("treant_mushroom_creature_big", vecBossArenaPos + Vector(300, -100, 0), false, nil, nil, entBossUnit:GetTeamNumber())
+				entBossMushroom.CanEnterGoal = false
+				entBossMushroom.MovementSystemActive = false
+				behaviorSystemMushroom = AICore:CreateBehaviorSystem( { BehaviorMushroomIdle, BehaviorMushroomAttack, BehaviorMushroomMoveToArena, BehaviorMushroomTrap} ) --  
 			end
 
 		end
@@ -970,7 +974,7 @@ function BehaviorMushroomTrap:Evaluate()
 		local aoeMin = self.ability:GetSpecialValueFor("activation_radius")
 		local team = DOTA_UNIT_TARGET_TEAM_ENEMY
 		local who = DOTA_UNIT_TARGET_HERO
-		position = UnitFindBestPositionForSkill(self.unit, search, aoeMax, aoeMin, team, who)
+		position = UnitFindBestTargetPositionInAoe(self.unit, search, aoeMax, aoeMin, team, who)
 	end
 
 	if position ~= nil then
@@ -1114,57 +1118,69 @@ BehaviorFlowerRun = {}
 function BehaviorFlowerRun:Evaluate()
 	self.unit = entBossFlower
 	local desire = 0
-	local aoe = 800
-	local nU = 100000
-	local position = nil
-	local danger = 100000
 
-	local vUnits = FindUnitsInRadius( self.unit:GetTeamNumber(), self.unit:GetOrigin(), nil, aoe, DOTA_UNIT_TARGET_TEAM_ENEMY, DOTA_UNIT_TARGET_ALL, 0, 0, false )
+	if self.nextIdle == nil or GameRules:GetGameTime() >= self.nextIdle then
 
-	if #vUnits >= 2 then
-		for _, unit in pairs(vUnits) do
-			desire = desire + (1 - (self.unit:GetAbsOrigin() - unit:GetAbsOrigin()):Length() / aoe)
-		end
-		print(string.format("desire: %f", desire))
+		local aoe = 800
+		local nU = 100000
+		local position = nil
+		local danger = 100000
 
-		if desire > DESIRE_ATTACK_FLOWER then
+		local vUnits = FindUnitsInRadius( self.unit:GetTeamNumber(), self.unit:GetOrigin(), nil, aoe, DOTA_UNIT_TARGET_TEAM_ENEMY, DOTA_UNIT_TARGET_ALL, 0, 0, false )
 
-			local steps = 12
+		if #vUnits >= 2 then
+			for _, unit in pairs(vUnits) do
+				desire = desire + (1 - (self.unit:GetAbsOrigin() - unit:GetAbsOrigin()):Length() / aoe)
+			end
+			print(string.format("desire: %f", desire))
 
-			for i = 0, steps do
-				local deg = i * 360 / steps
-				local pos = GetPointWithPolarOffset(self.unit:GetAbsOrigin(), deg, aoe )
-				local vU = FindUnitsInRadius( self.unit:GetTeamNumber(), pos, nil, aoe , DOTA_UNIT_TARGET_TEAM_ENEMY, DOTA_UNIT_TARGET_ALL, 0, 0, false )
+			if desire > DESIRE_ATTACK_FLOWER then
 
-				if #vU < nU then
-					local dang = 0
+				local steps = 12
 
-					for _, u in pairs(vU) do
-						dang = dang + 1 - (pos - u:GetAbsOrigin()):Length() / aoe
-					end
-					print(string.format("danger %f", dang))
+				for i = 0, steps do
+					local deg = i * 360 / steps
+					local pos = GetPointWithPolarOffset(self.unit:GetAbsOrigin(), deg, aoe )
+					local dist = GridNav:FindPathLength(self.unit:GetAbsOrigin(), pos)
+					local posZ = GetGroundHeight(pos, nil)
+					local unitZ = GetGroundHeight(self.unit:GetAbsOrigin(), nil)
+					local distToArena = (vecBossArenaPos - pos):Length()
+					print(string.format("ground unit: %d, ground pos: %d, distance: %d", unitZ, posZ, dist))
 
-					if dang < danger then
-						nU = #vU
-						danger = dang
-						position = pos
-						print("setting retreat position")
+					if dist ~= -1 and (posZ == unitZ or dist <= aoe * 2) and distToArena <= fBossArenaRange then
+						local vU = FindUnitsInRadius( self.unit:GetTeamNumber(), pos, nil, aoe , DOTA_UNIT_TARGET_TEAM_ENEMY, DOTA_UNIT_TARGET_ALL, 0, 0, false )
+
+						if #vU < nU then
+							local dang = 0
+
+							for _, u in pairs(vU) do
+								dang = dang + 1 - (pos - u:GetAbsOrigin()):Length() / aoe
+							end
+							print(string.format("danger %f", dang))
+
+							if dang < danger then
+								nU = #vU
+								danger = dang
+								position = pos
+								print("setting retreat position")
+							end
+						end
 					end
 				end
 			end
-		end
 
-		if position ~= nil then
+			if position ~= nil then
 
-			DebugDrawLine(self.unit:GetAbsOrigin(), position, 0, 255, 0, true, 1)
-			DebugDrawText(position, string.format("desire: %d", desire), true, 1)
-			self.order =
-			{
-				UnitIndex = self.unit:entindex(),
-				OrderType = DOTA_UNIT_ORDER_MOVE_TO_POSITION,
-				Position = position,
-			}
-			--print (string.format( "attack desire: %d", desire))
+				DebugDrawLine(self.unit:GetAbsOrigin(), position, 0, 255, 0, true, 1)
+				DebugDrawText(position, string.format("desire: %d", desire), true, 1)
+				self.order =
+				{
+					UnitIndex = self.unit:entindex(),
+					OrderType = DOTA_UNIT_ORDER_MOVE_TO_POSITION,
+					Position = position,
+				}
+				--print (string.format( "attack desire: %d", desire))
+			end
 		end
 	end
 
@@ -1173,7 +1189,8 @@ end
 
 
 function BehaviorFlowerRun:Begin()
-	self.endTime = GameRules:GetGameTime() + 0.9
+	self.endTime = GameRules:GetGameTime() + 2.9
+	self.nextIdle = GameRules:GetGameTime() + 7
 end
 
 BehaviorFlowerRun.Continue = BehaviorFlowerRun.Begin --if we re-enter this ability, we might have a different target; might as well do a full reset
@@ -1195,8 +1212,8 @@ function BehaviorFlowerWard:Evaluate()
 	local desire = 0
 	
 	if self.ability and self.ability:IsFullyCastable() then
-		local search = self.ability:GetSpecialValueFor("AbilityCastRange") * 1.5
-		local aoeMax = self.ability:GetSpecialValueFor("explosion_radius")
+		local search = 1200
+		local aoeMax = 700
 		local aoeMin = 0
 		local team = DOTA_UNIT_TARGET_TEAM_FRIENDLY
 		local who = DOTA_UNIT_TARGET_CREEP
@@ -1225,6 +1242,67 @@ end
 BehaviorFlowerWard.Continue = BehaviorFlowerWard.Begin --if we re-enter this ability, we might have a different target; might as well do a full reset
 
 function BehaviorFlowerWard:Think(dt)
+	if not self.ability:IsFullyCastable() and not self.ability:IsInAbilityPhase() then
+		self.endTime = GameRules:GetGameTime()
+	end
+end
+
+
+--------------------------------------------------------------------------------------------------------
+
+
+BehaviorFlowerHeal = {}
+
+function BehaviorFlowerHeal:Evaluate()
+	self.unit = entBossFlower
+	self.ability = self.unit:FindAbilityByName("creature_aoe_heal")
+	local desire = 0
+	local target = nil
+	local targetsMissingHealth = -1
+	local search = 1200
+	local aoe = 200
+	local heal = 200
+	
+	if self.ability and self.ability:IsFullyCastable() then
+		local allAllys = FindUnitsInRadius( self.unit:GetTeamNumber(), self.unit:GetOrigin(), nil, search, DOTA_UNIT_TARGET_TEAM_FRIENDLY, DOTA_UNIT_TARGET_CREEP, 0, 0, false )
+		for _, ally in pairs(allAllys) do
+			local units = FindUnitsInRadius( self.unit:GetTeamNumber(), ally:GetOrigin(), nil, aoe, DOTA_UNIT_TARGET_TEAM_FRIENDLY, DOTA_UNIT_TARGET_CREEP, 0, 0, false )
+			local missingHealth = 0
+			for _, unit in pairs(units) do
+				missingHealth = missingHealth + math.min(unit:GetMaxHealth() - unit:GetHealth(), heal)
+			end
+
+			DebugDrawText(ally:GetAbsOrigin(), string.format("health missing: %d", missingHealth), true, 4)
+
+			if missingHealth > targetsMissingHealth then
+				target = ally
+				targetsMissingHealth = missingHealth
+			end
+		end
+	end
+
+	if target ~= nil then
+		desire = 5
+		self.order =
+		{
+			OrderType = DOTA_UNIT_ORDER_CAST_TARGET,
+			UnitIndex = self.unit:entindex(),
+			TargetIndex = target:entindex(),
+			AbilityIndex = self.ability:entindex()
+		}
+	end
+	--print (string.format( "root Desire: %d", desire))
+	return desire
+end
+
+
+function BehaviorFlowerHeal:Begin()
+	self.endTime = GameRules:GetGameTime() + 1
+end
+
+BehaviorFlowerHeal.Continue = BehaviorFlowerHeal.Begin --if we re-enter this ability, we might have a different target; might as well do a full reset
+
+function BehaviorFlowerHeal:Think(dt)
 	if not self.ability:IsFullyCastable() and not self.ability:IsInAbilityPhase() then
 		self.endTime = GameRules:GetGameTime()
 	end

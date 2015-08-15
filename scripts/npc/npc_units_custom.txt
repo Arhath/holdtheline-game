@@ -47,7 +47,7 @@
 	
 	"treant_Phase_2_orb"
 	{
-		"BaseClass"   "npc_dota_creep_lane" 
+		"BaseClass"   "npc_dota_creature" 
 		"Model"   	 "models/development/invisiblebox.vmdl"
 		"ModelScale"  "1.7"
 		
