@@ -16,7 +16,6 @@ require( "trigger" )
 require( "timers" )
 require( "holdout_game_bosshandler" )
 require( "utility_functions" )
-require( "moonwell_system" )
 require( "movement_system" )
 require( "bottle_system" )
 

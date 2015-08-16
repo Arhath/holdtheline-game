@@ -1,4 +1,6 @@
+require( "moonwell_system" )
 require( "bottle_health" )
+require( "bottle_shop")
 
 if CBottleSystem == nil then
 	CBottleSystem = class({})
@@ -34,8 +36,8 @@ function CBottleSystem:Init( gameMode, team )
 	self._nTeam = team
 	self._vHeroes = {}
 	self._vMoonwells = {}
+	self._vBottleShops = {}
 	self:InitMoonwells()
-
 
 	Timers:CreateTimer(function()
 		CBottleSystem:Update()
@@ -43,6 +45,16 @@ function CBottleSystem:Init( gameMode, team )
 		return self:GetTickrate()
 	end
 	)
+end
+
+function CBottleSystem:InitBottleShop(hero)
+	local id = hero:GetPlayerOwnerID()
+	print(string.format("player owner: %d", id))
+
+	if Entities:FindByName(nil, "BottleShopPedestal" .. id) ~= nil then
+		local bottleShopObj = CBottleShop:CreateBottleShop("BottleShopPedestal" .. id, "BottleShopBottle" .. id, self)
+		table.insert(self._vBottleShops, bottleShopObj)
+	end
 end
 
 function CBottleSystem:InitMoonwells()
@@ -95,6 +107,8 @@ function CBottleSystem:OnHeroInGame( hero )
 			Lvl = 1,
 		},
 	}
+
+	self:InitBottleShop(hero)
 
 	table.insert(self._vHeroes, hero)
 
