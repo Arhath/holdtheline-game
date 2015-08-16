@@ -16,7 +16,7 @@ entBossUnit = nil
 entBossFlower = nil
 entBossMushroom = nil
 entBossArena = nil
-fBossArenaRange = 900.0
+fBossArenaRange = 2000.0
 strBossArenaName = "bossarena1"
 bossTimePhase3 = 10
 
@@ -447,16 +447,16 @@ function BossTreant:PhaseThink()
 
 		if self._fPhaseTime >= bossTimeFight then
 			--Walk to ancient		
-			local ancient = self._gameRound._gameMode._entAncient
-			local vecAncientPos = ancient:GetOrigin()
-			vecAncientPos.z = 0
-			local distToAncient = (vecAncientPos - vecBossArenaPos):Length()
-			local distIncr = distToAncient / bossTimeWalk * 0.25
+			local endPoint = Entities:FindByName(nil, "bossarena3")
+			local vecEndPos = endPoint:GetAbsOrigin()
+			vecEndPos .z = 0
+			local distToEnd = (vecEndPos - vecBossArenaPos):Length()
+			local distIncr = distToEnd / bossTimeWalk * 0.25
 			
-			if vecBossArenaPos.y + distIncr < vecAncientPos.y then
+			if vecBossArenaPos.y + distIncr < vecEndPos.y then
 				vecBossArenaPos = vecBossArenaPos + Vector(0, distIncr, 0)
 			else
-				vecBossArenaPos = vecAncientPos
+				vecBossArenaPos = vecEndPos
 			end
 		end
 		
@@ -509,6 +509,8 @@ end
 BehaviorRootHero = {}
 
 function BehaviorRootHero:Evaluate()
+	self.ID = 9
+
 	self.unit = entBossUnit
 	self.ability = self.unit:FindAbilityByName("treant_root_hero")
 	local target
@@ -538,6 +540,7 @@ end
 
 function BehaviorRootHero:Begin()
 	self.endTime = GameRules:GetGameTime() + 2
+	self.unit.lastBehavior = self.ID
 end
 
 BehaviorRootHero.Continue = BehaviorRootHero.Begin --if we re-enter this ability, we might have a different target; might as well do a full reset
@@ -555,6 +558,8 @@ end
 BehaviorEarthsplitter = {}
 
 function BehaviorEarthsplitter:Evaluate()
+	self.ID = 8
+
 	self.unit = entBossUnit
 	self.ability = self.unit:FindAbilityByName("creature_earth_splitter")
 	local target
@@ -584,6 +589,7 @@ end
 
 function BehaviorEarthsplitter:Begin()
 	self.endTime = GameRules:GetGameTime() + 1
+	self.unit.lastBehavior = self.ID
 end
 
 BehaviorEarthsplitter.Continue = BehaviorEarthsplitter.Begin --if we re-enter this ability, we might have a different target; might as well do a full reset
@@ -599,6 +605,8 @@ end
 BehaviorSpawnFlowers = {}
 
 function BehaviorSpawnFlowers:Evaluate()
+	self.ID = 7
+
 	self.unit = entBossUnit
 	self.ability = entBossUnit:FindAbilityByName("treant_spawn_flowers")
 	local desire = 0
@@ -619,6 +627,7 @@ end
 
 function BehaviorSpawnFlowers:Begin()
 	self.endTime = GameRules:GetGameTime() + 1
+	self.unit.lastBehavior = self.ID
 end
 
 BehaviorSpawnFlowers.Continue = BehaviorSpawnFlowers.Begin --if we re-enter this ability, we might have a different target; might as well do a full reset
@@ -636,6 +645,8 @@ end
 BehaviorSpawnMushrooms = {}
 
 function BehaviorSpawnMushrooms:Evaluate()
+	self.ID = 6
+
 	self.unit = entBossUnit
 	self.ability = self.unit:FindAbilityByName("treant_spawn_mushrooms")
 	local desire = 0
@@ -657,6 +668,7 @@ end
 
 function BehaviorSpawnMushrooms:Begin()
 	self.endTime = GameRules:GetGameTime() + 1
+	self.unit.lastBehavior = self.ID
 end
 
 BehaviorSpawnMushrooms.Continue = BehaviorSpawnMushrooms.Begin --if we re-enter this ability, we might have a different target; might as well do a full reset
@@ -674,6 +686,8 @@ end
 BehaviorSpawnTrees = {}
 
 function BehaviorSpawnTrees:Evaluate()
+	self.ID = 5
+
 	self.unit = entBossUnit
 	self.ability = entBossUnit:FindAbilityByName("treant_spawn_trees")
 	local desire = 0
@@ -694,6 +708,7 @@ end
 
 function BehaviorSpawnTrees:Begin()
 	self.endTime = GameRules:GetGameTime() + 1
+	self.unit.lastBehavior = self.ID
 end
 
 BehaviorSpawnTrees.Continue = BehaviorSpawnTrees.Begin --if we re-enter this ability, we might have a different target; might as well do a full reset
@@ -711,6 +726,8 @@ end
 BehaviorRaiseNature = {}
 
 function BehaviorRaiseNature:Evaluate()
+	self.ID = 4
+
 	self.unit = entBossUnit
 	self.ability = entBossUnit:FindAbilityByName("treant_raise_nature")
 	local desire = 0
@@ -739,6 +756,7 @@ end
 
 function BehaviorRaiseNature:Begin()
 	self.endTime = GameRules:GetGameTime() + 2
+	self.unit.lastBehavior = self.ID
 end
 
 BehaviorRaiseNature.Continue = BehaviorRaiseNature.Begin --if we re-enter this ability, we might have a different target; might as well do a full reset
@@ -756,6 +774,8 @@ end
 BehaviorMoveToArena = {}
 
 function BehaviorMoveToArena:Evaluate()
+	self.ID = 3
+
 	self.unit = entBossUnit
 	local desire = 0
 	desire = UnitCalcArenaDesire(self.unit, vecBossArenaPos, fBossArenaRange, 5, 0.01)
@@ -775,6 +795,7 @@ end
 
 function BehaviorMoveToArena:Begin()
 	self.endTime = GameRules:GetGameTime() + 0.9
+	self.unit.lastBehavior = self.ID
 end
 
 BehaviorMoveToArena.Continue = BehaviorMoveToArena.Begin --if we re-enter this ability, we might have a different target; might as well do a full reset
@@ -790,6 +811,8 @@ end
 BehaviorAttack = {}
 
 function BehaviorAttack:Evaluate()
+	self.ID = 2
+
 	self.unit = entBossUnit
 	local desire = 0
 	
@@ -811,6 +834,7 @@ end
 
 function BehaviorAttack:Begin()
 	self.endTime = GameRules:GetGameTime() + 0.9
+	self.unit.lastBehavior = self.ID
 end
 
 BehaviorAttack.Continue = BehaviorAttack.Begin --if we re-enter this ability, we might have a different target; might as well do a full reset
@@ -826,30 +850,56 @@ end
 BehaviorIdle = {}
 
 function BehaviorIdle:Evaluate()
+	self.ID = 1
+
 	self.unit = entBossUnit
 	local desire = 0.1
 	
-	--print (string.format( "idle desire: %d", desire))
+	local pos = nil
+	local posUnit = self.unit:GetAbsOrigin()
+
+	local distOld = -1
+
+	if self.order ~= nil and self.order.Position ~= nil then
+		distOld = GridNav:FindPathLength(posUnit, self.order.Position)
+	end
+
+	if self.unit.lastBehavior ~= self.ID or distOld == -1 or distOld < 250 or distOld > 2000 then
+
+		repeat
+		--print (string.format( "idle desire: %d", desire))
+			pos = GetRandomPointInAoe(vecBossArenaPos, fBossArenaRange)
+			local unitHeight = GetGroundHeight(posUnit, nil)
+			local posHeight = GetGroundHeight(pos, nil)
+			local dist = GridNav:FindPathLength(pos, posUnit)
+
+		until unitHeight == posHeight or (dist ~= -1 and dist <= fBossArenaRange * 1.2)
+
 		self.order =
 		{
 			UnitIndex = self.unit:entindex(),
 			OrderType = DOTA_UNIT_ORDER_MOVE_TO_POSITION,
-			Position = GetRandomPointInAoe(vecBossArenaPos, fBossArenaRange),
+			Position = pos,
 		}
+	end
+
 	return desire
 end
 
 
 function BehaviorIdle:Begin()
 	self.endTime = GameRules:GetGameTime() + 0.9
+	self.unit.lastBehavior = self.ID
 end
+
+function BehaviorIdle:End()
+end
+
 
 BehaviorIdle.Continue = BehaviorIdle.Begin --if we re-enter this ability, we might have a different target; might as well do a full reset
 
 function BehaviorIdle:Think(dt)
-
 end
-
 
 
 --------------------------------------------------------------------------------------------------------
@@ -860,28 +910,55 @@ end
 BehaviorMushroomIdle = {}
 
 function BehaviorMushroomIdle:Evaluate()
+	self.ID = 1
+
 	self.unit = entBossMushroom
 	local desire = 0.1
 	
-	--print (string.format( "idle desire: %d", desire))
+	local pos = nil
+	local posUnit = self.unit:GetAbsOrigin()
+
+	local distOld = -1
+
+	if self.order ~= nil and self.order.Position ~= nil then
+		distOld = GridNav:FindPathLength(posUnit, self.order.Position)
+	end
+
+	if self.unit.lastBehavior ~= self.ID or distOld == -1 or distOld < 250 or distOld > 2000 then
+
+		repeat
+		--print (string.format( "idle desire: %d", desire))
+			pos = GetRandomPointInAoe(vecBossArenaPos, fBossArenaRange)
+			local unitHeight = GetGroundHeight(posUnit, nil)
+			local posHeight = GetGroundHeight(pos, nil)
+			local dist = GridNav:FindPathLength(pos, posUnit)
+
+		until unitHeight == posHeight or (dist ~= -1 and dist <= fBossArenaRange * 1.2)
+
 		self.order =
 		{
 			UnitIndex = self.unit:entindex(),
 			OrderType = DOTA_UNIT_ORDER_MOVE_TO_POSITION,
-			Position = GetRandomPointInAoe(vecBossArenaPos, fBossArenaRange),
+			Position = pos,
 		}
+	end
+
 	return desire
 end
 
 
 function BehaviorMushroomIdle:Begin()
 	self.endTime = GameRules:GetGameTime() + 0.9
+	self.unit.lastBehavior = self.ID
 end
+
+function BehaviorMushroomIdle:End()
+end
+
 
 BehaviorMushroomIdle.Continue = BehaviorMushroomIdle.Begin --if we re-enter this ability, we might have a different target; might as well do a full reset
 
 function BehaviorMushroomIdle:Think(dt)
-
 end
 
 
@@ -891,6 +968,8 @@ end
 BehaviorMushroomMoveToArena = {}
 
 function BehaviorMushroomMoveToArena:Evaluate()
+	self.ID = 2
+
 	self.unit = entBossMushroom
 	local desire = 0
 	arenaDesire = UnitCalcArenaDesire(self.unit, vecBossArenaPos, fBossArenaRange, 5, 0.01)
@@ -912,6 +991,7 @@ end
 
 function BehaviorMushroomMoveToArena:Begin()
 	self.endTime = GameRules:GetGameTime() + 0.9
+	self.unit.lastBehavior = self.ID
 end
 
 BehaviorMushroomMoveToArena.Continue = BehaviorMushroomMoveToArena.Begin --if we re-enter this ability, we might have a different target; might as well do a full reset
@@ -927,6 +1007,8 @@ end
 BehaviorMushroomAttack = {}
 
 function BehaviorMushroomAttack:Evaluate()
+	self.ID = 3
+
 	self.unit = entBossMushroom
 	local desire = 0
 	
@@ -948,6 +1030,7 @@ end
 
 function BehaviorMushroomAttack:Begin()
 	self.endTime = GameRules:GetGameTime() + 0.9
+	self.unit.lastBehavior = self.ID
 end
 
 BehaviorMushroomAttack.Continue = BehaviorMushroomAttack.Begin --if we re-enter this ability, we might have a different target; might as well do a full reset
@@ -963,6 +1046,8 @@ end
 BehaviorMushroomTrap = {}
 
 function BehaviorMushroomTrap:Evaluate()
+	self.ID = 4
+
 	self.unit = entBossMushroom
 	self.ability = self.unit:FindAbilityByName("poison_trap")
 	local position
@@ -994,6 +1079,7 @@ end
 
 function BehaviorMushroomTrap:Begin()
 	self.endTime = GameRules:GetGameTime() + 1
+	self.unit.lastBehavior = self.ID
 end
 
 BehaviorMushroomTrap.Continue = BehaviorMushroomTrap.Begin --if we re-enter this ability, we might have a different target; might as well do a full reset
@@ -1013,28 +1099,55 @@ end
 BehaviorFlowerIdle = {}
 
 function BehaviorFlowerIdle:Evaluate()
+	self.ID = 1
+
 	self.unit = entBossFlower
 	local desire = 0.1
 	
-	--print (string.format( "idle desire: %d", desire))
+	local pos = nil
+	local posUnit = self.unit:GetAbsOrigin()
+
+	local distOld = -1
+
+	if self.order ~= nil and self.order.Position ~= nil then
+		distOld = GridNav:FindPathLength(posUnit, self.order.Position)
+	end
+
+	if self.unit.lastBehavior ~= self.ID or distOld == -1 or distOld < 250 or distOld > 2000 then
+
+		repeat
+		--print (string.format( "idle desire: %d", desire))
+			pos = GetRandomPointInAoe(vecBossArenaPos, fBossArenaRange)
+			local unitHeight = GetGroundHeight(posUnit, nil)
+			local posHeight = GetGroundHeight(pos, nil)
+			local dist = GridNav:FindPathLength(pos, posUnit)
+
+		until unitHeight == posHeight or (dist ~= -1 and dist <= fBossArenaRange * 1.2)
+
 		self.order =
 		{
 			UnitIndex = self.unit:entindex(),
 			OrderType = DOTA_UNIT_ORDER_MOVE_TO_POSITION,
-			Position = GetRandomPointInAoe(vecBossArenaPos, fBossArenaRange),
+			Position = pos,
 		}
+	end
+
 	return desire
 end
 
 
 function BehaviorFlowerIdle:Begin()
 	self.endTime = GameRules:GetGameTime() + 0.9
+	self.unit.lastBehavior = self.ID
 end
+
+function BehaviorFlowerIdle:End()
+end
+
 
 BehaviorFlowerIdle.Continue = BehaviorFlowerIdle.Begin --if we re-enter this ability, we might have a different target; might as well do a full reset
 
 function BehaviorFlowerIdle:Think(dt)
-
 end
 
 
@@ -1044,6 +1157,8 @@ end
 BehaviorFlowerMoveToArena = {}
 
 function BehaviorFlowerMoveToArena:Evaluate()
+	self.ID = 2
+
 	self.unit = entBossFlower
 	local desire = 0
 	arenaDesire = UnitCalcArenaDesire(self.unit, vecBossArenaPos, fBossArenaRange, 4, 0.01)
@@ -1065,6 +1180,7 @@ end
 
 function BehaviorFlowerMoveToArena:Begin()
 	self.endTime = GameRules:GetGameTime() + 0.9
+	self.unit.lastBehavior = self.ID
 end
 
 BehaviorFlowerMoveToArena.Continue = BehaviorFlowerMoveToArena.Begin --if we re-enter this ability, we might have a different target; might as well do a full reset
@@ -1080,6 +1196,8 @@ end
 BehaviorFlowerAttack = {}
 
 function BehaviorFlowerAttack:Evaluate()
+	self.ID = 3
+
 	self.unit = entBossFlower
 	local desire = 0
 	
@@ -1101,6 +1219,7 @@ end
 
 function BehaviorFlowerAttack:Begin()
 	self.endTime = GameRules:GetGameTime() + 0.9
+	self.unit.lastBehavior = self.ID
 end
 
 BehaviorFlowerAttack.Continue = BehaviorFlowerAttack.Begin --if we re-enter this ability, we might have a different target; might as well do a full reset
@@ -1116,6 +1235,8 @@ end
 BehaviorFlowerRun = {}
 
 function BehaviorFlowerRun:Evaluate()
+	self.ID = 4
+
 	self.unit = entBossFlower
 	local desire = 0
 
@@ -1191,6 +1312,7 @@ end
 function BehaviorFlowerRun:Begin()
 	self.endTime = GameRules:GetGameTime() + 2.9
 	self.nextIdle = GameRules:GetGameTime() + 7
+	self.unit.lastBehavior = self.ID
 end
 
 BehaviorFlowerRun.Continue = BehaviorFlowerRun.Begin --if we re-enter this ability, we might have a different target; might as well do a full reset
@@ -1206,6 +1328,8 @@ end
 BehaviorFlowerWard = {}
 
 function BehaviorFlowerWard:Evaluate()
+	self.ID = 5
+
 	self.unit = entBossFlower
 	self.ability = self.unit:FindAbilityByName("spawn_flower")
 	local position
@@ -1237,6 +1361,7 @@ end
 
 function BehaviorFlowerWard:Begin()
 	self.endTime = GameRules:GetGameTime() + 1
+	self.unit.lastBehavior = self.ID
 end
 
 BehaviorFlowerWard.Continue = BehaviorFlowerWard.Begin --if we re-enter this ability, we might have a different target; might as well do a full reset
@@ -1254,6 +1379,8 @@ end
 BehaviorFlowerHeal = {}
 
 function BehaviorFlowerHeal:Evaluate()
+	self.ID = 6
+
 	self.unit = entBossFlower
 	self.ability = self.unit:FindAbilityByName("creature_aoe_heal")
 	local desire = 0
@@ -1272,7 +1399,7 @@ function BehaviorFlowerHeal:Evaluate()
 				missingHealth = missingHealth + math.min(unit:GetMaxHealth() - unit:GetHealth(), heal)
 			end
 
-			DebugDrawText(ally:GetAbsOrigin(), string.format("health missing: %d", missingHealth), true, 4)
+			--DebugDrawText(ally:GetAbsOrigin(), string.format("health missing: %d", missingHealth), true, 4)
 
 			if missingHealth > targetsMissingHealth then
 				target = ally
@@ -1297,7 +1424,8 @@ end
 
 
 function BehaviorFlowerHeal:Begin()
-	self.endTime = GameRules:GetGameTime() + 1
+	self.endTime = GameRules:GetGameTime() + 2
+	self.unit.lastBehavior = self.ID
 end
 
 BehaviorFlowerHeal.Continue = BehaviorFlowerHeal.Begin --if we re-enter this ability, we might have a different target; might as well do a full reset
