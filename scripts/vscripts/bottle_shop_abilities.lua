@@ -89,7 +89,8 @@ function bottle_shop_abilities:OnSpellStart()
 		return
 	end
 
-	if abilityName == 
+	if abilityName == "" then
+	end
 end
  
 --------------------------------------------------------------------------------
