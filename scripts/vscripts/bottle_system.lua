@@ -52,7 +52,7 @@ function CBottleSystem:InitBottleShop(hero)
 	print(string.format("player owner: %d", id))
 
 	if Entities:FindByName(nil, "BottleShopPedestal" .. id) ~= nil then
-		local bottleShopObj = CBottleShop:CreateBottleShop("BottleShopPedestal" .. id, "BottleShopBottle" .. id, self)
+		local bottleShopObj = CBottleShop:CreateBottleShop("BottleShopPedestal" .. id, "BottleShopBottle" .. id, hero, self)
 		table.insert(self._vBottleShops, bottleShopObj)
 	end
 end
