@@ -49,7 +49,7 @@ function CMoonwell:Init(moonwell, water, trigger, bottleSystem)
 	self._fManaLastUpdate = self._entMoonwell:GetMana()
 	
 	self._fMaxHeight = self._entWater:GetOrigin().z
-	self._fHeightDiff = 55
+	self._fHeightDiff = 47
 
 	self._vBottleUnits = {}
 	

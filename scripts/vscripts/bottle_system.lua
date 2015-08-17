@@ -201,6 +201,7 @@ end
 
 
 function CBottleSystem:BottleAddCharges( hero, bottle, charges)
+
 	if hero == nil or hero.BottleSystem == nil then
 		return 0
 	end
@@ -257,7 +258,8 @@ function CBottleSystem:BottleAddCharges( hero, bottle, charges)
 	end
 
 	hero:SetModifierStackCount(MODIFIER_STACKS_[bottle], hero, math.floor(hero.BottleSystem[bottle].Charges))
-
+	print(string.format("charges: %f", hero.BottleSystem[bottle].Charges))
+	print(string.format("refilled: %f", chargesUsed))
 	return chargesUsed
 end
 
