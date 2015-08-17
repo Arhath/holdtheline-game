@@ -28,8 +28,6 @@ function CBottleShop:Init(pedestal, bottle, hero, bottleSystem)
 		return nil
 	end
 
-	self._entBottle:AddNewModifier( self._entBottle, nil, "modifier_invulnerable", {} )
-	self._entBottle:SetControllableByPlayer(hero:GetPlayerOwnerID(), true)
 	self._bottleSystem = bottleSystem
 
 	self._fMinHeigth = self._entBottle:GetOrigin().z
