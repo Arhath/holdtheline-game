@@ -640,7 +640,7 @@
 		
 		// Abilities
 		//----------------------------------------------------------------
-		
+		"AbilityLayout"				"6"			
 		"Ability1"					""			// Ability 1.
 		"Ability2"					""			// Ability 2.
 		"Ability3"					""			// Ability 3.

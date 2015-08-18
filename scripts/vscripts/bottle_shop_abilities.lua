@@ -1,95 +1,553 @@
-bottle_shop_abilities = class({})
+bottle_shop_ability_toggle = class({})
  
 --------------------------------------------------------------------------------
  
-function bottle_shop_abilities:CastFilterResultTarget( hTarget )
-	--[[if self:GetCaster() == hTarget then
-		return UF_FAIL_CUSTOM
-	end
- 
-	if ( hTarget:IsCreep() and ( not self:GetCaster():HasScepter() ) ) or hTarget:IsAncient() then
-		return UF_FAIL_CUSTOM
-	end
- 
-	local nResult = UnitFilter( hTarget, DOTA_UNIT_TARGET_TEAM_BOTH, DOTA_UNIT_TARGET_HERO + DOTA_UNIT_TARGET_CREEP, DOTA_UNIT_TARGET_FLAG_MAGIC_IMMUNE_ENEMIES, self:GetCaster():GetTeamNumber() )
-	if nResult ~= UF_SUCCESS then
-		return nResult
-	end]]
- 
+function bottle_shop_ability_toggle:CastFilterResultTarget( hTarget )
 	return UF_SUCCESS
 end
  
 --------------------------------------------------------------------------------
  
-function bottle_shop_abilities:GetCustomCastErrorTarget( hTarget )
-	--[[if self:GetCaster() == hTarget then
-		return "#dota_hud_error_cant_cast_on_self"
-	end
- 
-	if hTarget:IsAncient() then
-		return "#dota_hud_error_cant_cast_on_ancient"
-	end
- ]]
-	--if hTarget:IsCreep() then
-	--	return "#dota_hud_error_cant_cast_on_creep"
-	--end
- 
+function bottle_shop_ability_toggle:GetCustomCastErrorTarget( hTarget )
 	return ""
 end
  
 --------------------------------------------------------------------------------
  
-function bottle_shop_abilities:GetCooldown( nLevel )
+function bottle_shop_ability_toggle:GetCooldown( nLevel )
 	return self.BaseClass.GetCooldown( self, nLevel )
 end
  
 --------------------------------------------------------------------------------
  
-function bottle_shop_abilities:OnSpellStart()
-	--[[local hCaster = self:GetCaster()
-	local hTarget = self:GetCursorTarget()
- 
-	if hCaster == nil or hTarget == nil or hTarget:TriggerSpellAbsorb( this ) then
-		return
-	end
- 
-	local vPos1 = hCaster:GetOrigin()
-	local vPos2 = hTarget:GetOrigin()
- 
-	GridNav:DestroyTreesAroundPoint( vPos1, 300, false )
-	GridNav:DestroyTreesAroundPoint( vPos2, 300, false )
- 
-	hCaster:SetOrigin( vPos2 )
-	hTarget:SetOrigin( vPos1 )
- 
-	FindClearSpaceForUnit( hCaster, vPos2, true )
-	FindClearSpaceForUnit( hTarget, vPos1, true )
- 
-	hTarget:Interrupt()
- 
-	local nCasterFX = ParticleManager:CreateParticle( "particles/units/heroes/hero_vengeful/vengeful_nether_swap.vpcf", PATTACH_ABSORIGIN_FOLLOW, hCaster )
-	ParticleManager:SetParticleControlEnt( nCasterFX, 1, hTarget, PATTACH_ABSORIGIN_FOLLOW, nil, hTarget:GetOrigin(), false )
-	ParticleManager:ReleaseParticleIndex( nCasterFX )
- 
-	local nTargetFX = ParticleManager:CreateParticle( "particles/units/heroes/hero_vengeful/vengeful_nether_swap_target.vpcf", PATTACH_ABSORIGIN_FOLLOW, hTarget )
-	ParticleManager:SetParticleControlEnt( nTargetFX, 1, hCaster, PATTACH_ABSORIGIN_FOLLOW, nil, hCaster:GetOrigin(), false )
-	ParticleManager:ReleaseParticleIndex( nTargetFX )
- 
-	EmitSoundOn( "Hero_VengefulSpirit.NetherSwap", hCaster )
-	EmitSoundOn( "Hero_VengefulSpirit.NetherSwap", hTarget )
- 
-	hCaster:StartGesture( ACT_DOTA_CHANNEL_END_ABILITY_4 )
-	]]
+function bottle_shop_ability_toggle:OnSpellStart()
 
 	local hCaster = self:GetCaster()
-	local hTarget = self:GetCursorTarget()
 	local abilityName = self:GetAbilityName()
 
-	if hCaster == nil or hTarget == nil then
+	if hCaster == nil then
 		return
 	end
 
-	if abilityName == 
+	hCaster.BottleShop:OnSpellStart(abilityName)
+end
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+bottle_shop_ability_health_1 = class({})
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_health_1:CastFilterResultTarget( hTarget )
+	return UF_SUCCESS
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_health_1:GetCustomCastErrorTarget( hTarget )
+	return ""
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_health_1:GetCooldown( nLevel )
+	return self.BaseClass.GetCooldown( self, nLevel )
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_health_1:OnSpellStart()
+	
+	local hCaster = self:GetCaster()
+	local abilityName = self:GetAbilityName()
+
+	if hCaster == nil then
+		return
+	end
+
+	hCaster.BottleShop:OnSpellStart(abilityName)
+end
+ 
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+bottle_shop_ability_health_2 = class({})
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_health_2:CastFilterResultTarget( hTarget )
+	return UF_SUCCESS
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_health_2:GetCustomCastErrorTarget( hTarget )
+	return ""
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_health_2:GetCooldown( nLevel )
+	return self.BaseClass.GetCooldown( self, nLevel )
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_health_2:OnSpellStart()
+	
+	local hCaster = self:GetCaster()
+	local abilityName = self:GetAbilityName()
+
+	if hCaster == nil then
+		return
+	end
+
+	hCaster.BottleShop:OnSpellStart(abilityName)
+end
+ 
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+bottle_shop_ability_health_3 = class({})
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_health_3:CastFilterResultTarget( hTarget )
+	return UF_SUCCESS
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_health_3:GetCustomCastErrorTarget( hTarget )
+	return ""
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_health_3:GetCooldown( nLevel )
+	return self.BaseClass.GetCooldown( self, nLevel )
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_health_3:OnSpellStart()
+	
+	local hCaster = self:GetCaster()
+	local abilityName = self:GetAbilityName()
+
+	if hCaster == nil then
+		return
+	end
+
+	hCaster.BottleShop:OnSpellStart(abilityName)
+end
+ 
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+bottle_shop_ability_health_4 = class({})
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_health_4:CastFilterResultTarget( hTarget )
+	return UF_SUCCESS
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_health_4:GetCustomCastErrorTarget( hTarget )
+	return ""
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_health_4:GetCooldown( nLevel )
+	return self.BaseClass.GetCooldown( self, nLevel )
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_health_4:OnSpellStart()
+	
+	local hCaster = self:GetCaster()
+	local abilityName = self:GetAbilityName()
+
+	if hCaster == nil then
+		return
+	end
+
+	hCaster.BottleShop:OnSpellStart(abilityName)
+end
+ 
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+bottle_shop_ability_health_5 = class({})
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_health_5:CastFilterResultTarget( hTarget )
+	return UF_SUCCESS
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_health_5:GetCustomCastErrorTarget( hTarget )
+	return ""
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_health_5:GetCooldown( nLevel )
+	return self.BaseClass.GetCooldown( self, nLevel )
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_health_5:OnSpellStart()
+	
+	local hCaster = self:GetCaster()
+	local abilityName = self:GetAbilityName()
+
+	if hCaster == nil then
+		return
+	end
+
+	hCaster.BottleShop:OnSpellStart(abilityName)
+end
+ 
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+bottle_shop_ability_health_6 = class({})
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_health_6:CastFilterResultTarget( hTarget )
+	return UF_SUCCESS
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_health_6:GetCustomCastErrorTarget( hTarget )
+	return ""
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_health_6:GetCooldown( nLevel )
+	return self.BaseClass.GetCooldown( self, nLevel )
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_health_6:OnSpellStart()
+	
+	local hCaster = self:GetCaster()
+	local abilityName = self:GetAbilityName()
+
+	if hCaster == nil then
+		return
+	end
+
+	hCaster.BottleShop:OnSpellStart(abilityName)
+end
+ 
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+bottle_shop_ability_health_7 = class({})
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_health_7:CastFilterResultTarget( hTarget )
+	return UF_SUCCESS
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_health_7:GetCustomCastErrorTarget( hTarget )
+	return ""
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_health_7:GetCooldown( nLevel )
+	return self.BaseClass.GetCooldown( self, nLevel )
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_health_7:OnSpellStart()
+	
+	local hCaster = self:GetCaster()
+	local abilityName = self:GetAbilityName()
+
+	if hCaster == nil then
+		return
+	end
+
+	hCaster.BottleShop:OnSpellStart(abilityName)
+end
+ 
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+bottle_shop_ability_mana_1 = class({})
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_mana_1:CastFilterResultTarget( hTarget )
+	return UF_SUCCESS
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_mana_1:GetCustomCastErrorTarget( hTarget )
+	return ""
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_mana_1:GetCooldown( nLevel )
+	return self.BaseClass.GetCooldown( self, nLevel )
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_mana_1:OnSpellStart()
+	
+	local hCaster = self:GetCaster()
+	local abilityName = self:GetAbilityName()
+
+	if hCaster == nil then
+		return
+	end
+
+	hCaster.BottleShop:OnSpellStart(abilityName)
+end
+ 
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+bottle_shop_ability_mana_2 = class({})
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_mana_2:CastFilterResultTarget( hTarget )
+	return UF_SUCCESS
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_mana_2:GetCustomCastErrorTarget( hTarget )
+	return ""
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_mana_2:GetCooldown( nLevel )
+	return self.BaseClass.GetCooldown( self, nLevel )
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_mana_2:OnSpellStart()
+	
+	local hCaster = self:GetCaster()
+	local abilityName = self:GetAbilityName()
+
+	if hCaster == nil then
+		return
+	end
+
+	hCaster.BottleShop:OnSpellStart(abilityName)
+end
+ 
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+bottle_shop_ability_mana_3 = class({})
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_mana_3:CastFilterResultTarget( hTarget )
+	return UF_SUCCESS
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_mana_3:GetCustomCastErrorTarget( hTarget )
+	return ""
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_mana_3:GetCooldown( nLevel )
+	return self.BaseClass.GetCooldown( self, nLevel )
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_mana_3:OnSpellStart()
+	
+	local hCaster = self:GetCaster()
+	local abilityName = self:GetAbilityName()
+
+	if hCaster == nil then
+		return
+	end
+
+	hCaster.BottleShop:OnSpellStart(abilityName)
+end
+ 
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+bottle_shop_ability_mana_4 = class({})
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_mana_4:CastFilterResultTarget( hTarget )
+	return UF_SUCCESS
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_mana_4:GetCustomCastErrorTarget( hTarget )
+	return ""
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_mana_4:GetCooldown( nLevel )
+	return self.BaseClass.GetCooldown( self, nLevel )
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_mana_4:OnSpellStart()
+	
+	local hCaster = self:GetCaster()
+	local abilityName = self:GetAbilityName()
+
+	if hCaster == nil then
+		return
+	end
+
+	hCaster.BottleShop:OnSpellStart(abilityName)
+end
+ 
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+bottle_shop_ability_mana_5 = class({})
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_mana_5:CastFilterResultTarget( hTarget )
+	return UF_SUCCESS
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_mana_5:GetCustomCastErrorTarget( hTarget )
+	return ""
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_mana_5:GetCooldown( nLevel )
+	return self.BaseClass.GetCooldown( self, nLevel )
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_mana_5:OnSpellStart()
+	
+	local hCaster = self:GetCaster()
+	local abilityName = self:GetAbilityName()
+
+	if hCaster == nil then
+		return
+	end
+
+	hCaster.BottleShop:OnSpellStart(abilityName)
+end
+ 
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+bottle_shop_ability_mana_6 = class({})
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_mana_6:CastFilterResultTarget( hTarget )
+	return UF_SUCCESS
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_mana_6:GetCustomCastErrorTarget( hTarget )
+	return ""
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_mana_6:GetCooldown( nLevel )
+	return self.BaseClass.GetCooldown( self, nLevel )
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_mana_6:OnSpellStart()
+	
+	local hCaster = self:GetCaster()
+	local abilityName = self:GetAbilityName()
+
+	if hCaster == nil then
+		return
+	end
+
+	hCaster.BottleShop:OnSpellStart(abilityName)
+end
+ 
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+bottle_shop_ability_mana_7 = class({})
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_mana_7:CastFilterResultTarget( hTarget )
+	return UF_SUCCESS
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_mana_7:GetCustomCastErrorTarget( hTarget )
+	return ""
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_mana_7:GetCooldown( nLevel )
+	return self.BaseClass.GetCooldown( self, nLevel )
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_shop_ability_mana_7:OnSpellStart()
+	
+	local hCaster = self:GetCaster()
+	local abilityName = self:GetAbilityName()
+
+	if hCaster == nil then
+		return
+	end
+
+	hCaster.BottleShop:OnSpellStart(abilityName)
 end
  
 --------------------------------------------------------------------------------

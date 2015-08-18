@@ -2,6 +2,32 @@ if CBottleShop == nil then
 	CBottleShop = class({})
 end
 
+BOTTLE_HEALTH = 1
+BOTTLE_MANA = 2
+
+
+SHOP_ABILITY_LIST_ = {
+	{
+			"bottle_shop_ability_health_1",
+			"bottle_shop_ability_health_2",
+			"bottle_shop_ability_health_3",
+			"bottle_shop_ability_health_4",
+			"bottle_shop_ability_health_5",
+			"bottle_shop_ability_health_6",
+			"bottle_shop_ability_toggle",
+	},
+
+	{
+			"bottle_shop_ability_mana_1",
+			"bottle_shop_ability_mana_2",
+			"bottle_shop_ability_mana_3",
+			"bottle_shop_ability_mana_4",
+			"bottle_shop_ability_mana_5",
+			"bottle_shop_ability_mana_6",
+			"bottle_shop_ability_toggle",
+	},
+}
+
 
 function CBottleShop:CreateBottleShop(pedestal, bottle, hero, bottleSystem)
 	local shopObj = CBottleShop()
@@ -38,15 +64,74 @@ function CBottleShop:Init(pedestal, bottle, hero, bottleSystem)
 	self._fAnimationDuration = 4.0
 	self._fAnimationClock = 0
 	self._fLastAnimationFrame = GameRules:GetGameTime()
+	self._shopToggleState = BOTTLE_HEALTH
+	self._state = BOTTLE_MANA
+
+	self._vAbilityLevels = {
+		{
+			1,
+			1,
+			1,
+			1,
+			1,
+			1,
+			1,
+		},
+
+		{
+			1,
+			1,
+			1,
+			1,
+			1,
+			1,
+			1,
+		},
+	}
+
+	self._vAbilityLevelsMax = {
+		{
+			10,
+			10,
+			10,
+			10,
+			10,
+			10,
+			10,
+		},
+
+		{
+			10,
+			10,
+			10,
+			10,
+			10,
+			10,
+			10,
+		},
+	}
+
+	self._vAbilities = {
+		{
+		},
+
+		{
+		},
+	}
 
 	self._hero = hero
+
+	self._entBottle.BottleShop = self
+
+	self:UpdateShop()
 	
 	Timers:CreateTimer(function()
 		
 		return self:Think()
 	end
 	)
-	return true
+
+	return self
 end
 
 
@@ -54,6 +139,79 @@ function CBottleShop:Think()
 	self:AnimateShop()
 	
 	return self._TICKRATE
+end
+
+
+function CBottleShop:OnSpellStart( name )
+	if name == "bottle_shop_ability_toggle" then
+		self:ToggleAbilities()
+	else
+		print(name)
+		local state = self:GetToggledState()
+
+		for i, ability in pairs(SHOP_ABILITY_LIST_[state]) do
+			print(ability)
+			if ability == name then
+				if self._vAbilityLevels[state][i] + 1 <= self._vAbilityLevelsMax[state][i] then
+					self._vAbilityLevels[state][i] = self._vAbilityLevels[state][i] + 1
+
+					self:UpdateShop()
+					break
+				end
+			end
+		end
+	end
+end
+
+function CBottleShop:GetToggledState()
+	if self._shopToggleState == BOTTLE_HEALTH then
+		return BOTTLE_MANA
+	elseif self._shopToggleState == BOTTLE_MANA then
+		return BOTTLE_HEALTH
+	end
+end
+
+
+function CBottleShop:UpdateShop()
+	local state = self._shopToggleState
+	local counterState = self:GetToggledState()
+
+	print(string.format("shopstate: %d", self._shopToggleState))
+	print(string.format("counterState: %d", counterState))
+
+	if state ~= self._state then
+		for _, ability in pairs(SHOP_ABILITY_LIST_[state]) do
+			self._entBottle:RemoveAbility(ability)
+			self._vAbilities = {}
+		end
+
+		for i, ability in pairs(SHOP_ABILITY_LIST_[counterState]) do
+			local spell = self._entBottle:AddAbility(ability)
+			--print(ability)
+			if ability ~= "bottle_shop_ability_toggle" then
+				print(string.format("abilitylevel: %d", self._vAbilityLevels[counterState][i]))
+				print(string.format("abilitylevel max: %d", self._vAbilityLevelsMax[counterState][i]))
+
+				spell:SetLevel(self._vAbilityLevels[counterState][i])
+				table.insert(self._vAbilities, spell)
+			else
+				spell:SetLevel(1)
+			end
+		end
+
+		self._state = self._shopToggleState
+	else
+		--print("just setting levels")
+		for i, ability in pairs(self._vAbilities) do
+			ability:SetLevel(self._vAbilityLevels[counterState][i])
+		end
+	end
+end
+
+
+function CBottleShop:ToggleAbilities()
+	self._shopToggleState = self:GetToggledState()
+	self:UpdateShop()
 end
 
 
@@ -68,7 +226,7 @@ function CBottleShop:AnimateShop()
 		self._fAnimationClock = self._fAnimationClock - self._fAnimationDuration
 	end
 
-	print(self._fAnimationClock)
+	--print(self._fAnimationClock)
 
 
 	local pos = self._entBottle:GetOrigin()

@@ -106,9 +106,10 @@ function CBottleSystem:OnHeroInGame( hero )
 			ChargesMax = 3,
 			Lvl = 1,
 		},
-	}
 
-	self:InitBottleShop(hero)
+		BottleShop = self:InitBottleShop(hero),
+	}
+	
 
 	table.insert(self._vHeroes, hero)
 
