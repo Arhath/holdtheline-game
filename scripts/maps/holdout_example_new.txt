@@ -1,6 +1,6 @@
 "dota_holdout"
 {
-	"PrepTimeBetweenRounds"			"2"
+	"PrepTimeBetweenRounds"			"30"
 	"ItemExpireTime"				"10"
 	"RestoreHPAfterRound"			"0"
 	"RestoreMPAfterRound"			"0"
@@ -74,11 +74,142 @@
 		"UnitFodder_1a" // Duration 80s - Continues with UnitFodderGrouped_2a & 3a to 120s total
 		{
 			"NPCName"				"npc_dota_creature_kobold_tunneler"
-			"TotalUnitsToSpawn"		"4"
-			"UnitsPerSpawn"			"4"
-			"SpawnInterval"			"2"
-			"SpawnerName"			"all"
-			"DontOffsetSpawn"		"true"
+			"TotalUnitsToSpawn"		"50"
+			"UnitsPerSpawn"			"5"
+			"SpawnInterval"			"4"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+		
+		"UnitFodder_1b" // Duration 80s - Continues with UnitFodderGrouped_2b & 3b to 120s total
+		{
+			"NPCName"				"npc_dota_creature_kobold_tunneler"
+			"TotalUnitsToSpawn"		"50"
+			"UnitsPerSpawn"			"5"
+			"SpawnInterval"			"4"
+
+			"SpawnerName"			"path_invader2_1"
+		}
+		
+		"UnitRanged_1a" // Duration 60s + 30s
+		{
+			"WaitForTime"			"30"
+			"NPCName"				"npc_dota_creature_gnoll_assassin"
+			"TotalUnitsToSpawn"		"10"
+			"UnitsPerSpawn"			"5"
+			"SpawnInterval"			"20"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+		
+		"UnitRanged_1b" // Duration 60s + 30s
+		{
+			"WaitForTime"			"30"
+			"NPCName"				"npc_dota_creature_gnoll_assassin"
+			"TotalUnitsToSpawn"		"10"
+			"UnitsPerSpawn"			"5"
+			"SpawnInterval"			"20"
+
+			"SpawnerName"			"path_invader2_1"
+		}
+		
+		// Stage 2 ================================================
+		"UnitFodderGrouped_2a" // Duration 20s
+		{
+			"WaitForUnit"			"UnitFodder_1a"
+			"WaitForTime"			"12"
+			
+			"NPCName"				"npc_dota_creature_kobold_tunneler"
+			"TotalUnitsToSpawn"		"16"
+			"UnitsPerSpawn"			"8"
+			"SpawnInterval"			"10"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+		
+		"UnitFodderGrouped_2b" // Duration 20s
+		{
+			"WaitForUnit"			"UnitFodder_1b"
+			"WaitForTime"			"12"
+			
+			"NPCName"				"npc_dota_creature_kobold_tunneler"
+			"TotalUnitsToSpawn"		"16"
+			"UnitsPerSpawn"			"8"
+			"SpawnInterval"			"10"
+
+			"SpawnerName"			"path_invader2_1"
+		}
+		
+		"UnitHealer_2a"
+		{
+			"GroupWithUnit"			"UnitFodderGrouped_2a"
+			
+			"NPCName"				"npc_dota_creature_troll_healer"
+			"TotalUnitsToSpawn"		"1"
+			"UnitsPerSpawn"			"1"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+		
+		"UnitHealer_2b"
+		{
+			"GroupWithUnit"			"UnitFodderGrouped_2b"
+			
+			"NPCName"				"npc_dota_creature_troll_healer"
+			"TotalUnitsToSpawn"		"1"
+			"UnitsPerSpawn"			"1"
+
+			"SpawnerName"			"path_invader2_1"
+		}
+		
+		
+		// Stage 3 ================================================
+		"UnitFodderGrouped_3a" // Duration 20s
+		{
+			"WaitForUnit"			"UnitFodderGrouped_2a"
+			"WaitForTime"			"10"
+			
+			"NPCName"				"npc_dota_creature_kobold_tunneler"
+			"TotalUnitsToSpawn"		"16"
+			"UnitsPerSpawn"			"8"
+			"SpawnInterval"			"10"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+		
+		"UnitFodderGrouped_3b" // Duration 20s
+		{
+			"WaitForUnit"			"UnitFodderGrouped_2b"
+			"WaitForTime"			"10"
+			
+			"NPCName"				"npc_dota_creature_kobold_tunneler"
+			"TotalUnitsToSpawn"		"16"
+			"UnitsPerSpawn"			"8"
+			"SpawnInterval"			"10"
+
+			"SpawnerName"			"path_invader2_1"
+		}
+		
+		"UnitHealer_3a"
+		{
+			"GroupWithUnit"			"UnitFodderGrouped_3a"
+			
+			"NPCName"				"npc_dota_creature_troll_healer"
+			"TotalUnitsToSpawn"		"1"
+			"UnitsPerSpawn"			"1"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+		
+		"UnitHealer_3b"
+		{
+			"GroupWithUnit"			"UnitFodderGrouped_3b"
+			
+			"NPCName"				"npc_dota_creature_troll_healer"
+			"TotalUnitsToSpawn"		"1"
+			"UnitsPerSpawn"			"1"
+
+			"SpawnerName"			"path_invader2_1"
 		}
 	}
 	
@@ -90,9 +221,6 @@
 		"BagCount"					"40"
 		"BagVariance"				"10"
 		"FixedXP"					"3500"
-		"IsBoss"					"1"
-		"BossNumber"				"1"
-		"PrepTime"					"0"
 		
 		// Stage 1 ================================================
 		"UnitZombie_1a"
@@ -101,10 +229,241 @@
 			"TotalUnitsToSpawn"		"18"
 			"UnitsPerSpawn"			"6"
 			"SpawnInterval"			"8"
+
+			"SpawnerName"			"path_invader1_1"
 		}
 		
+		"UnitZombieExploding"
+		{
+			"GroupWithUnit"			"UnitZombie_1a"
+			
+			"NPCName"				"npc_dota_creature_basic_zombie_exploding"
+			"TotalUnitsToSpawn"		"3"
+			"UnitsPerSpawn"			"1"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+		
+		"UnitZombie_1b"
+		{
+			"NPCName"				"npc_dota_creature_basic_zombie"
+			"TotalUnitsToSpawn"		"18"
+			"UnitsPerSpawn"			"6"
+			"SpawnInterval"			"8"
+
+			"SpawnerName"			"path_invader2_1"
+		}
+		
+		"UnitZombieExploding"
+		{
+			"GroupWithUnit"			"UnitZombie_1b"
+			
+			"NPCName"				"npc_dota_creature_basic_zombie_exploding"
+			"TotalUnitsToSpawn"		"3"
+			"UnitsPerSpawn"			"1"
+
+			"SpawnerName"			"path_invader2_1"
+		}
+		
+		// Stage 2 ================================================
+		"UnitZombie_2a"
+		{
+			"WaitForUnit"			"UnitZombie_1a"
+			"WaitForTime"			"15"
+			
+			"NPCName"				"npc_dota_creature_basic_zombie"
+			"TotalUnitsToSpawn"		"24"
+			"UnitsPerSpawn"			"8"
+			"SpawnInterval"			"8"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+		
+		"UnitZombieCorpseLord_2a"
+		{
+			"GroupWithUnit"			"UnitZombie_2a"
+			
+			"NPCName"				"npc_dota_creature_corpselord"
+			"TotalUnitsToSpawn"		"3"
+			"UnitsPerSpawn"			"1"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+		
+		"UnitZombieExploding_2a"
+		{
+			"GroupWithUnit"			"UnitZombie_2a"
+			
+			"NPCName"				"npc_dota_creature_basic_zombie_exploding"
+			"TotalUnitsToSpawn"		"3"
+			"UnitsPerSpawn"			"1"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+
+		"UnitZombie_2b"
+		{
+			"WaitForUnit"			"UnitZombie_1a"
+			"WaitForTime"			"15"
+			
+			"NPCName"				"npc_dota_creature_basic_zombie"
+			"TotalUnitsToSpawn"		"24"
+			"UnitsPerSpawn"			"8"
+			"SpawnInterval"			"8"
+
+			"SpawnerName"			"path_invader2_1"
+		}
+		
+		"UnitZombieCorpseLord_2b"
+		{
+			"GroupWithUnit"			"UnitZombie_2a"
+			
+			"NPCName"				"npc_dota_creature_corpselord"
+			"TotalUnitsToSpawn"		"3"
+			"UnitsPerSpawn"			"1"
+
+			"SpawnerName"			"path_invader2_1"
+		}
+		
+		"UnitZombieExploding_2b"
+		{
+			"GroupWithUnit"			"UnitZombie_2a"
+			
+			"NPCName"				"npc_dota_creature_basic_zombie_exploding"
+			"TotalUnitsToSpawn"		"3"
+			"UnitsPerSpawn"			"1"
+
+			"SpawnerName"			"path_invader2_1"
+		}
+		
+		// Stage 3 ================================================
+
+		"UnitZombie_3a"
+		{
+			"WaitForUnit"			"UnitZombie_2a"
+			"WaitForTime"			"10"
+			
+			"NPCName"				"npc_dota_creature_basic_zombie"
+			"TotalUnitsToSpawn"		"24"
+			"UnitsPerSpawn"			"8"
+			"SpawnInterval"			"6"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+		
+		"UnitZombie_3b"
+		{
+			"WaitForUnit"			"UnitZombie_2a"			
+			"WaitForTime"			"10"
+			
+			"NPCName"				"npc_dota_creature_basic_zombie"
+			"TotalUnitsToSpawn"		"24"
+			"UnitsPerSpawn"			"8"
+			"SpawnInterval"			"6"
+
+			"SpawnerName"			"path_invader2_1"
+		}
+		
+		// Stage 5 ================================================
+		"UnitZombie_5a"
+		{
+			"WaitForUnit"			"UnitZombie_3a"
+			"WaitForTime"			"15"
+			
+			"NPCName"				"npc_dota_creature_basic_zombie"
+			"TotalUnitsToSpawn"		"3"
+			"UnitsPerSpawn"			"3"
+			//"SpawnInterval"			"25"
+			
+			"SpawnerName"			"path_invader1_1"
+		}
+		
+		"UnitZombieCorpseLord_5a"
+		{
+			"GroupWithUnit"			"UnitZombie_5a"
+			
+			"NPCName"				"npc_dota_creature_corpselord"
+			"TotalUnitsToSpawn"		"1"
+			"UnitsPerSpawn"			"1"
+			
+			"SpawnerName"			"path_invader1_1"
+		}
+		
+		"UnitZombie_5b"
+		{
+			"WaitForUnit"			"UnitZombie_3a"
+			"WaitForTime"			"15"
+			
+			"NPCName"				"npc_dota_creature_basic_zombie"
+			"TotalUnitsToSpawn"		"3"
+			"UnitsPerSpawn"			"3"
+			
+			"SpawnerName"			"path_invader2_1"
+		}
+		
+		"UnitZombieCorpseLord_5b"
+		{
+			"GroupWithUnit"			"UnitZombie_5b"
+			
+			"NPCName"				"npc_dota_creature_corpselord"
+			"TotalUnitsToSpawn"		"1"
+			"UnitsPerSpawn"			"1"
+			
+			"SpawnerName"			"path_invader2_1"
+		}
+				
+		// Stage Finale ================================================
+		"UnitZombieSupport_Finale"
+		{
+			"WaitForUnit"			"UnitZombie_5a"
+			"WaitForTime"			"15"
+			
+			"NPCName"				"npc_dota_creature_basic_zombie"
+			"TotalUnitsToSpawn"		"20"
+			"UnitsPerSpawn"			"10"
+			"SpawnInterval"			"8"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+		
+		"UnitZombieCorpseLord_Finale"
+		{
+			"WaitForUnit"			"UnitZombie_5a"
+			"GroupWithUnit"			"UnitZombieSupport_Finale"
+			
+			"NPCName"				"npc_dota_creature_corpselord"
+			"TotalUnitsToSpawn"		"2"
+			"UnitsPerSpawn"			"1"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+		
+		"UnitZombieSupport_Finale_b"
+		{
+			"WaitForUnit"			"UnitZombie_5a"
+			"WaitForTime"			"15"
+			
+			"NPCName"				"npc_dota_creature_basic_zombie"
+			"TotalUnitsToSpawn"		"20"
+			"UnitsPerSpawn"			"10"
+			"SpawnInterval"			"8"
+
+			"SpawnerName"			"path_invader2_1"
+		}
+		
+		"UnitZombieCorpseLord_Finale_b"
+		{
+			"WaitForUnit"			"UnitZombie_5a"
+			"GroupWithUnit"			"UnitZombieSupport_Finale_b"
+			
+			"NPCName"				"npc_dota_creature_corpselord"
+			"TotalUnitsToSpawn"		"2"
+			"UnitsPerSpawn"			"1"
+
+			"SpawnerName"			"path_invader2_1"
+		}
 	}
-	
+
 	"Round3" // Ogres
 	{
 		"round_quest_title"			"#DOTA_Holdout_Round_Ogre_Quest_Title"
@@ -311,9 +670,6 @@
 			"TotalUnitsToSpawn"		"6"
 			"UnitsPerSpawn"			"3"
 			"SpawnInterval"			"12"
-			
-			"SpawnerName"			"spawner3"
-			"Waypoint"				"path_invader3_1"
 		}
 		
 		"UnitJumper_2d"
@@ -325,9 +681,6 @@
 			"TotalUnitsToSpawn"		"6"
 			"UnitsPerSpawn"			"3"
 			"SpawnInterval"			"12"
-			
-			"SpawnerName"			"spawner4"
-			"Waypoint"				"path_invader4_1"
 		}
 		
 		"UnitStun_UnGrouped_2"
@@ -770,9 +1123,6 @@
 			"TotalUnitsToSpawn"		"1"
 			"UnitsPerSpawn"			"1"
 			//"SpawnInterval"			"20"
-			
-			"SpawnerName"			"spawner3"
-			"DontGiveGoal"			"1"
 		}
 		
 		"UnitMissile_2d"
@@ -784,9 +1134,6 @@
 			"TotalUnitsToSpawn"		"1"
 			"UnitsPerSpawn"			"1"
 			//"SpawnInterval"			"20"
-			
-			"SpawnerName"			"spawner4"
-			"DontGiveGoal"			"1"
 		}
 	}
 	
@@ -896,9 +1243,6 @@
 			"TotalUnitsToSpawn"		"8"
 			"UnitsPerSpawn"			"4"
 			"SpawnInterval"			"30"
-			
-			"SpawnerName"			"spawner3"
-			"Waypoint"				"path_invader3_1"
 		}
 		
 		"UnitAreaEffect_3c"
@@ -919,9 +1263,6 @@
 			"TotalUnitsToSpawn"		"8"
 			"UnitsPerSpawn"			"4"
 			"SpawnInterval"			"30"
-			
-			"SpawnerName"			"spawner4"
-			"Waypoint"				"path_invader4_1"
 		}
 		
 		"UnitAreaEffect_3d"

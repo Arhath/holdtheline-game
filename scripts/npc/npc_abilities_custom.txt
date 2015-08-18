@@ -9938,9 +9938,7 @@
 	  
 	  	"precache"
 		{
-			"particle"				"particles/units/heroes/hero_oracle/oracle_false_promise_break_heal.vpcf"
-			"particle" 				"particles/units/heroes/hero_witchdoctor/witchdoctor_voodoo_restoration.vpcf"
-
+			"particle"				"particles/test_particle/oracle_false_promise_break_heal_bigger.vpcf"
 		}
 		
 		"OnSpellStart"
@@ -9960,24 +9958,9 @@
 			"FireEffect"
 			{
 				"Target"			"TARGET"
-				"EffectName"		"particles/units/heroes/hero_oracle/oracle_false_promise_break_heal.vpcf"
-				"EffectAttachType"	"follow_overhead"
-			}
-
-			"FireEffect"
-			{
-				"Target"			"TARGET"
-				"EffectName"		"particles/units/heroes/hero_witchdoctor/witchdoctor_voodoo_restoration.vpcf"
+				"EffectName"		"particles/test_particle/oracle_false_promise_break_heal_bigger.vpcf"
 				"EffectAttachType"	"follow_origin"
-				"Duration"			"1"
-
-				"ControlPoints"
-				{
-					"00"	"0 0 0"
-					"01"	"200 0 0"
-					"02"	"0 0 -200"
-				}
-			}					
+			}				
 		}		
 	}
 	

@@ -69,7 +69,7 @@ function CHoldoutGameSpawner:Begin()
 	if self._szSpawnerName ~= "" then
 		local entSpawner = Entities:FindByName( nil, self._szSpawnerName )
 		if not entSpawner then
-			--print( string.format( "Failed to find spawner named %s for %s\n", self._szSpawnerName, self._szName ) )
+			print( string.format( "Failed to find spawner named %s for %s\n", self._szSpawnerName, self._szName ) )
 		end
 		self._vecSpawnLocation = entSpawner:GetAbsOrigin()
 	end
@@ -77,7 +77,7 @@ function CHoldoutGameSpawner:Begin()
 	if self._szWaypointName ~= "" and not self._bDontGiveGoal then
 		self._entWaypoint = Entities:FindByName( nil, self._szWaypointName )
 		if not self._entWaypoint then
-			--print( string.format( "Failed to find waypoint named %s for %s", self._szWaypointName, self._szName ) )
+			print( string.format( "Failed to find waypoint named %s for %s", self._szWaypointName, self._szName ) )
 		end
 	end
 
