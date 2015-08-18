@@ -405,7 +405,7 @@ function TestSpawn(name, spawner, player, team)
 	if entSpawn ~= nil then
 		local point = entSpawn:GetOrigin()
 		local unit = CreateUnitByName(name, point, true, nil, nil, team)
-		unit:SetControllableByPlayer(player, false)
+		unit:SetControllableByPlayer(player, false)   
 	else 
 		print("Error: No Spawner found!")
 	end

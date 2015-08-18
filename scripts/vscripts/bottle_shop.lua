@@ -121,6 +121,8 @@ function CBottleShop:Init(pedestal, bottle, hero, bottleSystem)
 
 	self._hero = hero
 
+	self._hero.BottleSystem.BottleShop = self
+
 	self._entBottle.BottleShop = self
 
 	self:UpdateShop()
@@ -132,6 +134,11 @@ function CBottleShop:Init(pedestal, bottle, hero, bottleSystem)
 	)
 
 	return self
+end
+
+
+function CBottleShop:TestCall()
+ print("testcall")
 end
 
 
@@ -163,12 +170,19 @@ function CBottleShop:OnSpellStart( name )
 	end
 end
 
+
 function CBottleShop:GetToggledState()
 	if self._shopToggleState == BOTTLE_HEALTH then
 		return BOTTLE_MANA
 	elseif self._shopToggleState == BOTTLE_MANA then
 		return BOTTLE_HEALTH
 	end
+end
+
+
+function CBottleShop:GetUpgradeLevels(bottle)
+	local copy = shallowcopy(self._vAbilityLevels[bottle])
+	return copy
 end
 
 
@@ -206,6 +220,8 @@ function CBottleShop:UpdateShop()
 			ability:SetLevel(self._vAbilityLevels[counterState][i])
 		end
 	end
+
+	self._bottleSystem:HeroUpdateBottle(self._hero, counterState)
 end
 
 

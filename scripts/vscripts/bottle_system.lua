@@ -39,12 +39,12 @@ function CBottleSystem:Init( gameMode, team )
 	self._vBottleShops = {}
 	self:InitMoonwells()
 
-	Timers:CreateTimer(function()
-		CBottleSystem:Update()
+	--Timers:CreateTimer(function()
+		--CBottleSystem:Update()
 
-		return self:GetTickrate()
-	end
-	)
+		----return self:GetTickrate()
+	--end
+	--)
 end
 
 function CBottleSystem:InitBottleShop(hero)
@@ -107,8 +107,10 @@ function CBottleSystem:OnHeroInGame( hero )
 			Lvl = 1,
 		},
 
-		BottleShop = self:InitBottleShop(hero),
+		BottleShop = nil,
 	}
+
+	self.bshop = self:InitBottleShop(hero)
 	
 
 	table.insert(self._vHeroes, hero)
@@ -118,9 +120,11 @@ function CBottleSystem:OnHeroInGame( hero )
 	self:BottleAddCharges(hero, BOTTLE_HEALTH, 100)
 end
 
-function CBottleSystem:Update()
-	--for _, h in pairs(self._vHeroes) do
-	--	if h.
+function CBottleSystem:HeroUpdateBottle(hero, bottle)
+	local data = hero.BottleSystem.BottleShop:GetUpgradeLevels(bottle)
+
+	hero.BottleSystem[bottle].ChargesMax = 100 + (data[6]-1) * 10
+	hero.BottleSystem[bottle].ChargesCost = 20 - (data[5]-1) * 2
 end
 
 
@@ -135,10 +139,17 @@ end
 
 
 function CBottleSystem:BottleCalcThink( hero, bottle )
-	hero.BottleSystem[bottle].Think.HealInstant = 500
-	hero.BottleSystem[bottle].Think.Healing = 1000
-	hero.BottleSystem[bottle].Think.TimeLeft = 4
-	hero.BottleSystem[bottle].Think.Hps = hero.BottleSystem[bottle].Think.Healing / hero.BottleSystem[bottle].Think.TimeLeft
+	local data = hero.BottleSystem.BottleShop:GetUpgradeLevels(bottle)
+
+	local healTime = 		4 + 1 * (data[3]-1)
+	local healPct = 		0.3 + (data[1]-1) * 0.1 * healTime / 4
+	local healPctInstant = 	0.2 + (data[2]-1) * 0.5 * healPct
+	local hps =				1 + (data[4]-1) * 0.1
+
+	hero.BottleSystem[bottle].Think.HealInstant = hero:GetMaxHealth() * healPct * healPctInstant
+	hero.BottleSystem[bottle].Think.Healing = hero:GetMaxHealth() * healPct
+	hero.BottleSystem[bottle].Think.TimeLeft = healTime
+	hero.BottleSystem[bottle].Think.Hps = hero:GetMaxHealth() * healPct * hps
 end
 
 
