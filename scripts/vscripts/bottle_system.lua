@@ -107,10 +107,10 @@ function CBottleSystem:OnHeroInGame( hero )
 			Lvl = 1,
 		},
 
-		BottleShop = nil,
+		BottleShop = nil
 	}
 
-	self.bshop = self:InitBottleShop(hero)
+	self:InitBottleShop(hero)
 	
 
 	table.insert(self._vHeroes, hero)
@@ -141,15 +141,15 @@ end
 function CBottleSystem:BottleCalcThink( hero, bottle )
 	local data = hero.BottleSystem.BottleShop:GetUpgradeLevels(bottle)
 
-	local healTime = 		4 + 1 * (data[3]-1)
-	local healPct = 		0.3 + (data[1]-1) * 0.1 * healTime / 4
-	local healPctInstant = 	0.2 + (data[2]-1) * 0.5 * healPct
-	local hps =				1 + (data[4]-1) * 0.1
+	local healTime = 		4 + 1 * ( data[3] - 1 )
+	local healPct = 		( 0.3 + ( data[1] - 1 ) * 0.1 ) * healTime / 4
+	local healPctInstant = 	0.2 + ( data[2] - 1 ) * 0.5 * healPct
+	local hps =				1 + ( data[4] - 1 ) * 0.1
 
-	hero.BottleSystem[bottle].Think.HealInstant = hero:GetMaxHealth() * healPct * healPctInstant
-	hero.BottleSystem[bottle].Think.Healing = hero:GetMaxHealth() * healPct
+	hero.BottleSystem[bottle].Think.HealInstant = hero:GetMaxHealth() * healPctInstant
+	hero.BottleSystem[bottle].Think.Healing = hero:GetMaxHealth() * healPct * hps
 	hero.BottleSystem[bottle].Think.TimeLeft = healTime
-	hero.BottleSystem[bottle].Think.Hps = hero:GetMaxHealth() * healPct * hps
+	hero.BottleSystem[bottle].Think.Hps = hero.BottleSystem[bottle].Think.Healing / healTime
 end
 
 

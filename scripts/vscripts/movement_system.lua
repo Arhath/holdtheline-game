@@ -18,6 +18,8 @@ WAYPOINT_ANTI_STUCK_TIME_MAX = 10.0
 MAX_TIME_IGNORE			= 5.0
 MAX_TIME_FOLLOW_NO_VISION = 4.0
 
+MAX_DISTANCE_AGGRO = 2000.0
+
 MAX_STUCK_TIME = 4.0
 
 debugtimer = 0.0
@@ -301,6 +303,15 @@ function CMovementSystem:UnitThink( unit )
 					unit.MovementSystem.NoVisionTime = 0
 				end
 
+				if  unit.MovementSystem.Target ~= nil then
+					local posUnit = unit:GetAbsOrigin()
+					local posTarget = unit.MovementSystem.Target:GetAbsOrigin()
+					local dist = (posUnit - posTarget):Length()
+
+					if dist > MAX_DISTANCE_AGGRO then
+						self:UnitSetTarget(unit, nil, true)
+					end
+				end
 
 				if  unit.MovementSystem.Target ~= nil then
 
