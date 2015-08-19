@@ -327,6 +327,7 @@
  }
 	 "treant_flower_creature"
 	{
+		"vscripts"	"template_script.lua"
 		"BaseClass"   "npc_dota_creature" 
 		"Model"   	 "models\items\furion\treant_flower_1.vmdl"
 		"ModelScale"  "1.0"  
@@ -1133,12 +1134,14 @@
 		"GameSoundsFile"			"soundevents/game_sounds_creeps.vsndevts"
 		"Level"						"1"
 		"ModelScale" 				".9"
+		
+		"vscripts"					"template_script.lua"
 
 		// Abilities
 		//----------------------------------------------------------------
-		"Ability1"					""			// Ability 1
-		"Ability2"					""			// Ability 2
-		"Ability3"					""			// Ability 3
+		"Ability1"					"custom_ogre_magi_bloodlust"			// Ability 1
+		"Ability2"					"creature_zombie_berserk"			// Ability 2
+		"Ability3"					"creature_summon_undead"			// Ability 3
 		"Ability4"					""			// Ability 4
 
 		// Armor
@@ -1177,7 +1180,8 @@
 		//----------------------------------------------------------------
 		"StatusHealth"				"40"		// Base health.
 		"StatusHealthRegen"			"0.5"		// Health regeneration rate.
-		"StatusMana"				"0"			// Base mana.
+		"StatusMana"				"20000"			// Base mana.
+		"StatusStartingMana"		"0"			// Base mana.
 		"StatusManaRegen"			"0.0"		// Mana regeneration rate.		 
 		
 		// Vision
@@ -1649,6 +1653,7 @@
 	//=================================================================================
 	"npc_dota_creature_corpselord"
 	{
+		"vscripts"					"template_script.lua"
 		// General
 		//
 		"BaseClass"					"npc_dota_creature"	// Class of entity of link to.
@@ -1800,6 +1805,7 @@
 	//=================================================================================
 	"npc_dota_creature_lesser_nightcrawler"
 	{
+		"vscripts"					"template_script.lua"
 		// General
 		//
 		"BaseClass"					"npc_dota_creature"	// Class of entity of link to.
@@ -1944,6 +1950,7 @@
 	//=================================================================================
 	"npc_dota_creature_berserk_zombie"
 	{
+		"vscripts"					"template_script.lua"
 		// General
 		//
 		"BaseClass"					"npc_dota_creature"	// Class of entity of link to.
@@ -2072,6 +2079,7 @@
 	//=================================================================================
 	"npc_dota_creature_missile_launcher"
 	{
+		"vscripts"					"template_script.lua"
 		// General
 		//
 		"BaseClass"					"npc_dota_creature"					// Class of entity of link to.
@@ -2158,8 +2166,6 @@
 		"VisionDaytimeRange"		"1500"		// Range of vision during day light.
 		"VisionNighttimeRange"		"1500"		// Range of vision at night time.
 
-		"vscripts"					"gyrocopter_ai.lua"
-
 		// Creature Data
 		//----------------------------------------------------------------------------------------------------------------------
 		"Creature"
@@ -2237,6 +2243,7 @@
 	//=================================================================================================================
 	"npc_dota_creature_rattletrap"
 	{
+		"vscripts"					"template_script.lua"
 		// General
 		//-------------------------------------------------------------------------------------------------------------
 		"BaseClass"					"npc_dota_creature"					// Class of entity of link to.
@@ -2381,6 +2388,7 @@
 	//=================================================================================
 	"npc_dota_creature_slithereen"
 	{
+		"vscripts"					"template_script.lua"
 		// General
 		//
 		"BaseClass"					"npc_dota_creature"	// Class of entity of link to.
@@ -2516,6 +2524,7 @@
 	//=================================================================================
 	"npc_dota_creature_mini_roshan"
 	{
+		"vscripts"					"template_script.lua"
 		// General
 		//
 		"BaseClass"					"npc_dota_creature"	// Class of entity of link to.
@@ -2627,6 +2636,7 @@
 	//=================================================================================
 	"npc_dota_creature_tormented_soul"
 	{
+		"vscripts"					"template_script.lua"
 		// General
 		//
 		"BaseClass"					"npc_dota_creature"	// Class of entity of link to.
@@ -3154,6 +3164,7 @@
 	//=================================================================================
 	"npc_dota_creature_ogre_magi"
 	{
+		"vscripts"					"template_script.lua"
 		// General
 		//----------------------------------------------------------------
 		"Model"						"models/heroes/ogre_magi/ogre_magi.vmdl"	// Model.
@@ -3274,6 +3285,7 @@
 	//=================================================================================
 	"npc_dota_creature_ogre_tank"
 	{
+		"vscripts"					"template_script.lua"
 		// General
 		//----------------------------------------------------------------
 		"Model"						"models/creeps/neutral_creeps/n_creep_ogre_med/n_creep_ogre_med.vmdl"
@@ -3397,6 +3409,7 @@
 	//=================================================================================
 	"npc_dota_creature_boss_pudge"
 	{
+		"vscripts"					"template_script.lua"
 		// General
 		//
 		"BaseClass"					"npc_dota_creature"	// Class of entity of link to.
@@ -3561,6 +3574,7 @@
 	//=================================================================================
 	"npc_dota_creature_king_treant"
 	{
+		"vscripts"					"template_script.lua"
 		// General
 		//
 		"BaseClass"					"npc_dota_creature"	// Class of entity of link to.
@@ -3687,6 +3701,7 @@
 	//=================================================================================
 	"npc_dota_creature_forest_prophet"
 	{
+		"vscripts"					"template_script.lua"
 		// General
 		//
 		"BaseClass"					"npc_dota_creature"	// Class of entity of link to.
@@ -3984,7 +3999,8 @@
 	// Creature: Bear Chieftan
 	//=================================================================================
 	"npc_dota_creature_bear_chieftain"
-	{										
+	{
+		"vscripts"					"template_script.lua"
 		// General
 		//----------------------------------------------------------------
 		"Model"						"models/heroes/lone_druid/true_form.vmdl"	// Model.
@@ -4089,7 +4105,8 @@
 	// Creature: Big Bear
 	//=================================================================================
 	"npc_dota_creature_big_bear"
-	{										
+	{
+		"vscripts"					"template_script.lua"
 		// General
 		//----------------------------------------------------------------
 		"Model"						"models/heroes/ursa/ursa.vmdl"	// Model.
@@ -4229,6 +4246,7 @@
 	//=================================================================================================================
 	"npc_dota_creature_ancient_apparition"
 	{
+		"vscripts"					"template_script.lua"
 		// General
 		//-------------------------------------------------------------------------------------------------------------
 		"Model"						"models/heroes/ancient_apparition/ancient_apparition.vmdl"		// Model.
@@ -4302,6 +4320,7 @@
 	//=================================================================
 	"npc_dota_creature_broodking"
 	{
+		"vscripts"					"template_script.lua"
 		// General
 		//
 		"BaseClass"					"npc_dota_creature"	// Class of entity of link to.
@@ -4475,6 +4494,7 @@
 	//=================================================================
 	"npc_dota_creature_broodmother"
 	{
+		"vscripts"					"template_script.lua"
 		// General
 		//
 		"BaseClass"					"npc_dota_creature"	// Class of entity of link to.
@@ -4679,7 +4699,7 @@
 		//------------------------------------------------------------------
 		"VoiceFile"				"soundevents/voscripts/game_sounds_vo_broodmother.vsndevts"
 		"GameSoundsFile"		"soundevents/game_sounds_heroes/game_sounds_broodmother.vsndevts"
-		"vscript"				"spiderling_ai.lua"
+		"vscripts"				"spiderling_ai.lua"
 	}
 
 	//=======================================================================
@@ -4771,6 +4791,7 @@
 	//=================================================================================
 	"npc_dota_creature_minor_lich"
 	{
+		"vscripts"					"template_script.lua"
 		// General
 		//
 		"BaseClass"					"npc_dota_creature"	// Class of entity of link to.

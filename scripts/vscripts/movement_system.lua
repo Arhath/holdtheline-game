@@ -2,6 +2,12 @@ if CMovementSystem == nil then
 	CMovementSystem = class({})
 end
 
+MOVEMENT_SYSTEM_STATE_ACTIVE = 1
+MOVEMENT_SYSTEM_STATE_PAUSE = 2
+
+MOVEMENT_SYSTEM_TYPE_ATTACKER = 1
+MOVEMENT_SYSTEM_TYPE_DEFENDER = 2
+
 MAX_TARGET_TIME			= 10.0
 MIN_TARGET_TIME			= 7.0
 RANGE_NEXT_WAYPOINT 	= 300.0
@@ -33,6 +39,8 @@ AGGRO_OVERWRITE_ALL		= 10
 AGGRO_OVERWRITE_RENEW	= 2
 AGGRO_OVERWRITE_NORMAL	= 1
 
+UPDATE_INTERVALL = 0.5
+
 
 
 function CMovementSystem:OnNPCSpawned( event )
@@ -47,7 +55,7 @@ function CMovementSystem:OnNPCSpawned( event )
 		table.insert(self._vUnits, spawnedUnit)
 		spawnedUnit.MovementSystem =
 		{
-			Type = "attacker",
+			Type = MOVEMENT_SYSTEM_TYPE_ATTACKER,
 			NextWaypoint = nil,
 			TargetList = {},
 			Target = nil,
@@ -61,6 +69,8 @@ function CMovementSystem:OnNPCSpawned( event )
 			CanChangeTarget = true,
 			StuckTime = 0,
 			LastPosition = spawnedUnit:GetAbsOrigin(),
+			State = MOVEMENT_SYSTEM_STATE_ACTIVE,
+			ForceUpdate = true,
 		}
 	end
 
@@ -68,7 +78,7 @@ function CMovementSystem:OnNPCSpawned( event )
 		table.insert(self._vAggroUnits, spawnedUnit)
 		spawnedUnit.MovementSystem =
 		{
-			Type = "defender",
+			Type = MOVEMENT_SYSTEM_TYPE_DEFENDER,
 			TargetList = {},
 		}
 	end
@@ -113,7 +123,7 @@ function CMovementSystem:OnEntityHurt( keys)
 			return
 		end
 
-		if entCause.MovementSystem.Type == "defender" and entVictim.MovementSystem.Type == "attacker" then
+		if entCause.MovementSystem.Type == MOVEMENT_SYSTEM_TYPE_DEFENDER and entVictim.MovementSystem.Type == MOVEMENT_SYSTEM_TYPE_ATTACKER then
 			local newTargets =
 			FindUnitsInRadius(
 				entVictim:GetTeamNumber(),
@@ -127,7 +137,7 @@ function CMovementSystem:OnEntityHurt( keys)
 				false
 			)
 
-			DebugDrawCircle(entVictim:GetOrigin() + Vector(0, 0, 100), Vector(255, 255, 255), 0, ATTACK_AGGRO_AOE, false, 1)
+			--DebugDrawCircle(entVictim:GetOrigin() + Vector(0, 0, 100), Vector(255, 255, 255), 0, ATTACK_AGGRO_AOE, false, 1)
 
 			for _, nt in pairs(newTargets) do
 				self:UnitAggroTarget(nt, entCause, MAX_TARGET_TIME, 4, AGGRO_TYPE_DAMAGE_AOE, AGGRO_OVERWRITE_RENEW)
@@ -137,7 +147,7 @@ function CMovementSystem:OnEntityHurt( keys)
 			--entVictim.MovementSystem.StuckTime = 0
 		end
 
-		if entCause.MovementSystem.Type == "attacker" and entVictim.MovementSystem.Type == "defender" then
+		if entCause.MovementSystem.Type == MOVEMENT_SYSTEM_TYPE_ATTACKER and entVictim.MovementSystem.Type == MOVEMENT_SYSTEM_TYPE_DEFENDER then
 
 			local newTargets =
 			FindUnitsInRadius(
@@ -152,7 +162,7 @@ function CMovementSystem:OnEntityHurt( keys)
 				false
 			)
 
-			--DebugDrawCircle(entCause:GetOrigin() + Vector(0, 0, 100), Vector(255, 255, 255), 0, ATTACK_AGGRO_AOE, false, 0.5)
+			----DebugDrawCircle(entCause:GetOrigin() + Vector(0, 0, 100), Vector(255, 255, 255), 0, ATTACK_AGGRO_AOE, false, 0.5)
 
 			for _, nt in pairs(newTargets) do
 				self:UnitAggroTarget(nt, entVictim, MAX_TARGET_TIME, 4, AGGRO_TYPE_DAMAGE_AOE, AGGRO_OVERWRITE_NORMAL)
@@ -184,6 +194,8 @@ function CMovementSystem:Init( gameMode, team)
 	"path_invader2_1", "path_invader2_2", "path_invader2_3", "path_invader2_4", "path_invader2_5", "path_invader2_6", "path_invader2_7", "path_invader2_8", "path_invader2_9", "path_invader2_10", "path_invader2_11", "path_invader2_12", "path_invader2_13", "path_invader2_14", "path_invader2_15", "path_invader2_16", "path_invader2_17", "path_invader2_18", "path_invader2_19", "path_invader2_20", "path_invader2_21", "path_invader2_22", "path_invader2_23", "end"
 	}
 
+	self.NextUpdate = GameRules:GetGameTime()
+
 	Timers:CreateTimer(function()
     	self:Think()
 		return self:GetTickrate()
@@ -199,7 +211,7 @@ function CMovementSystem:Think()
 			if t:IsNull() or not t:IsAlive() then
 				table.remove(au.MovementSystem.TargetList, k)
 			else
-				DebugDrawLine(au:GetOrigin() + Vector(0, 0, 100),t:GetOrigin() + Vector(0, 0, 100), 255, 255, 255, false, 0.25)
+				--DebugDrawLine(au:GetOrigin() + Vector(0, 0, 100),t:GetOrigin() + Vector(0, 0, 100), 255, 255, 255, false, 0.25)
 				----print(t:GetName())
 			end
 		end
@@ -230,9 +242,10 @@ function CMovementSystem:Think()
 			self:UnitAggroTarget(nt, au, MAX_TARGET_TIME, 4, AGGRO_TYPE_SIGHT, AGGRO_OVERWRITE_NORMAL)
 		end
 
-		DebugDrawText(au:GetOrigin() + Vector(0, 0, 100), string.format("Targets: %d", #au.MovementSystem.TargetList), false, 0.25)
-		DebugDrawCircle(au:GetOrigin() + Vector(0, 0, 100), Vector(255, 255, 255), 0, aggroRange, false, 0.25)
+		--DebugDrawText(au:GetOrigin() + Vector(0, 0, 100), string.format("Targets: %d", #au.MovementSystem.TargetList), false, 0.25)
+		--DebugDrawCircle(au:GetOrigin() + Vector(0, 0, 100), Vector(255, 255, 255), 0, aggroRange, false, 0.25)
 	end
+	local gameTime = GameRules:GetGameTime()
 
 	for i,unit in pairs(self._vUnits) do
 		if unit.MovementSystemActive ~= nil then
@@ -240,8 +253,15 @@ function CMovementSystem:Think()
 				table.remove(self._vUnits, i)
 			end
 		else
-			self:UnitThink(unit)
+			if self.NextUpdate >= gameTime or unit.MovementSystem.ForceUpdate then
+				self:UnitThink(unit)
+				unit.MovementSystem.ForceUpdate = false
+			end
 		end
+	end
+
+	if self.NextUpdate >= gameTime then
+		self.NextUpdate = self.NextUpdate + UPDATE_INTERVALL
 	end
 end
 
@@ -251,101 +271,110 @@ function CMovementSystem:UnitThink( unit )
 		return
 	end
 
-	if unit.MovementSystem.StuckTime >= MAX_STUCK_TIME then
-		SetPhasing(unit, 2)
-		unit.MovementSystem.StuckTime = 0
-	else
-		if (unit:GetAbsOrigin() - unit.MovementSystem.LastPosition):Length() == 0 then
-			unit.MovementSystem.StuckTime = unit.MovementSystem.StuckTime + self:GetTickrate()
-		else
-			unit.MovementSystem.StuckTime = 0
-		end
-
-		unit.MovementSystem.LastPosition = unit:GetAbsOrigin()
-	end
-
-	if unit.MovementSystem.IgnoreTarget ~= nil then
-		if unit.MovementSystem.IgnoreTime >= MAX_TIME_IGNORE then
-			unit.MovementSystem.IgnoreTarget = nil
-			unit.MovementSystem.IgnoreTime = 0
-			--print("unignoring target")
-		else
-			--print(string.format("ignore time: %d", unit.MovementSystem.IgnoreTime))
-			unit.MovementSystem.IgnoreTime = unit.MovementSystem.IgnoreTime + self:GetTickrate()
-		end
-	end
-
-	if unit.MovementSystem.Target ~= nil then
-
-		if not unit.MovementSystem.Target:IsAlive() then
+	if unit.MovementSystem.State ~= MOVEMENT_SYSTEM_STATE_ACTIVE then
+		if unit.MovementSystem.State == MOVEMENT_SYSTEM_STATE_PAUSE then
 			self:UnitSetTarget(unit, nil, false)
+			unit.MovementSystem.NextWaypoint = nil
+		end
+	else
+
+		if unit.MovementSystem.StuckTime >= MAX_STUCK_TIME then
+			SetPhasing(unit, 2)
+			unit.MovementSystem.StuckTime = 0
 		else
+			if (unit:GetAbsOrigin() - unit.MovementSystem.LastPosition):Length() == 0 then
+				unit.MovementSystem.StuckTime = unit.MovementSystem.StuckTime + self:GetTickrate()
+			else
+				unit.MovementSystem.StuckTime = 0
+			end
 
-			if unit.MovementSystem.TargetTime >= unit.MovementSystem.MaxTargetTime then
+			unit.MovementSystem.LastPosition = unit:GetAbsOrigin()
+		end
 
-				self:UnitSetTarget(unit, nil, true)
+		if unit.MovementSystem.IgnoreTarget ~= nil then
+			if unit.MovementSystem.IgnoreTime >= MAX_TIME_IGNORE then
+				unit.MovementSystem.IgnoreTarget = nil
+				unit.MovementSystem.IgnoreTime = 0
+				--print("unignoring target")
+			else
+				--print(string.format("ignore time: %d", unit.MovementSystem.IgnoreTime))
+				unit.MovementSystem.IgnoreTime = unit.MovementSystem.IgnoreTime + self:GetTickrate()
+			end
+		end
 
-				--print("max target time reached")
-				--print("ignore unit: " .. unit.MovementSystem.IgnoreTarget:GetName())
+		if unit.MovementSystem.Target ~= nil then
+
+			if not unit.MovementSystem.Target:IsAlive() then
+				self:UnitSetTarget(unit, nil, false)
 			else
 
-				if not unit:CanEntityBeSeenByMyTeam(unit.MovementSystem.Target) then
-					if unit.MovementSystem.Target:IsInvisible() then
-						self:UnitSetTarget(unit, nil, false)
-					else
-						if unit.MovementSystem.NoVisionTime >= MAX_TIME_FOLLOW_NO_VISION then
-							self:UnitSetTarget(unit, nil, true)
+				if unit.MovementSystem.TargetTime >= unit.MovementSystem.MaxTargetTime then
+
+					self:UnitSetTarget(unit, nil, true)
+
+					--print("max target time reached")
+					--print("ignore unit: " .. unit.MovementSystem.IgnoreTarget:GetName())
+				else
+
+					if not unit:CanEntityBeSeenByMyTeam(unit.MovementSystem.Target) then
+						if unit.MovementSystem.Target:IsInvisible() then
+							self:UnitSetTarget(unit, nil, false)
 						else
-							unit.MovementSystem.NoVisionTime = unit.MovementSystem.NoVisionTime + self:GetTickrate()
+							if unit.MovementSystem.NoVisionTime >= MAX_TIME_FOLLOW_NO_VISION then
+								self:UnitSetTarget(unit, nil, true)
+							else
+								unit.MovementSystem.NoVisionTime = unit.MovementSystem.NoVisionTime + self:GetTickrate()
+							end
+						end
+					else
+						unit.MovementSystem.NoVisionTime = 0
+					end
+
+					if  unit.MovementSystem.Target ~= nil then
+						local posUnit = unit:GetAbsOrigin()
+						local posTarget = unit.MovementSystem.Target:GetAbsOrigin()
+						local dist = (posUnit - posTarget):Length()
+						local distNav = GridNav:FindPathLength(posUnit, posTarget)
+
+						if dist > MAX_DISTANCE_AGGRO or distNav > MAX_DISTANCE_AGGRO then
+							self:UnitSetTarget(unit, nil, true)
 						end
 					end
-				else
-					unit.MovementSystem.NoVisionTime = 0
-				end
 
-				if  unit.MovementSystem.Target ~= nil then
-					local posUnit = unit:GetAbsOrigin()
-					local posTarget = unit.MovementSystem.Target:GetAbsOrigin()
-					local dist = (posUnit - posTarget):Length()
+					if  unit.MovementSystem.Target ~= nil then
 
-					if dist > MAX_DISTANCE_AGGRO then
-						self:UnitSetTarget(unit, nil, true)
+						if unit.MovementSystem.TargetTime >= unit.MovementSystem.MinTargetTime then
+							unit.MovementSystem.CanChangeTarget = true
+						end
+
+						--print(string.format("target time: %d", unit.MovementSystem.TargetTime))
+						unit.MovementSystem.TargetTime = unit.MovementSystem.TargetTime + self:GetTickrate()
 					end
-				end
-
-				if  unit.MovementSystem.Target ~= nil then
-
-					if unit.MovementSystem.TargetTime >= unit.MovementSystem.MinTargetTime then
-						unit.MovementSystem.CanChangeTarget = true
-					end
-
-					--print(string.format("target time: %d", unit.MovementSystem.TargetTime))
-					unit.MovementSystem.TargetTime = unit.MovementSystem.TargetTime + self:GetTickrate()
 				end
 			end
 		end
+
+		if unit.MovementSystem.Target ~= nil then
+			self:UnitAttackTarget(unit, unit.MovementSystem.Target)
+			----print("unitthinkattack")
+		else
+			----print("UnitThinkMovement")
+			self:UnitThinkMovement(unit)
+		end
+
+		--if debugtimer >= 1.0 then
+
+		if unit.MovementSystem.Target ~= nil then
+			--DebugDrawText(unit:GetOrigin() + Vector(0, 0, 100), string.format("Target: %d", unit.MovementSystem.TargetTime), false, 0.25)
+		elseif unit.MovementSystem.IgnoreTarget ~= nil then
+			--DebugDrawText(unit:GetOrigin() + Vector(0, 0, 100), string.format("Ignore: %d", unit.MovementSystem.IgnoreTime), false, 0.25)
+		end
+
+		--	debugtimer = 0.0
+		--end
+
+		--debugtimer = debugtimer + self:GetTickrate()
 	end
-
-	if unit.MovementSystem.Target ~= nil then
-		self:UnitAttackTarget(unit, unit.MovementSystem.Target)
-		----print("unitthinkattack")
-	else
-		----print("UnitThinkMovement")
-		self:UnitThinkMovement(unit)
-	end
-
-	--if debugtimer >= 1.0 then
-
-	if unit.MovementSystem.Target ~= nil then
-		DebugDrawText(unit:GetOrigin() + Vector(0, 0, 100), string.format("Target: %d", unit.MovementSystem.TargetTime), false, 0.25)
-	elseif unit.MovementSystem.IgnoreTarget ~= nil then
-		DebugDrawText(unit:GetOrigin() + Vector(0, 0, 100), string.format("Ignore: %d", unit.MovementSystem.IgnoreTime), false, 0.25)
-	end
-
-	--	debugtimer = 0.0
-	--end
-
-	--debugtimer = debugtimer + self:GetTickrate()
 end
 
 
@@ -388,13 +417,15 @@ function CMovementSystem:UnitSetTarget(unit, data, ignore)
 		unit.MovementSystem.IgnoreTime = 0
 		unit.MovementSystem.StuckTime = 0
 	end
+
+	unit.MovementSystem.ForceUpdate = true
 end
 
 
 function  CMovementSystem:UnitAggroTarget( unit, target, timeMax, timeMin, aggroType, overwrite)
 	local bNewTarget = true
 
-	if unit.MovementSystem.Type == "attacker" and target.MovementSystem.Type == "defender" and unit:CanEntityBeSeenByMyTeam(target) then
+	if unit.MovementSystem.Type == MOVEMENT_SYSTEM_TYPE_ATTACKER and target.MovementSystem.Type == MOVEMENT_SYSTEM_TYPE_DEFENDER and unit:CanEntityBeSeenByMyTeam(target) then
 
 		if overwrite ~= AGGRO_OVERWRITE_ALL then
 
@@ -455,7 +486,7 @@ function  CMovementSystem:UnitAggroTarget( unit, target, timeMax, timeMin, aggro
 		self:UnitSetTarget(unit, data, false)
 		--print("new aggro Target: " .. unit.MovementSystem.Target:GetName())
 
-		DebugDrawLine(unit:GetOrigin() + Vector(0, 0, 100),target:GetOrigin() + Vector(0, 0, 100), 255, 255, 255, false, 1)
+		--DebugDrawLine(unit:GetOrigin() + Vector(0, 0, 100),target:GetOrigin() + Vector(0, 0, 100), 255, 255, 255, false, 1)
 	end
 end
 
@@ -545,12 +576,12 @@ function CMovementSystem:UnitThinkMovement( unit )
 					local angletest = GetAngleBetweenVectors(pos1 - pos2, pos1 - pos3)
 						--print(string.format("angletest: %d", angletest))
 
-					DebugDrawText(pos1, string.format("angle diff: %d", angletest), false, 2)
-					--DebugDrawText(pos2, "waypoint 2", false, 20)
-					--DebugDrawText(pos3, "Unit", false, 20)
+					--DebugDrawText(pos1, string.format("angle diff: %d", angletest), false, 2)
+					----DebugDrawText(pos2, "waypoint 2", false, 20)
+					----DebugDrawText(pos3, "Unit", false, 20)
 
-					DebugDrawLine(pos1, pos2, 0, 255, 255, false, 2)
-					DebugDrawLine(pos3, pos1, 0, 255, 0, false, 2)
+					--DebugDrawLine(pos1, pos2, 0, 255, 255, false, 2)
+					--DebugDrawLine(pos3, pos1, 0, 255, 0, false, 2)
 
 					if angletest < 75 	then
 						nBest = nBest + 1
@@ -570,7 +601,7 @@ function CMovementSystem:UnitThinkMovement( unit )
 		local loc = entWp:GetAbsOrigin()
 		local dist = GridNav:FindPathLength(posUnit, loc)
 
-		DebugDrawCircle(loc + Vector(0, 0, 100), Vector(255, 255, 255), 0, RANGE_NEXT_WAYPOINT, false, 0.25)
+		--DebugDrawCircle(loc + Vector(0, 0, 100), Vector(255, 255, 255), 0, RANGE_NEXT_WAYPOINT, false, 0.25)
 
 		self:UnitMoveToPosition(unit, loc)
 

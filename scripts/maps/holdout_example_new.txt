@@ -1,6 +1,6 @@
 "dota_holdout"
 {
-	"PrepTimeBetweenRounds"			"30"
+	"PrepTimeBetweenRounds"			"2"
 	"ItemExpireTime"				"10"
 	"RestoreHPAfterRound"			"0"
 	"RestoreMPAfterRound"			"0"
@@ -73,143 +73,12 @@
 		// Stage 1 ================================================
 		"UnitFodder_1a" // Duration 80s - Continues with UnitFodderGrouped_2a & 3a to 120s total
 		{
-			"NPCName"				"npc_dota_creature_kobold_tunneler"
-			"TotalUnitsToSpawn"		"50"
-			"UnitsPerSpawn"			"5"
+			"NPCName"				"npc_dota_creature_lesser_nightcrawler"//"npc_dota_creature_corpselord"//"npc_dota_creature_ogre_tank"//"npc_dota_creature_tormented_soul"//"npc_dota_creature_missile_launcher"////"npc_dota_creature_mini_roshan"//"treant_flower_creature"////"npc_dota_creature_kobold_tunneler"
+			"TotalUnitsToSpawn"		"1"
+			"UnitsPerSpawn"			"1"
 			"SpawnInterval"			"4"
 
 			"SpawnerName"			"path_invader1_1"
-		}
-		
-		"UnitFodder_1b" // Duration 80s - Continues with UnitFodderGrouped_2b & 3b to 120s total
-		{
-			"NPCName"				"npc_dota_creature_kobold_tunneler"
-			"TotalUnitsToSpawn"		"50"
-			"UnitsPerSpawn"			"5"
-			"SpawnInterval"			"4"
-
-			"SpawnerName"			"path_invader2_1"
-		}
-		
-		"UnitRanged_1a" // Duration 60s + 30s
-		{
-			"WaitForTime"			"30"
-			"NPCName"				"npc_dota_creature_gnoll_assassin"
-			"TotalUnitsToSpawn"		"10"
-			"UnitsPerSpawn"			"5"
-			"SpawnInterval"			"20"
-
-			"SpawnerName"			"path_invader1_1"
-		}
-		
-		"UnitRanged_1b" // Duration 60s + 30s
-		{
-			"WaitForTime"			"30"
-			"NPCName"				"npc_dota_creature_gnoll_assassin"
-			"TotalUnitsToSpawn"		"10"
-			"UnitsPerSpawn"			"5"
-			"SpawnInterval"			"20"
-
-			"SpawnerName"			"path_invader2_1"
-		}
-		
-		// Stage 2 ================================================
-		"UnitFodderGrouped_2a" // Duration 20s
-		{
-			"WaitForUnit"			"UnitFodder_1a"
-			"WaitForTime"			"12"
-			
-			"NPCName"				"npc_dota_creature_kobold_tunneler"
-			"TotalUnitsToSpawn"		"16"
-			"UnitsPerSpawn"			"8"
-			"SpawnInterval"			"10"
-
-			"SpawnerName"			"path_invader1_1"
-		}
-		
-		"UnitFodderGrouped_2b" // Duration 20s
-		{
-			"WaitForUnit"			"UnitFodder_1b"
-			"WaitForTime"			"12"
-			
-			"NPCName"				"npc_dota_creature_kobold_tunneler"
-			"TotalUnitsToSpawn"		"16"
-			"UnitsPerSpawn"			"8"
-			"SpawnInterval"			"10"
-
-			"SpawnerName"			"path_invader2_1"
-		}
-		
-		"UnitHealer_2a"
-		{
-			"GroupWithUnit"			"UnitFodderGrouped_2a"
-			
-			"NPCName"				"npc_dota_creature_troll_healer"
-			"TotalUnitsToSpawn"		"1"
-			"UnitsPerSpawn"			"1"
-
-			"SpawnerName"			"path_invader1_1"
-		}
-		
-		"UnitHealer_2b"
-		{
-			"GroupWithUnit"			"UnitFodderGrouped_2b"
-			
-			"NPCName"				"npc_dota_creature_troll_healer"
-			"TotalUnitsToSpawn"		"1"
-			"UnitsPerSpawn"			"1"
-
-			"SpawnerName"			"path_invader2_1"
-		}
-		
-		
-		// Stage 3 ================================================
-		"UnitFodderGrouped_3a" // Duration 20s
-		{
-			"WaitForUnit"			"UnitFodderGrouped_2a"
-			"WaitForTime"			"10"
-			
-			"NPCName"				"npc_dota_creature_kobold_tunneler"
-			"TotalUnitsToSpawn"		"16"
-			"UnitsPerSpawn"			"8"
-			"SpawnInterval"			"10"
-
-			"SpawnerName"			"path_invader1_1"
-		}
-		
-		"UnitFodderGrouped_3b" // Duration 20s
-		{
-			"WaitForUnit"			"UnitFodderGrouped_2b"
-			"WaitForTime"			"10"
-			
-			"NPCName"				"npc_dota_creature_kobold_tunneler"
-			"TotalUnitsToSpawn"		"16"
-			"UnitsPerSpawn"			"8"
-			"SpawnInterval"			"10"
-
-			"SpawnerName"			"path_invader2_1"
-		}
-		
-		"UnitHealer_3a"
-		{
-			"GroupWithUnit"			"UnitFodderGrouped_3a"
-			
-			"NPCName"				"npc_dota_creature_troll_healer"
-			"TotalUnitsToSpawn"		"1"
-			"UnitsPerSpawn"			"1"
-
-			"SpawnerName"			"path_invader1_1"
-		}
-		
-		"UnitHealer_3b"
-		{
-			"GroupWithUnit"			"UnitFodderGrouped_3b"
-			
-			"NPCName"				"npc_dota_creature_troll_healer"
-			"TotalUnitsToSpawn"		"1"
-			"UnitsPerSpawn"			"1"
-
-			"SpawnerName"			"path_invader2_1"
 		}
 	}
 	
@@ -221,6 +90,8 @@
 		"BagCount"					"40"
 		"BagVariance"				"10"
 		"FixedXP"					"3500"
+		"PrepTime"					"600"
+
 		
 		// Stage 1 ================================================
 		"UnitZombie_1a"
@@ -695,7 +566,7 @@
 		}
 	}
 	
-	"Round5" // Trees
+	"Round5" // Trees	
 	{
 		"round_quest_title"			"#DOTA_Holdout_Round_Trees_Quest_Title"
 		"round_title"				"#DOTA_Holdout_Round_Trees_Title"
@@ -1034,14 +905,14 @@
 		// Stage 1 ================================================
 		"UnitMelee_1"
 		{
-			"NPCName"				"npc_dota_creature_boss_pudge"
+			"NPCName"				"npc_dota_creature_kobold_tunneler"//"npc_dota_creature_boss_pudge"
 			"TotalUnitsToSpawn"		"1"
 			"UnitsPerSpawn"			"1"
 			"DontGiveGoal"    		"1"
 		}
 		"UnitMelee_2"
 		{
-			"NPCName"				"npc_dota_creature_boss_pudge"
+			"NPCName"				"npc_dota_creature_kobold_tunneler"//"npc_dota_creature_boss_pudge"
 			"TotalUnitsToSpawn"		"1"
 			"UnitsPerSpawn"			"1"
 			"DontGiveGoal"    		"1"

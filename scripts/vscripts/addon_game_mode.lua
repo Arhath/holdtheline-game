@@ -576,6 +576,7 @@ end
 
 
 function CHoldoutGameMode:_SpawnHeroClientEffects( hero, nPlayerID )
+	local nPlayerID = hero:GetPlayerOwnerID()
 	-- Spawn these effects on the client, since we don't need them to stay in sync or anything
 	-- ParticleManager:ReleaseParticleIndex( ParticleManager:CreateParticleForPlayer( "particles/generic_gameplay/winter_effects_hero.vpcf", PATTACH_ABSORIGIN_FOLLOW, hero, PlayerResource:GetPlayer( nPlayerID ) ) )	-- Attaches the breath effects to players for winter maps
 	ParticleManager:ReleaseParticleIndex( ParticleManager:CreateParticleForPlayer( "particles/frostivus_gameplay/frostivus_hero_light.vpcf", PATTACH_ABSORIGIN_FOLLOW, hero, PlayerResource:GetPlayer( nPlayerID ) ) )
@@ -624,13 +625,15 @@ function CHoldoutGameMode:OnNPCSpawned( event )
 
 	if spawnedUnit:IsRealHero() then
 		self._bottleSystem:OnHeroSpawned(spawnedUnit)
+		self:_SpawnHeroClientEffects( spawnedUnit )
 	end
 
-	for nPlayerID = 0, DOTA_MAX_PLAYERS-1 do
-		if ( PlayerResource:IsValidPlayer( nPlayerID ) ) then
-				self:_SpawnHeroClientEffects( spawnedUnit, nPlayerID )
-		end
-	end
+	--for nPlayerID = 0, DOTA_MAX_PLAYERS-1 do
+		--if ( PlayerResource:IsValidPlayer( nPlayerID ) ) then
+		--		
+		--self:_SpawnHeroClientEffects( spawnedUnit, nPlayerID )
+		--end
+	--end
 end
 
 function CHoldoutGameMode:OnHeroInGame( hero )

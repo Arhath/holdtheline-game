@@ -499,6 +499,7 @@
 		//-------------------------------------------------------------------------------------------------------------
 		"AbilityName"					"zombie_berserk"
 		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_IMMEDIATE | DOTA_ABILITY_BEHAVIOR_NO_TARGET | DOTA_ABILITY_BEHAVIOR_IGNORE_CHANNEL"
+		"AbilityUnitTargetTeam"			"DOTA_UNIT_TARGET_TEAM_ENEMY"
 		"BaseClass" 					"ability_datadriven"
 		"AbilityTextureName"            "life_stealer_rage"
 
@@ -564,6 +565,7 @@
 		//-------------------------------------------------------------------------------------------------------------
 		"AbilityName"					"zombie_rage"
 		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_NO_TARGET | DOTA_ABILITY_BEHAVIOR_CHANNELLED | DOTA_ABILITY_BEHAVIOR_DONT_RESUME_ATTACK"
+		"AbilityUnitTargetTeam"			"DOTA_UNIT_TARGET_TEAM_ENEMY"
 		"BaseClass" 					"ability_datadriven"
 		"AbilityTextureName"            "item_mask_of_madness"
 		

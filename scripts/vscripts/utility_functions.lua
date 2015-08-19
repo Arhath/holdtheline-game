@@ -47,6 +47,35 @@ function shallowcopy(orig)
 end
 
 
+function ListFilterWithFn( t, fn )
+
+    if not t then
+        return {}
+    end
+
+    local result = {}
+
+    for i = 1, #t do
+        if fn( t[i] ) then
+            table.insert( result, t[i] )
+        end
+    end
+
+    return result
+end
+
+
+function ExistsInList( list, entity )
+    for i = 1, #list do
+        if list[i] == entity then
+            return true
+        end
+    end
+
+    return false
+end
+
+
 function ShuffledList( orig_list )
 	local list = shallowcopy( orig_list )
 	local result = {}
@@ -196,6 +225,7 @@ function UnitGetBestRetreatPositionInAoe( unit, aoe )
     return resultVec
 end
 
+
 function Roate2DVector ( vec, angle )
   local result = Vector(0, 0 ,0)
   angle = math.rad(angle)
@@ -227,6 +257,10 @@ function UnitFindBestTargetPositionInAoe(unit, search, aoeMax, aoeMin, team, who
     local bestPoint = nil
     local bestNumUnits = -1
     local vUnits = FindUnitsInRadius( unit:GetTeamNumber(), unit:GetOrigin(), nil, search, team, who, 0, 0, false )
+
+    if #vUnits == 1 then
+        return vUnits[1]:GetAbsOrigin()
+    end
 
     for _, u in pairs(vUnits) do
         table.insert(vEnemyPos, u:GetAbsOrigin())

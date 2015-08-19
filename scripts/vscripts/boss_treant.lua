@@ -1050,7 +1050,7 @@ function BehaviorMushroomTrap:Evaluate()
 
 	self.unit = entBossMushroom
 	self.ability = self.unit:FindAbilityByName("poison_trap")
-	local position
+	local position = nil
 	local desire = 0
 	
 	if self.ability and self.ability:IsFullyCastable() then
@@ -1059,7 +1059,10 @@ function BehaviorMushroomTrap:Evaluate()
 		local aoeMin = self.ability:GetSpecialValueFor("activation_radius")
 		local team = DOTA_UNIT_TARGET_TEAM_ENEMY
 		local who = DOTA_UNIT_TARGET_HERO
-		position = UnitFindBestTargetPositionInAoe(self.unit, search, aoeMax, aoeMin, team, who)
+		local vUnits = FindUnitsInRadius( self.unit:GetTeamNumber(), self.unit:GetOrigin(), nil, search, team, who, 0, 0, false )
+		if #vUnits > 1 then
+			position = UnitFindBestTargetPositionInAoe(self.unit, search, aoeMax, aoeMin, team, who)
+		end
 	end
 
 	if position ~= nil then
