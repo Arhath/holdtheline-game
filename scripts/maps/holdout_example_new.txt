@@ -827,8 +827,16 @@
 		"UnitSplitter_1"
 		{
 			"NPCName"				"npc_dota_splitter_a"
-			"TotalUnitsToSpawn"		"2"
-			"UnitsPerSpawn"			"1"
+			"TotalUnitsToSpawn"		"6"
+			"UnitsPerSpawn"			"2"
+			"SpawnInterval"			"25"
+		}
+
+		"UnitSplitter_1"
+		{
+			"NPCName"				"npc_dota_splitter_a"
+			"TotalUnitsToSpawn"		"6"
+			"UnitsPerSpawn"			"2"
 			"SpawnInterval"			"25"
 		}
 		
