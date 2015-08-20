@@ -487,6 +487,41 @@
 				"var_type"				"FIELD_INTEGER"
 				"leash_radius"			"325"
 			}
+			"08"
+			{
+				"var_type"				"FIELD_FLOAT"
+				"aoe_radius"			"0"
+			}
+			"09"
+			{
+				"var_type"				"FIELD_FLOAT"
+				"search_radius"			"700"
+			}
+			"10"
+			{
+				"var_type"				"FIELD_INTEGER"
+				"ability_type"			"4"
+			}
+			"11"
+			{
+				"var_type"				"FIELD_INTEGER"
+				"casting_when"			"1"
+			}
+			"12"
+			{
+				"var_type"				"FIELD_FLOAT"
+				"abilit_value"			"0"
+			}
+			"13"
+			{
+				"var_type"				"FIELD_INTEGER"
+				"utility_type"			"0"
+			}
+			"14"
+			{
+				"var_type"				"FIELD_FLOAT"
+				"utility_value"			"0"
+			}
 		}
 	}
 
@@ -571,7 +606,7 @@
 			"06"
 			{
 				"var_type"				"FIELD_INTEGER"
-				"casting_when"			""
+				"casting_when"			"3"
 			}
 		}
 	}
@@ -723,6 +758,31 @@
 			{
 				"var_type"			"FIELD_FLOAT"
 				"stun_duration"		"3.0"
+			}
+			"05"
+			{
+				"var_type"				"FIELD_FLOAT"
+				"aoe_radius"			"0"
+			}
+			"06"
+			{
+				"var_type"				"FIELD_FLOAT"
+				"search_radius"			"700"
+			}
+			"07"
+			{
+				"var_type"				"FIELD_INTEGER"
+				"ability_type"			"2"
+			}
+			"08"
+			{
+				"var_type"				"FIELD_INTEGER"
+				"casting_when"			"3"
+			}
+			"09"
+			{
+				"var_type"				"FIELD_FLOAT"
+				"abilit_value"			"0"
 			}
 		}
 	}
@@ -902,7 +962,31 @@
 				"var_type"			"FIELD_FLOAT"
 				"tick_interval"		"0.1"
 			}
-			
+			"04"
+			{
+				"var_type"				"FIELD_FLOAT"
+				"aoe_radius"			"0"
+			}
+			"05"
+			{
+				"var_type"				"FIELD_FLOAT"
+				"search_radius"			"0"
+			}
+			"06"
+			{
+				"var_type"				"FIELD_INTEGER"
+				"ability_type"			"0"
+			}
+			"07"
+			{
+				"var_type"				"FIELD_INTEGER"
+				"casting_when"			"1"
+			}
+			"08"
+			{
+				"var_type"				"FIELD_FLOAT"
+				"abilit_value"			"0"
+			}
 		}
 	}
 
@@ -1158,6 +1242,41 @@
 			{
 				"var_type"						"FIELD_FLOAT"
 				"stun_duration"					"2.0 2.5 3.0 4.0"
+			}
+			"05"
+			{
+				"var_type"				"FIELD_FLOAT"
+				"aoe_radius"			"350"
+			}
+			"06"
+			{
+				"var_type"				"FIELD_FLOAT"
+				"search_radius"			"350"
+			}
+			"07"
+			{
+				"var_type"				"FIELD_INTEGER"
+				"ability_type"			"4"
+			}
+			"08"
+			{
+				"var_type"				"FIELD_INTEGER"
+				"casting_when"			"2"
+			}
+			"09"
+			{
+				"var_type"				"FIELD_FLOAT"
+				"abilit_value"			"150"
+			}
+			"10"
+			{
+				"var_type"				"FIELD_FLOAT"
+				"utility_type"			"0"
+			}
+			"11"
+			{
+				"var_type"				"FIELD_FLOAT"
+				"utility_value"			"0"
 			}
 		}
 	}

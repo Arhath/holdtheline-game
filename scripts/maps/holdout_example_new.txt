@@ -73,7 +73,7 @@
 		// Stage 1 ================================================
 		"UnitFodder_1a" // Duration 80s - Continues with UnitFodderGrouped_2a & 3a to 120s total
 		{
-			"NPCName"				"treant_flower_creature"//"npc_dota_creature_kobold_tunneler"//"npc_dota_creature_lesser_nightcrawler"//"npc_dota_creature_corpselord"//"npc_dota_creature_ogre_tank"//"npc_dota_creature_tormented_soul"//"npc_dota_creature_missile_launcher"////"npc_dota_creature_mini_roshan"//"treant_flower_creature"////"npc_dota_creature_kobold_tunneler"
+			"NPCName"				"npc_dota_creature_slithereen"//"npc_dota_creature_lesser_nightcrawler"////"treant_flower_creature"//"npc_dota_creature_kobold_tunneler"//"npc_dota_creature_lesser_nightcrawler"//"npc_dota_creature_corpselord"//"npc_dota_creature_ogre_tank"//"npc_dota_creature_tormented_soul"//"npc_dota_creature_missile_launcher"////"npc_dota_creature_mini_roshan"//"treant_flower_creature"////"npc_dota_creature_kobold_tunneler"
 			"TotalUnitsToSpawn"		"1"
 			"UnitsPerSpawn"			"1"
 			"SpawnInterval"			"4"
@@ -90,9 +90,7 @@
 		"BagCount"					"40"
 		"BagVariance"				"10"
 		"FixedXP"					"3500"
-		"PrepTime"					"2000"
-		"IsBoss"					"1"
-		"BossNumber"				"1"
+		"PrepTime"					"2"
 
 		
 		// Stage 1 ================================================
