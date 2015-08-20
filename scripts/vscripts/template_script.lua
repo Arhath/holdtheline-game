@@ -133,6 +133,7 @@ function BehaviorAbility:Evaluate()
 				local search = ability:GetSpecialValueFor("search_radius")
 				local category = ability:GetSpecialValueFor("ability_type")
 				local casting = ability:GetSpecialValueFor("casting_when")
+				local abilityValue = ability:GetSpecialValueFor("ability_value")
 
 				local bCasting = true
 
@@ -163,7 +164,7 @@ function BehaviorAbility:Evaluate()
 							radius = 200.0
 						end
 
-						if category == ABILITY_TYPE_BUFF or category ==ABILITY_TYPE_HEAL then
+						if category == ABILITY_TYPE_BUFF or category == ABILITY_TYPE_HEAL then
 							team = DOTA_UNIT_TARGET_TEAM_FRIENDLY
 						elseif category == ABILITY_TYPE_DEBUFF or category == ABILITY_TYPE_DAMAGE then
 							team = DOTA_UNIT_TARGET_TEAM_ENEMY
@@ -202,17 +203,38 @@ function BehaviorAbility:Evaluate()
 									end
 								elseif category == ABILITY_TYPE_HEAL then
 									for _, unit in pairs(allAllys) do
-										local hPct = unit:GetHealth() / unit:GetMaxHealth()
+										if abilityValue == 0 then
+											local hPct = unit:GetHealth() / unit:GetMaxHealth()
 
-										if hPct < numAllys or numAllys == 0 and hPct ~= 1 then
-											target = unit
-											numAllys = hPct
-											value = 2.5
+											if hPct < numAllys or numAllys == 0 and hPct ~= 1 then
+												target = unit
+												numAllys = hPct
+												value = 2.5
+											end
+										else
+											local efficiency = math.min(unit:GetMaxHealth() - unit:GetHealth(), abilityValue)
+
+											if efficiency > numAllys then
+												target = unit
+												numAllys = efficiency
+												value = 2.5
+											end
 										end
 									end
 								else
-									target = allAllys[RandomInt(1, #allAllys)]
-									value = 2.5
+									if abilityValue == 0 then
+										target = allAllys[RandomInt(1, #allAllys)]
+										value = 2.5
+									else
+										for _, unit in pairs(allAllys) do
+											local efficiency = math.min(unit:GetHealth(), abilityValue)
+											if efficiency > numAllys then
+												target = unit
+												numAllys = efficiency
+												value = 2.5
+											end
+										end
+									end
 								end
 							end
 						else
@@ -224,7 +246,7 @@ function BehaviorAbility:Evaluate()
 
 									for _, unit in pairs(units) do
 										local hPct = unit:GetHealth() / unit:GetMaxHealth()
-										if hPct >= 20 then
+										if hPct >= 0.2 then
 											targetUnits = targetUnits + 1
 										end
 									end
@@ -241,26 +263,46 @@ function BehaviorAbility:Evaluate()
 									local targUnits = 0
 
 									for _, unit in pairs(units) do
-										local hPct = unit:GetHealth() / unit:GetMaxHealth()
-										if hPct <= 90 then
-											targetUnits = targetUnits + 1
+										if abilityValue == 0 then
+											local hPct = unit:GetHealth() / unit:GetMaxHealth()
+											if hPct <= 0.9 then
+												targetUnits = targetUnits + 1
+											end
+										else
+											local efficiency = math.min(unit:GetMaxHealth() - unit:GetHealth(), abilityValue)
+											targetUnits = targetUnits + efficiency
 										end
 									end
 									if targetUnits > numAllys then
 										target = unit
 										numAllys = targetUnits
-										value = targetUnits
+										value = #units
 									end
 								end
 							else
 								for _, ally in pairs(allAllys) do
 									local units = FindUnitsInRadius( ally:GetTeamNumber(), ally:GetOrigin(), nil, radius, targetTeam, targetType, 0, 0, false )
 
-									if #units > numAllys then
-										target = ally
-										numAllys = #units
-										value = #units
-									end	
+									if abilityValue == 0 then
+										if #units > numAllys then
+											target = ally
+											numAllys = #units
+											value = #units
+										end
+									else
+										local targUnits = 0
+
+										for _, unit in pairs(units) do
+											local efficiency = math.min(unit:GetHealth(), abilityValue)
+											targetUnits = targetUnits + efficiency
+										end
+
+										if targetUnits > numAllys then
+											target = unit
+											numAllys = targetUnits
+											value = #units
+										end
+									end
 								end
 							end
 						end
@@ -275,10 +317,17 @@ function BehaviorAbility:Evaluate()
 							local units = {}
 							if casting == CASTING_ONSIGHT then
 								if category == ABILITY_TYPE_BUFF or category == ABILITY_TYPE_HEAL then
-									local hPct = self.unit:GetHealth() / self.unit:GetMaxHealth()
+									if abilityValue == 0 then
+										local hPct = self.unit:GetHealth() / self.unit:GetMaxHealth()
 
-									if hPct >= 90 then
-										units = FindUnitsInRadius( self.unit:GetTeamNumber(), self.unit:GetOrigin(), nil, radius, DOTA_UNIT_TARGET_TEAM_FRIENDLY, unitType, 0, 0, false )
+										if hPct >= 0.9 then
+											units = FindUnitsInRadius( self.unit:GetTeamNumber(), self.unit:GetOrigin(), nil, radius, DOTA_UNIT_TARGET_TEAM_FRIENDLY, unitType, 0, 0, false )
+										end
+									else
+										local efficiency = unit:GetMaxHealth() - unit:GetHealth()
+										if efficiency >= abilityValue then
+											units = FindUnitsInRadius( self.unit:GetTeamNumber(), self.unit:GetOrigin(), nil, radius, DOTA_UNIT_TARGET_TEAM_FRIENDLY, unitType, 0, 0, false )
+										end
 									end
 								else
 									units = FindUnitsInRadius( self.unit:GetTeamNumber(), self.unit:GetOrigin(), nil, radius, DOTA_UNIT_TARGET_TEAM_ENEMY, unitType, 0, 0, false )
@@ -296,7 +345,7 @@ function BehaviorAbility:Evaluate()
 
 								for _, unit in pairs(units) do
 									local hPct = unit:GetHealth() / unit:GetMaxHealth()
-									if hPct >= 20 then
+									if hPct >= 0.2 then
 										targetUnits = targetUnits + 1
 									end
 								end
@@ -311,16 +360,21 @@ function BehaviorAbility:Evaluate()
 							local targetUnits = 0
 
 							for _, unit in pairs(units) do
-								local hPct = unit:GetHealth() / unit:GetMaxHealth()
-								if hPct <= 90 then
+								if abilityValue == 0 then
+									local hPct = unit:GetHealth() / unit:GetMaxHealth()
+									if hPct <= 0.9 then
 										targetUnits = targetUnits + 1
+									end
+								else
+									local efficiency = math.min(unit:GetMaxHealth() - unit:GetHealth(), abilityValue)
+									targetUnits = targetUnits + efficiency
 								end
 							end
 
 							if targetUnits > numAllys then
 								target = unit
 								numAllys = targetUnits
-								value = targetUnits
+								value = #units
 							end
 						else
 							local units = FindUnitsInRadius( self.unit:GetTeamNumber(), self.unit:GetOrigin(), nil, radius, DOTA_UNIT_TARGET_TEAM_ENEMY, unitType, 0, 0, false )

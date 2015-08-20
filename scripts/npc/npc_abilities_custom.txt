@@ -9952,6 +9952,11 @@
 				"var_type"				"FIELD_INTEGER"
 				"casting_when"			"3"
 			}
+			"05"
+			{
+				"var_type"				"FIELD_FLOAT"
+				"abilit_value"			"200"
+			}
 		}
 	}
 
