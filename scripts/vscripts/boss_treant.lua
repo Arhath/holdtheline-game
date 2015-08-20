@@ -95,7 +95,7 @@ function BossTreant:Spawn()
 	self._bossOriginalHealth = entBossUnit:GetMaxHealth()
 	entBossUnit.difficultyApplier = nil
 	self:ApplyDifficultyBuff(entBossUnit)
-	behaviorSystemBoss = AICore:CreateBehaviorSystem( { BehaviorIdle } )--, BehaviorEarthsplitter, BehaviorRootHero, BehaviorSpawnFlowers, BehaviorSpawnMushrooms, BehaviorSpawnTrees, BehaviorRaiseNature, BehaviorMoveToArena, BehaviorAttack } )
+	behaviorSystemBoss = AICore:CreateBehaviorSystem( { BehaviorIdle , BehaviorEarthsplitter, BehaviorRootHero, BehaviorSpawnFlowers, BehaviorSpawnMushrooms, BehaviorSpawnTrees, BehaviorRaiseNature, BehaviorMoveToArena, BehaviorAttack } )
 	
 	self._entQuest = SpawnEntityFromTableSynchronous( "quest", {
 		name = self._strRoundTitle,
@@ -170,7 +170,7 @@ function BossTreant:Think()
 
 		self:AIThink()
 		
-		if testcount == 2 and entBossUnit:GetHealth() >= entBossUnit:GetMaxHealth()/2 then
+		if testcount == 30 and entBossUnit:GetHealth() >= entBossUnit:GetMaxHealth()/2 then
 			entBossUnit:SetHealth(entBossUnit:GetMaxHealth()/2)
 			GameRules:SetRuneSpawnTime(testcount)
 			
@@ -346,9 +346,9 @@ function BossTreant:PhaseThink()
 				orbPos.z = 0
 				orbHeight = GetGroundHeight(orbPos, nil)
 
-				--SafeSpawnCreature("treant_flower_creature", orbPos, 300, orbHeight, nil, nil, entBossUnit:GetTeamNumber())
-				--SafeSpawnCreature("treant_mushroom_creature", orbPos, 300, orbHeight, nil, nil, entBossUnit:GetTeamNumber())
-				--SafeSpawnCreature("npc_dota_furion_treant", orbPos, 300, orbHeight, nil, nil, entBossUnit:GetTeamNumber())
+				SafeSpawnCreature("treant_flower_creature", orbPos, 300, orbHeight, nil, nil, entBossUnit:GetTeamNumber())
+				SafeSpawnCreature("treant_mushroom_creature", orbPos, 300, orbHeight, nil, nil, entBossUnit:GetTeamNumber())
+				SafeSpawnCreature("npc_dota_furion_treant", orbPos, 300, orbHeight, nil, nil, entBossUnit:GetTeamNumber())
 		
 				orbDistArenaLeft = ( vecBossArenaPos - orbPos):Length()
 				orbHP = self.entOrbLeft:GetHealth()
@@ -372,9 +372,9 @@ function BossTreant:PhaseThink()
 				orbPos.z = 0
 				orbHeight = GetGroundHeight(orbPos, nil)
 						
-				--SafeSpawnCreature("treant_flower_creature", orbPos, 300, orbHeight, nil, nil, entBossUnit:GetTeamNumber())
-				--SafeSpawnCreature("treant_mushroom_creature", orbPos, 300, orbHeight, nil, nil, entBossUnit:GetTeamNumber())
-				--SafeSpawnCreature("npc_dota_furion_treant", orbPos, 300, orbHeight, nil, nil, entBossUnit:GetTeamNumber())
+				SafeSpawnCreature("treant_flower_creature", orbPos, 300, orbHeight, nil, nil, entBossUnit:GetTeamNumber())
+				SafeSpawnCreature("treant_mushroom_creature", orbPos, 300, orbHeight, nil, nil, entBossUnit:GetTeamNumber())
+				SafeSpawnCreature("npc_dota_furion_treant", orbPos, 300, orbHeight, nil, nil, entBossUnit:GetTeamNumber())
 
 				orbDistArenaRight = ( vecBossArenaPos - orbPos ):Length()
 				

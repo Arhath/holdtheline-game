@@ -7,6 +7,15 @@ local behaviorSystem = {}
 local MOVEMENT_SYSTEM_STATE_ACTIVE = 1
 local MOVEMENT_SYSTEM_STATE_PAUSE = 2
 
+local CASTING_ALAWAYS = 1
+local CASTING_ONSIGHT = 2
+local CASTING_INFIGHT = 3
+
+local ABILITY_TYPE_BUFF = 1
+local ABILITY_TYPE_HEAL = 2
+local ABILITY_TYPE_DEBUFF = 3
+local ABILITY_TYPE_DAMAGE = 4
+
 --[[-------------------------------------------------------------------------
 	Setup the focus on ancient think on spawn
 -----------------------------------------------------------------------------]]
@@ -120,94 +129,220 @@ function BehaviorAbility:Evaluate()
 				local targetType = ability:GetAbilityTargetType()
 				local targetTeam = ability:GetAbilityTargetTeam()
 				local castRange = ability:GetCastRange()
-				local search = 700.0
+				local radius = ability:GetSpecialValueFor("aoe_radius")
+				local search = ability:GetSpecialValueFor("search_radius")
+				local category = ability:GetSpecialValueFor("ability_type")
+				local casting = ability:GetSpecialValueFor("casting_when")
 
-				--Print(string.format("castrange: %d", castRange))
-				if castRange ~= 0 then
-					search = castRange * 1.5
-				end
+				local bCasting = true
 
-				local radius = ability:GetSpecialValueFor("radius")
-				--Print(string.format("radius: %d", radius))
-
-				if bit.band(behavior, DOTA_ABILITY_BEHAVIOR_POINT) > 0 then
-					--Print("behavior point")
-					if radius == 0 then
-						radius = 200.0
-					end
-					if targetTeam == 0 then
-						position = UnitFindBestTargetPositionInAoe(self.unit, search, radius, 0, DOTA_UNIT_TARGET_TEAM_ENEMY, DOTA_UNIT_TARGET_ALL)
-					else
-						if targetType == 0 then
-							position = UnitFindBestTargetPositionInAoe(self.unit, search, radius, 0, targetTeam, DOTA_UNIT_TARGET_ALL)
-						else
-							position = UnitFindBestTargetPositionInAoe(self.unit, search, radius, 0, targetTeam, targetType)
+				if casting ~= CASTING_ALAWAYS then
+					if casting == CASTING_INFIGHT then
+						if self.unit.MovementSystem.Target == nil then
+							bCasting = false
 						end
 					end
-					if position ~= nil then
-						value = 2.5
+				end
+
+				if bCasting then
+					--Print(string.format("castrange: %d", castRange))
+					if search == 0 then
+						if castRange ~= 0 then
+							search = castRange * 1.5
+						else
+							search = 700
+						end
 					end
-				elseif bit.band(behavior, DOTA_ABILITY_BEHAVIOR_UNIT_TARGET) > 0 then
-					--Print("behavior target")
-					local allAllys = FindUnitsInRadius( self.unit:GetTeamNumber(), self.unit:GetOrigin(), nil, search, targetTeam, targetType, 0, 0, false )
+					--Print(string.format("radius: %d", radius))
 
-					local numAllys = 0
+					if bit.band(behavior, DOTA_ABILITY_BEHAVIOR_POINT) > 0 then
+						local team = DOTA_UNIT_TARGET_TEAM_ENEMY
+						local unitType = targetType
+						--Print("behavior point")
+						if radius == 0 then
+							radius = 200.0
+						end
 
-					if radius == 0 then
-						--Print("target without radius")
-						if #allAllys > 0 then
-							--Print("found target")
-							target = allAllys[RandomInt(1, #allAllys)]
+						if category == ABILITY_TYPE_BUFF or category ==ABILITY_TYPE_HEAL then
+							team = DOTA_UNIT_TARGET_TEAM_FRIENDLY
+						elseif category == ABILITY_TYPE_DEBUFF or category == ABILITY_TYPE_DAMAGE then
+							team = DOTA_UNIT_TARGET_TEAM_ENEMY
+						elseif targetTeam ~= 0 then
+							team = targetTeam
+						end
+
+						if unitType == 0 then
+							unitType = DOTA_UNIT_TARGET_ALL
+						end
+
+						position = UnitFindBestTargetPositionInAoe(self.unit, search, radius, 0, team, unitType)
+
+						if position ~= nil then
 							value = 2.5
 						end
-					else
-						--Print("target with radius")
+					elseif bit.band(behavior, DOTA_ABILITY_BEHAVIOR_UNIT_TARGET) > 0 then
+						--Print("behavior target")
+						local allAllys = FindUnitsInRadius( self.unit:GetTeamNumber(), self.unit:GetOrigin(), nil, search, targetTeam, targetType, 0, 0, false )
 
-						for _, ally in pairs(allAllys) do
-							local units = FindUnitsInRadius( self.unit:GetTeamNumber(), ally:GetOrigin(), nil, radius, targetTeam, targetType, 0, 0, false )
+						local numAllys = 0
 
-							if #allAllys > numAllys then
-								target = ally
-								numAllys = #allAllys
-								value = #allAllys
+						if radius == 0 then
+							--Print("target without radius")
+							if #allAllys > 0 then
+								--Print("found target")
+								if category == ABILITY_TYPE_BUFF then
+									for _, unit in pairs(allAllys) do
+										local hPct = unit:GetHealth() / unit:GetMaxHealth()
+
+										if hPct > numAllys then
+											target = unit
+											numAllys = hPct
+											value = 2.5
+										end
+									end
+								elseif category == ABILITY_TYPE_HEAL then
+									for _, unit in pairs(allAllys) do
+										local hPct = unit:GetHealth() / unit:GetMaxHealth()
+
+										if hPct < numAllys or numAllys == 0 and hPct ~= 1 then
+											target = unit
+											numAllys = hPct
+											value = 2.5
+										end
+									end
+								else
+									target = allAllys[RandomInt(1, #allAllys)]
+									value = 2.5
+								end
+							end
+						else
+							--Print("target with radius")
+							if category == ABILITY_TYPE_BUFF then
+								for _, ally in pairs(allAllys) do
+									local units = FindUnitsInRadius( ally:GetTeamNumber(), ally:GetOrigin(), nil, radius, targetTeam, targetType, 0, 0, false )
+									local targetUnits = 0
+
+									for _, unit in pairs(units) do
+										local hPct = unit:GetHealth() / unit:GetMaxHealth()
+										if hPct >= 20 then
+											targetUnits = targetUnits + 1
+										end
+									end
+
+									if targetUnits > numAllys then
+										target = unit
+										numAllys = targetUnits
+										value = targetUnits
+									end
+								end
+							elseif category == ABILITY_TYPE_HEAL then
+								for _, ally in pairs(allAllys) do
+									local units = FindUnitsInRadius( ally:GetTeamNumber(), ally:GetOrigin(), nil, radius, targetTeam, targetType, 0, 0, false )
+									local targUnits = 0
+
+									for _, unit in pairs(units) do
+										local hPct = unit:GetHealth() / unit:GetMaxHealth()
+										if hPct <= 90 then
+											targetUnits = targetUnits + 1
+										end
+									end
+									if targetUnits > numAllys then
+										target = unit
+										numAllys = targetUnits
+										value = targetUnits
+									end
+								end
+							else
+								for _, ally in pairs(allAllys) do
+									local units = FindUnitsInRadius( ally:GetTeamNumber(), ally:GetOrigin(), nil, radius, targetTeam, targetType, 0, 0, false )
+
+									if #units > numAllys then
+										target = ally
+										numAllys = #units
+										value = #units
+									end	
+								end
 							end
 						end
-					end
-				elseif bit.band(behavior, DOTA_ABILITY_BEHAVIOR_NO_TARGET) > 0 then
-					--Print("behavior no target")
-					if bit.band(targetTeam, DOTA_UNIT_TARGET_TEAM_ENEMY) > 0 or bit.band(targetTeam, DOTA_UNIT_TARGET_TEAM_FRIENDLY) > 0 or bit.band(targetTeam, DOTA_UNIT_TARGET_TEAM_BOTH) > 0 then
-						--Print("spell has target team")
+					elseif bit.band(behavior, DOTA_ABILITY_BEHAVIOR_NO_TARGET) > 0 then
+						local unitType = targetType
 
-						--Print(string.format("search: %d", search))
-						local allAllys
-
-						if targetType == 0 then
-							allAllys = FindUnitsInRadius( self.unit:GetTeamNumber(), self.unit:GetOrigin(), nil, search, targetTeam, DOTA_UNIT_TARGET_ALL, 0, 0, false )
-						else
-							allAllys = FindUnitsInRadius( self.unit:GetTeamNumber(), self.unit:GetOrigin(), nil, search, targetTeam, targetType, 0, 0, false )
+						if unitType == 0 then
+							unitType = DOTA_UNIT_TARGET_ALL
 						end
-						--Print(string.format("numunits: %d", #allAllys))
+						--Print("behavior no target")
 						if radius == 0 then
-							if #allAllys > 0 then
+							local units = {}
+							if casting == CASTING_ONSIGHT then
+								if category == ABILITY_TYPE_BUFF or category == ABILITY_TYPE_HEAL then
+									local hPct = self.unit:GetHealth() / self.unit:GetMaxHealth()
+
+									if hPct >= 90 then
+										units = FindUnitsInRadius( self.unit:GetTeamNumber(), self.unit:GetOrigin(), nil, radius, DOTA_UNIT_TARGET_TEAM_FRIENDLY, unitType, 0, 0, false )
+									end
+								else
+									units = FindUnitsInRadius( self.unit:GetTeamNumber(), self.unit:GetOrigin(), nil, radius, DOTA_UNIT_TARGET_TEAM_ENEMY, unitType, 0, 0, false )
+								end
+
+								if #units > 0 then
+									value = 2.5
+								end 
+							else
 								value = 2.5
 							end
-						elseif #allAllys > 0 then
-							value = #allAllys
+						elseif category == ABILITY_TYPE_BUFF then
+								local units = FindUnitsInRadius( self.unit:GetTeamNumber(), self.unit:GetOrigin(), nil, radius, DOTA_UNIT_TARGET_TEAM_FRIENDLY, unitType, 0, 0, false )
+								local targetUnits = 0
+
+								for _, unit in pairs(units) do
+									local hPct = unit:GetHealth() / unit:GetMaxHealth()
+									if hPct >= 20 then
+										targetUnits = targetUnits + 1
+									end
+								end
+
+								if targetUnits > numAllys then
+									target = unit
+									numAllys = targetUnits
+									value = targetUnits
+								end
+						elseif category == ABILITY_TYPE_HEAL then
+							local units = FindUnitsInRadius( self.unit:GetTeamNumber(), self.unit:GetOrigin(), nil, radius, DOTA_UNIT_TARGET_TEAM_FRIENDLY, unitType, 0, 0, false )
+							local targetUnits = 0
+
+							for _, unit in pairs(units) do
+								local hPct = unit:GetHealth() / unit:GetMaxHealth()
+								if hPct <= 90 then
+										targetUnits = targetUnits + 1
+								end
+							end
+
+							if targetUnits > numAllys then
+								target = unit
+								numAllys = targetUnits
+								value = targetUnits
+							end
+						else
+							local units = FindUnitsInRadius( self.unit:GetTeamNumber(), self.unit:GetOrigin(), nil, radius, DOTA_UNIT_TARGET_TEAM_ENEMY, unitType, 0, 0, false )
+
+							if #units > numAllys then
+								target = unit
+								numAllys = #units
+								value = #units
+							end
 						end
-					else			
-						value = 2.5
 					end
-				end
 
-				if bit.band(behavior, DOTA_ABILITY_BEHAVIOR_CHANNELLED) > 0 then
-					--Print("behavior channeled")
-				end
+					if bit.band(behavior, DOTA_ABILITY_BEHAVIOR_CHANNELLED) > 0 then
+						--Print("behavior channeled")
+					end
 
 
-				if value > bestValue then
-					bestValue = value
-					bestAbility = ability
-					--Print("setting best ability")
+					if value > bestValue then
+						bestValue = value
+						bestAbility = ability
+						--Print("setting best ability")
+					end
 				end
 			end
 		end

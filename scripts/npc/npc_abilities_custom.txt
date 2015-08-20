@@ -499,7 +499,6 @@
 		//-------------------------------------------------------------------------------------------------------------
 		"AbilityName"					"zombie_berserk"
 		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_IMMEDIATE | DOTA_ABILITY_BEHAVIOR_NO_TARGET | DOTA_ABILITY_BEHAVIOR_IGNORE_CHANNEL"
-		"AbilityUnitTargetTeam"			"DOTA_UNIT_TARGET_TEAM_ENEMY"
 		"BaseClass" 					"ability_datadriven"
 		"AbilityTextureName"            "life_stealer_rage"
 
@@ -552,6 +551,27 @@
 			{
 				"var_type"				"FIELD_FLOAT"
 				"berserk_duration"				"3.0 3.0 3.0 3.0"
+			}
+			
+			"04"
+			{
+				"var_type"				"FIELD_FLOAT"
+				"aoe_radius"			"0"
+			}
+			"05"
+			{
+				"var_type"				"FIELD_FLOAT"
+				"search_radius"			"700"
+			}
+			"05"
+			{
+				"var_type"				"FIELD_INTEGER"
+				"ability_type"			"1"
+			}
+			"06"
+			{
+				"var_type"				"FIELD_INTEGER"
+				"casting_when"			""
 			}
 		}
 	}
@@ -9909,7 +9929,30 @@
 				"EffectName"		"particles/units/heroes/hero_oracle/oracle_false_promise_break_heal.vpcf"
 				"EffectAttachType"	"follow_overhead"
 			}			
-		}		
+		}
+		"AbilitySpecial"
+		{
+			"01"
+			{
+				"var_type"				"FIELD_FLOAT"
+				"aoe_radius"			"0"
+			}
+			"02"
+			{
+				"var_type"				"FIELD_FLOAT"
+				"search_radius"			"700"
+			}
+			"03"
+			{
+				"var_type"				"FIELD_INTEGER"
+				"ability_type"			"2"
+			}
+			"04"
+			{
+				"var_type"				"FIELD_INTEGER"
+				"casting_when"			"3"
+			}
+		}
 	}
 
 	"creature_aoe_heal"
