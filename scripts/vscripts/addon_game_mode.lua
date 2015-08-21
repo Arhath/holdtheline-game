@@ -12,12 +12,12 @@ Holdout Example
 
 require( "holdout_game_round" )
 require( "holdout_game_spawner" )
-require( "trigger" )
-require( "timers" )
-require( "holdout_game_bosshandler" )
-require( "utility_functions" )
-require( "movement_system" )
-require( "bottle_system" )
+require( "misc/trigger" )
+require( "misc/timers" )
+require( "misc/utility_functions" )
+require( "boss/holdout_game_bosshandler" )
+require( "ai/movement_system" )
+require( "bottle/bottle_system" )
 
 if CHoldoutGameMode == nil then
 	CHoldoutGameMode = class({})
@@ -119,10 +119,27 @@ function CHoldoutGameMode:InitGameMode()
 	GameRules:SetRuneMinimapIconScale( 0.7 )
 	GameRules:SetGoldTickTime( 0.5 )
 	GameRules:SetGoldPerTick( 2 )
+	GameRules:SetUseBaseGoldBountyOnHeroes(false)
+	GameRules:SetRuneSpawnTime(180.0)
+
 	GameRules:GetGameModeEntity():SetRemoveIllusionsOnDeath( false )
 	GameRules:GetGameModeEntity():SetTopBarTeamValuesOverride( true )
 	GameRules:GetGameModeEntity():SetTopBarTeamValuesVisible( false )
-	GameRules:SetRuneSpawnTime(180.0)
+	GameRules:GetGameModeEntity():SetLoseGoldOnDeath( false )
+	mode:SetUseCustomHeroLevels ( true )
+
+	MAX_LEVEL = 125
+
+	mode:SetCustomHeroMaxLevel ( MAX_LEVEL )
+
+
+	XP_PER_LEVEL_TABLE = {}
+	for i=1,MAX_LEVEL do
+ 		XP_PER_LEVEL_TABLE[i] = (i-1) * 100
+	end
+
+	mode:SetCustomXPRequiredToReachNextLevel( XP_PER_LEVEL_TABLE )
+
 
 --	GameRules:GetGameModeEntity():SetHUDVisible( DOTA_HUD_VISIBILITY_TOP_TIMEOFDAY, false )
 --	GameRules:GetGameModeEntity():SetHUDVisible( DOTA_HUD_VISIBILITY_TOP_HEROES, false )
@@ -168,7 +185,12 @@ function CHoldoutGameMode:InitGameMode()
 
 
 	-- Register OnThink with the game engine so it is called every 0.25 seconds
-	GameRules:GetGameModeEntity():SetThink( "OnThink", self, 0.25 ) 
+	--GameRules:GetGameModeEntity():SetThink( "OnThink", self, 0.25 )
+	Timers:CreateTimer(function()
+		self:OnThink()
+		return 0.25
+	end
+	)
 end
 
 

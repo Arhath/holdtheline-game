@@ -91,6 +91,8 @@
 		"BagVariance"				"10"
 		"FixedXP"					"3500"
 		"PrepTime"					"2"
+		"IsBoss"					"1"
+		"BossNumber"				"1"
 
 		
 		// Stage 1 ================================================

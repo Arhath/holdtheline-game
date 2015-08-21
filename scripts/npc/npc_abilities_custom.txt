@@ -11,7 +11,7 @@
 		"AbilityName"					"bottle_shop_ability_toggle"
 		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_IMMEDIATE | DOTA_ABILITY_BEHAVIOR_NO_TARGET | DOTA_ABILITY_BEHAVIOR_IGNORE_CHANNEL"
 		"BaseClass" 					"ability_lua"
-		"ScriptFile"					"bottle_shop_abilities.lua"
+		"ScriptFile"					"abilities/bottle_abilities.lua"
 		"AbilityTextureName"            "alchemist_unstable_concoction"
 
 		// Stats		
@@ -30,7 +30,7 @@
 		"AbilityName"					"bottle_shop_ability_health_1"
 		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_IMMEDIATE | DOTA_ABILITY_BEHAVIOR_NO_TARGET | DOTA_ABILITY_BEHAVIOR_IGNORE_CHANNEL"
 		"BaseClass" 					"ability_lua"
-		"ScriptFile"					"bottle_shop_abilities"
+		"ScriptFile"					"abilities/bottle_abilities.lua"
 		"AbilityTextureName"            "alchemist_unstable_concoction"
 
 		// Stats		
@@ -49,7 +49,7 @@
 		"AbilityName"					"bottle_shop_ability_health_2"
 		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_IMMEDIATE | DOTA_ABILITY_BEHAVIOR_NO_TARGET | DOTA_ABILITY_BEHAVIOR_IGNORE_CHANNEL"
 		"BaseClass" 					"ability_lua"
-		"ScriptFile"					"bottle_shop_abilities"
+		"ScriptFile"					"abilities/bottle_abilities.lua"
 		"AbilityTextureName"            "alchemist_unstable_concoction"
 
 		// Stats		
@@ -68,7 +68,7 @@
 		"AbilityName"					"bottle_shop_ability_health_3"
 		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_IMMEDIATE | DOTA_ABILITY_BEHAVIOR_NO_TARGET | DOTA_ABILITY_BEHAVIOR_IGNORE_CHANNEL"
 		"BaseClass" 					"ability_lua"
-		"ScriptFile"					"bottle_shop_abilities"
+		"ScriptFile"					"abilities/bottle_abilities.lua"
 		"AbilityTextureName"            "alchemist_unstable_concoction"
 
 		// Stats		
@@ -87,7 +87,7 @@
 		"AbilityName"					"bottle_shop_ability_health_4"
 		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_IMMEDIATE | DOTA_ABILITY_BEHAVIOR_NO_TARGET | DOTA_ABILITY_BEHAVIOR_IGNORE_CHANNEL"
 		"BaseClass" 					"ability_lua"
-		"ScriptFile"					"bottle_shop_abilities"
+		"ScriptFile"					"abilities/bottle_abilities.lua"
 		"AbilityTextureName"            "alchemist_unstable_concoction"
 
 		// Stats		
@@ -106,7 +106,7 @@
 		"AbilityName"					"bottle_shop_ability_health_5"
 		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_IMMEDIATE | DOTA_ABILITY_BEHAVIOR_NO_TARGET | DOTA_ABILITY_BEHAVIOR_IGNORE_CHANNEL"
 		"BaseClass" 					"ability_lua"
-		"ScriptFile"					"bottle_shop_abilities"
+		"ScriptFile"					"abilities/bottle_abilities.lua"
 		"AbilityTextureName"            "alchemist_unstable_concoction"
 
 		// Stats		
@@ -125,7 +125,7 @@
 		"AbilityName"					"bottle_shop_ability_health_6"
 		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_IMMEDIATE | DOTA_ABILITY_BEHAVIOR_NO_TARGET | DOTA_ABILITY_BEHAVIOR_IGNORE_CHANNEL"
 		"BaseClass" 					"ability_lua"
-		"ScriptFile"					"bottle_shop_abilities"
+		"ScriptFile"					"abilities/bottle_abilities.lua"
 		"AbilityTextureName"            "alchemist_unstable_concoction"
 
 		// Stats		
@@ -144,7 +144,7 @@
 		"AbilityName"					"bottle_shop_ability_health_7"
 		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_IMMEDIATE | DOTA_ABILITY_BEHAVIOR_NO_TARGET | DOTA_ABILITY_BEHAVIOR_IGNORE_CHANNEL"
 		"BaseClass" 					"ability_lua"
-		"ScriptFile"					"bottle_shop_abilities"
+		"ScriptFile"					"abilities/bottle_abilities.lua"
 		"AbilityTextureName"            "alchemist_unstable_concoction"
 
 		// Stats		
@@ -163,7 +163,7 @@
 		"AbilityName"					"bottle_shop_ability_mana_1"
 		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_IMMEDIATE | DOTA_ABILITY_BEHAVIOR_NO_TARGET | DOTA_ABILITY_BEHAVIOR_IGNORE_CHANNEL"
 		"BaseClass" 					"ability_lua"
-		"ScriptFile"					"bottle_shop_abilities"
+		"ScriptFile"					"abilities/bottle_abilities.lua"
 		"AbilityTextureName"            "alchemist_unstable_concoction"
 
 		// Stats		
@@ -182,7 +182,7 @@
 		"AbilityName"					"bottle_shop_ability_mana_2"
 		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_IMMEDIATE | DOTA_ABILITY_BEHAVIOR_NO_TARGET | DOTA_ABILITY_BEHAVIOR_IGNORE_CHANNEL"
 		"BaseClass" 					"ability_lua"
-		"ScriptFile"					"bottle_shop_abilities"
+		"ScriptFile"					"abilities/bottle_abilities.lua"
 		"AbilityTextureName"            "alchemist_unstable_concoction"
 
 		// Stats		
@@ -201,7 +201,7 @@
 		"AbilityName"					"bottle_shop_ability_mana_3"
 		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_IMMEDIATE | DOTA_ABILITY_BEHAVIOR_NO_TARGET | DOTA_ABILITY_BEHAVIOR_IGNORE_CHANNEL"
 		"BaseClass" 					"ability_lua"
-		"ScriptFile"					"bottle_shop_abilities"
+		"ScriptFile"					"abilities/bottle_abilities.lua"
 		"AbilityTextureName"            "alchemist_unstable_concoction"
 
 		// Stats		
@@ -220,7 +220,7 @@
 		"AbilityName"					"bottle_shop_ability_mana_4"
 		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_IMMEDIATE | DOTA_ABILITY_BEHAVIOR_NO_TARGET | DOTA_ABILITY_BEHAVIOR_IGNORE_CHANNEL"
 		"BaseClass" 					"ability_lua"
-		"ScriptFile"					"bottle_shop_abilities"
+		"ScriptFile"					"abilities/bottle_abilities.lua"
 		"AbilityTextureName"            "alchemist_unstable_concoction"
 
 		// Stats		
@@ -239,7 +239,7 @@
 		"AbilityName"					"bottle_shop_ability_mana_5"
 		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_IMMEDIATE | DOTA_ABILITY_BEHAVIOR_NO_TARGET | DOTA_ABILITY_BEHAVIOR_IGNORE_CHANNEL"
 		"BaseClass" 					"ability_lua"
-		"ScriptFile"					"bottle_shop_abilities"
+		"ScriptFile"					"abilities/bottle_abilities.lua"
 		"AbilityTextureName"            "alchemist_unstable_concoction"
 
 		// Stats		
@@ -258,7 +258,7 @@
 		"AbilityName"					"bottle_shop_ability_mana_6"
 		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_IMMEDIATE | DOTA_ABILITY_BEHAVIOR_NO_TARGET | DOTA_ABILITY_BEHAVIOR_IGNORE_CHANNEL"
 		"BaseClass" 					"ability_lua"
-		"ScriptFile"					"bottle_shop_abilities"
+		"ScriptFile"					"abilities/bottle_abilities.lua"
 		"AbilityTextureName"            "alchemist_unstable_concoction"
 
 		// Stats		
@@ -277,7 +277,7 @@
 		"AbilityName"					"bottle_shop_ability_mana_7"
 		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_IMMEDIATE | DOTA_ABILITY_BEHAVIOR_NO_TARGET | DOTA_ABILITY_BEHAVIOR_IGNORE_CHANNEL"
 		"BaseClass" 					"ability_lua"
-		"ScriptFile"					"bottle_shop_abilities"
+		"ScriptFile"					"abilities/bottle_abilities.lua"
 		"AbilityTextureName"            "alchemist_unstable_concoction"
 
 		// Stats		
@@ -298,7 +298,7 @@
 		"AbilityUnitTargetTeam"			"DOTA_UNIT_TARGET_TEAM_FRIENDLY"
 		"AbilityUnitTargetType"			"DOTA_UNIT_TARGET_HERO | DOTA_UNIT_TARGET_CREEP"
 		"BaseClass" 					"ability_lua"
-		"ScriptFile"					"bottle_health"
+		"ScriptFile"					"abilities/bottle_abilities.lua"
 		"AbilityTextureName"            "alchemist_unstable_concoction"
 
 		// Stats		
@@ -336,7 +336,7 @@
 		"AbilityUnitTargetTeam"			"DOTA_UNIT_TARGET_TEAM_FRIENDLY"
 		"AbilityUnitTargetType"			"DOTA_UNIT_TARGET_HERO | DOTA_UNIT_TARGET_CREEP"
 		"BaseClass" 					"ability_lua"
-		"ScriptFile"					"bottle_mana"
+		"ScriptFile"					"abilities/bottle_abilities.lua"
 		"AbilityTextureName"            "alchemist_unstable_concoction"
 
 		// Stats		
@@ -9438,7 +9438,7 @@
 		{
 			"RunScript"
 			{
-				"ScriptFile"				"treant_eat_tree.lua"
+				"ScriptFile"				"abilities/treant_eat_tree.lua"
 				"Function"					"DestroyTree"
 				"Target"					"TARGET"
 				"Caster"					"CASTER"
@@ -9519,7 +9519,7 @@
 		{
 			"RunScript"
 			{
-				"ScriptFile"				"treant_root_hero.lua"
+				"ScriptFile"				"abilities/treant_root_hero.lua"
 				"Function"					"OnSpell"
 				"Target"					"TARGET"
 				"modifier_target"			"modifier_root_target"
@@ -9543,7 +9543,7 @@
 				{
 					"RunScript"
 					{
-						"ScriptFile"				"treant_root_hero.lua"
+						"ScriptFile"				"abilities/treant_root_hero.lua"
 						"Function"					"RootDeath"
 						"Target"					"TARGET"
 						"modifier_target"			"modifier_root_target"
@@ -9596,7 +9596,7 @@
 				{
 					"RunScript"
 					{
-						"ScriptFile"				"treant_root_hero.lua"
+						"ScriptFile"				"abilities/treant_root_hero.lua"
 						"Function"					"TargetDeath"
 					}
 				}
@@ -9610,7 +9610,7 @@
   //-------------------------------------------------------------------------------------------------------------
   "AbilityBehavior"    "DOTA_ABILITY_BEHAVIOR_NO_TARGET | DOTA_ABILITY_BEHAVIOR_AOE"
   "BaseClass"     			 "ability_lua"
-  "ScriptFile"     		"treant_raise_nature"
+  "ScriptFile"     		"abilities/treant_raise_nature"
   "AbilityTextureName"    "furion_force_of_nature"
   "AbilityCastAnimation"   "ACT_DOTA_CAST_ABILITY_3"
   
@@ -9659,7 +9659,7 @@
   //-------------------------------------------------------------------------------------------------------------
   "AbilityBehavior"    "DOTA_ABILITY_BEHAVIOR_NO_TARGET | DOTA_ABILITY_BEHAVIOR_AOE"
   "BaseClass"      "ability_lua"
-  "ScriptFile"     "treant_spawn_trees"
+  "ScriptFile"     "abilities/treant_spawn_trees"
   
   "AbilityTextureName"    "furion_force_of_nature"
   "AbilityCastAnimation"   "ACT_DOTA_CAST_ABILITY_3"
@@ -9777,7 +9777,7 @@
 
 			"RunScript"
 			{
-				"ScriptFile"			"treant_spawn_flowers.lua"
+				"ScriptFile"			"abilities/treant_spawn_flowers.lua"
 				"Function"				"FlowersPlant"
 				"Target"				"CASTER"
 				"modifier_flower"		"modifier_flower"
@@ -9795,7 +9795,7 @@
 				{
 					"RunScript"
 					{
-						"ScriptFile"			"treant_spawn_flowers.lua"
+						"ScriptFile"			"abilities/treant_spawn_flowers.lua"
 						"Function"				"FlowerDeath"
 						"modifier_caster"		"modifier_flower_caster"
 					}
@@ -9857,7 +9857,7 @@
 		{
 			"RunScript"
 			{
-				"ScriptFile"			"treant_spawn_mushrooms.lua"
+				"ScriptFile"			"abilities/treant_spawn_mushrooms.lua"
 				"Function"				"MushroomsPlant"
 				"Target"				"CASTER"
 				"modifier_mushroom"		"modifier_mushroom"
@@ -9879,7 +9879,7 @@
 				{
 					"RunScript"
 					{
-						"ScriptFile"			"treant_spawn_mushrooms.lua"
+						"ScriptFile"			"abilities/treant_spawn_mushrooms.lua"
 						"Function"				"MushroomDeath"
 						"modifier_caster"		"modifier_mushroom_caster"
 					}
@@ -10711,7 +10711,7 @@
 
 				"RunScript"
 				{
-					"ScriptFile"			"poison_trap.lua"
+					"ScriptFile"			"abilities/poison_trap.lua"
 					"Function"				"TrapPlant"
 					"Target"				"POINT"
 					"modifier_trap"			"modifier_trap_datadriven"
@@ -10776,7 +10776,7 @@
 					{
 						"RunScript"
 						{
-							"ScriptFile"		"poison_trap.lua"
+							"ScriptFile"		"abilities/poison_trap.lua"
 							"Function"			"TrapTracker"
 							"modifier_target"	"modifier_poison_nova_debuff_datadriven"
 						}
@@ -10798,7 +10798,7 @@
 					{
 						"RunScript"
 						{
-							"ScriptFile"	"poison_trap.lua"
+							"ScriptFile"	"abilities/poison_trap.lua"
 							"Function"		"PoisonNova"
 							"Target"		"TARGET"
 						}
@@ -10814,7 +10814,7 @@
 
 						"RunScript"
 						{
-							"ScriptFile"	"poison_trap.lua"
+							"ScriptFile"	"abilities/poison_trap.lua"
 							"Function"		"PoisonNova"
 							"Target"		"TARGET"
 						}
@@ -10849,7 +10849,7 @@
 					{
 						"RunScript"
 						{
-							"ScriptFile"	"nightbane_invis.lua"
+							"ScriptFile"	"abilities/nightbane_invis.lua"
 							"Function"		"InvisTracker"
 						}
 					}
@@ -10888,7 +10888,7 @@
 
 				"RunScript"
 				{	
-					"ScriptFile"			"nightbane_eyes_of_night.lua"
+					"ScriptFile"			"abilities/nightbane_eyes_of_night.lua"
 					"Function"				"SpellStart"
 					"modifier_thinker"		"modifier_thinker"
 				}
@@ -10964,7 +10964,7 @@
 				{
 					"RunScript"
 					{
-						"ScriptFile"	"nightbane_eyes_of_night.lua"
+						"ScriptFile"	"abilities/nightbane_eyes_of_night.lua"
 						"Function"		"SpawnUnits"
 						"Target"		"TARGET"
 					}
