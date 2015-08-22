@@ -510,7 +510,7 @@
 			"12"
 			{
 				"var_type"				"FIELD_FLOAT"
-				"abilit_value"			"0"
+				"ability_value"			"0"
 			}
 			"13"
 			{
@@ -782,7 +782,7 @@
 			"09"
 			{
 				"var_type"				"FIELD_FLOAT"
-				"abilit_value"			"0"
+				"ability_value"			"0"
 			}
 		}
 	}
@@ -985,7 +985,7 @@
 			"08"
 			{
 				"var_type"				"FIELD_FLOAT"
-				"abilit_value"			"0"
+				"ability_value"			"0"
 			}
 		}
 	}
@@ -1266,7 +1266,7 @@
 			"09"
 			{
 				"var_type"				"FIELD_FLOAT"
-				"abilit_value"			"150"
+				"ability_value"			"150"
 			}
 			"10"
 			{
@@ -10075,7 +10075,7 @@
 			"05"
 			{
 				"var_type"				"FIELD_FLOAT"
-				"abilit_value"			"200"
+				"ability_value"			"200"
 			}
 		}
 	}
