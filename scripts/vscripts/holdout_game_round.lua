@@ -47,16 +47,22 @@ function CHoldoutGameRound:ReadConfiguration( kv, gameMode, roundNumber )
 							local spawner = CHoldoutGameSpawner()
 							v.SpawnerName = sp.szSpawnerName
 							v.Waypoint = sp.szFirstWaypoint
-							spawner:ReadConfiguration( #self._vSpawners, v, self )
-							table.insert(self._vSpawners, spawner)
+							--spawner:ReadConfiguration( #self._vSpawners, v, self )
+							--table.insert(self._vSpawners, spawner)
+							spawner:ReadConfiguration( k, v, self )
+							self._vSpawners[ k ] = spawner
 						end
 					else
 				
 					end
 				else
 					local spawner = CHoldoutGameSpawner()
-					spawner:ReadConfiguration( #self._vSpawners, v, self )
-					table.insert(self._vSpawners, spawner)
+					--local name = v.name
+					--print( "spawnername:" .. name)
+
+					spawner:ReadConfiguration( k, v, self )
+					--table.insert(self._vSpawners, spawner)
+					self._vSpawners[ k ] = spawner
 				end
 			end
 		end

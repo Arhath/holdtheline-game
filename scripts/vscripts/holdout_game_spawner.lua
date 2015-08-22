@@ -38,14 +38,14 @@ end
 function CHoldoutGameSpawner:PostLoad( spawnerList )
 	self._waitForUnit = spawnerList[ self._szWaitForUnit ]
 	if self._szWaitForUnit ~= "" and not self._waitForUnit then
-		--print( self._szName .. " has a wait for unit " .. self._szWaitForUnit .. " that is missing from the round data." )
+		print( self._szName .. " has a wait for unit " .. self._szWaitForUnit .. " that is missing from the round data." )
 	elseif self._waitForUnit then
 		table.insert( self._waitForUnit._dependentSpawners, self )
 	end
 
 	self._groupWithUnit = spawnerList[ self._szGroupWithUnit ]
 	if self._szGroupWithUnit ~= "" and not self._groupWithUnit then
-		--print ( self._szName .. " has a group with unit " .. self._szGroupWithUnit .. " that is missing from the round data." )
+		print ( self._szName .. " has a group with unit " .. self._szGroupWithUnit .. " that is missing from the round data." )
 	elseif self._groupWithUnit then
 		table.insert( self._groupWithUnit._dependentSpawners, self )
 	end
