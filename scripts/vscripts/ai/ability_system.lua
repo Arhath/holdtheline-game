@@ -138,8 +138,8 @@ function BehaviorAbility:Evaluate()
 				local category = ability:GetSpecialValueFor("ability_type")
 				local casting = ability:GetSpecialValueFor("casting_when")
 				local abilityValue = ability:GetSpecialValueFor("ability_value")
-				local utility = 0--ability:GetSpecialValueFor("utility_type")
-				local utilityValue = 0--ability:GetSpecialValueFor("utility_value")
+				local utility = ability:GetSpecialValueFor("utility_type")
+				local utilityValue = ability:GetSpecialValueFor("utility_value")
 
 				local bCasting = true
 				local numAllys = 0
@@ -376,15 +376,22 @@ function BehaviorAbility:Evaluate()
 							if utility == UTILITY_TYPE_MOVEMENT then
 								print("movement utility")
 								if utilityValue ~= 0 then
-									for i, ally in pairs(allAllys) do
-										local posUnit = self.unit:GetAbsOrigin()
-										local vec = self.unit:GetAnglesAsVector()
-										local pos = GetPointWithPolarOffset(posUnit, vec.yaw, utility_value)
-										local dist = GridNav:FindPathLength(posUnit, pos)
+									local posUnit = self.unit:GetAbsOrigin()
+									local vec = self.unit:GetAnglesAsVector()
+									local pos = GetPointWithPolarOffset(posUnit, vec[2], utilityValue)
+									local dist = GridNav:FindPathLength(posUnit, pos)
 
-										if dist == -1 then
-											bCasting = false
-										end
+									local entWaypoint = Entities:FindByName(nil, GameRules.holdOut._movementSystem._vWaypoints[self.unit.MovementSystem.NextWaypoint])
+									local distNexTWaypoint = nil
+
+									if entWaypoint ~= nil then
+										distNexTWaypoint = (entWaypoint:GetAbsOrigin() - posUnit):Length()
+									end
+
+									if dist == -1 then
+										bCasting = false
+									elseif distNexTWaypoint ~= nil and distNexTWaypoint < utilityValue / 2 then
+										bCasting = false
 									end
 								end
 							end

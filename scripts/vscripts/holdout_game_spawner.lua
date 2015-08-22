@@ -251,7 +251,9 @@ function CHoldoutGameSpawner:_DoSpawn()
 			entUnit:AddNewModifier(entUnit, nil, "modifier_netherworld_buff" ,nil)
 			entUnit.Holdout_CoreNum = self._gameRound._nRoundNumber
 			entUnit.goalValue = 1
-			entUnit:SetDeathXP( self._gameRound:GetXPPerCoreUnit() )
+			entUnit:SetDeathXP( 0 )
+			entUnit.RewardXP = self._gameRound:GetXPPerCoreUnit()
+			entUnit.RewardGold = self._gameRound:GetGoldPerCoreUnit()
 		end
 	end
 end

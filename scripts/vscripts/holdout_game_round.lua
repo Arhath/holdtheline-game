@@ -6,6 +6,9 @@ if CHoldoutGameRound == nil then
 	CHoldoutGameRound = class({})
 end
 
+XP_BUFFER_PCT = 0.1
+GOLD_BUFFER_PCT = 0.1
+
 
 function CHoldoutGameRound:ReadConfiguration( kv, gameMode, roundNumber )
 	self._gameMode = gameMode
@@ -14,9 +17,13 @@ function CHoldoutGameRound:ReadConfiguration( kv, gameMode, roundNumber )
 	self._szRoundTitle = kv.round_title or string.format( "Round%d", roundNumber )
 
 	self._nMaxGold = tonumber( kv.MaxGold or 0 )
+	self._nMaxWood = tonumber( kv.MaxWood or 0)
 	self._nBagCount = tonumber( kv.BagCount or 0 )
 	self._nBagVariance = tonumber( kv.BagVariance or 0 )
 	self._nFixedXP = tonumber( kv.FixedXP or 0 )
+	self._nXPBuffer = 0
+	self._nGoldBuffer = 0
+	self._nWoodBuffer = 0
 	self._bIsBoss = tonumber( kv.IsBoss or 0 )
 	self._nBoss = tonumber( kv.BossNumber or 1 )
 	self._flPrepTime = tonumber( kv.PrepTime or gameMode._flPrepTimeBetweenRounds or 0 )
@@ -102,6 +109,7 @@ function CHoldoutGameRound:Begin()
 	end
 
 	self._nGoldRemainingInRound = self._nMaxGold
+	self._nWoodRemainingInRound = self._nMaxWood
 	self._nGoldBagsRemaining = self._nBagCount
 	self._nGoldBagsExpired = 0
 	self._nCoreUnitsTotal = 0
@@ -250,6 +258,15 @@ function CHoldoutGameRound:GetXPPerCoreUnit()
 	end
 end
 
+function CHoldoutGameRound:GetGoldPerCoreUnit()
+	if self._nCoreUnitsTotal == 0 then
+		return 0
+	else
+		return math.floor( self._nMaxGold / self._nCoreUnitsTotal )
+	end
+end
+
+
 
 function CHoldoutGameRound:OnNPCSpawned( event )
 	local spawnedUnit = EntIndexToHScript( event.entindex )
@@ -277,10 +294,37 @@ end
 
 
 function CHoldoutGameRound:OnEntityKilled( event )
+	print("entity killed !!!!! round trigger")
 	local killedUnit = EntIndexToHScript( event.entindex_killed )
 	if not killedUnit then
 		return
 	end
+
+	local attackerUnit = EntIndexToHScript( event.entindex_attacker or -1 )
+
+
+	--[[if killedUnit:GetTeamNumber() == DOTA_TEAM_BADGUYS and killedunit.Holdout_CoreNum == self._nRoundNumber then
+		for nPlayerID = 0, DOTA_MAX_PLAYERS-1 do
+			local team = PlayerResource:GetTeam(nPlayerID)
+			if PlayerResource:IsValidPlayer( nPlayerID ) and team == DOTA_TEAM_GOODGUYS then
+				local hero = PlayerResource:GetSelectedHeroEntity(nPlayerID)
+
+				if killedUnit.RewardXP ~= nil then
+					hero:AddExperience(killedUnit.RewardXP, false)
+				end
+
+				if killedUnit.RewardGold ~= nil then
+					if attackerUnit ~= nil and hero == attackerUnit then
+						PlayerResource:ModifyGold(nPlayerID, killedUnit.RewardGold, true, DOTA_ModifyGold_CreepKill)
+					else
+						PlayerResource:ModifyGold(nPlayerID, killedUnit.RewardGold * 0.33, true, DOTA_ModifyGold_CreepKill)
+					end
+				end
+			end
+		end
+	end]]
+
+
 
 	for i, unit in pairs( self._vEnemiesRemaining ) do
 		if killedUnit == unit then
@@ -288,13 +332,49 @@ function CHoldoutGameRound:OnEntityKilled( event )
 			break
 		end
 	end	
+
 	if killedUnit.Holdout_CoreNum == self._nRoundNumber then
 		self._nCoreUnitsKilled = self._nCoreUnitsKilled + 1
 		self:_CheckForGoldBagDrop( killedUnit )
 		self._gameMode:CheckForLootItemDrop( killedUnit )
+
+		local xpGain = killedUnit.RewardXP
+		print(string.format("xpGain = %d", xpGain))
+		local goldGain = killedUnit.RewardGold
+		print(string.format("goldGain = %d", goldGain))
+		local bGoal = killedUnit.EnteredGoal
+
+		--print(string.format("enteredGoal = %d", bGoal))
+		if bGoal then
+			local xpBuffer = self._nFixedXP * XP_BUFFER_PCT - self._nXPBuffer
+			print(string.format("xpbuffer = %d", xpBuffer))
+			local xpGain = math.min( xpBuffer, xpGain)
+			
+
+			self._nXPBuffer = self._nXPBuffer + xpGain
+
+			local goldBuffer = self._nMaxGold * GOLD_BUFFER_PCT - self._nGoldBuffer
+			local goldGain = math.min( goldBuffer, goldGain)
+
+			self._nGoldBuffer = self._nGoldBuffer + goldGain
+			goldGain = goldGain * 1.7
+		end
+
+		for _, hero in pairs(self._gameMode._vHeroes) do
+			if killedUnit.RewardXP ~= nil then
+				hero:AddExperience(xpGain, DOTA_ModifyXP_CreepKill, true, false)
+			end
+
+			if killedUnit.RewardGold ~= nil then
+				if attackerUnit ~= nil and hero == attackerUnit then
+					--PlayerResource:ModifyGold(nPlayerID, killedUnit.RewardGold, true, DOTA_ModifyGold_CreepKill)
+				else
+					--PlayerResource:ModifyGold(nPlayerID, killedUnit.RewardGold * 0.33, true, DOTA_ModifyGold_CreepKill)
+				end
+			end
+		end
 	end
 
-	local attackerUnit = EntIndexToHScript( event.entindex_attacker or -1 )
 	if attackerUnit then
 		local playerID = attackerUnit:GetPlayerOwnerID()
 		local playerStats = self._vPlayerStats[ playerID ]

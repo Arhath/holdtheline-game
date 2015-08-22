@@ -73,9 +73,9 @@
 		// Stage 1 ================================================
 		"UnitFodder_1a" // Duration 80s - Continues with UnitFodderGrouped_2a & 3a to 120s total
 		{
-			"NPCName"				"npc_dota_creature_slithereen"//"npc_dota_creature_lesser_nightcrawler"////"treant_flower_creature"//"npc_dota_creature_kobold_tunneler"//"npc_dota_creature_lesser_nightcrawler"//"npc_dota_creature_corpselord"//"npc_dota_creature_ogre_tank"//"npc_dota_creature_tormented_soul"//"npc_dota_creature_missile_launcher"////"npc_dota_creature_mini_roshan"//"treant_flower_creature"////"npc_dota_creature_kobold_tunneler"
-			"TotalUnitsToSpawn"		"1"
-			"UnitsPerSpawn"			"1"
+			"NPCName"				"npc_dota_creature_ogre_tank"//"npc_dota_creature_lesser_nightcrawler"//////"npc_dota_creature_slithereen"//"npc_dota_creature_lesser_nightcrawler"////"treant_flower_creature"//"npc_dota_creature_kobold_tunneler"//"npc_dota_creature_lesser_nightcrawler"//"npc_dota_creature_corpselord"////"npc_dota_creature_tormented_soul"//"npc_dota_creature_missile_launcher"////"npc_dota_creature_mini_roshan"//"treant_flower_creature"////"npc_dota_creature_kobold_tunneler"
+			"TotalUnitsToSpawn"		"100"
+			"UnitsPerSpawn"			"100"
 			"SpawnInterval"			"4"
 
 			"SpawnerName"			"path_invader1_1"
@@ -87,11 +87,12 @@
 		"round_quest_title"			"#DOTA_Holdout_Round_Zombies_Quest_Title"
 		"round_title"				"#DOTA_Holdout_Round_Zombies_Title"
 		"MaxGold"					"6150"
+		"MaxWood"					"100"
 		"BagCount"					"40"
 		"BagVariance"				"10"
 		"FixedXP"					"3500"
-		"PrepTime"					"2"
-		"IsBoss"					"1"
+		"PrepTime"					"2000"
+		"IsBoss"					"0"
 		"BossNumber"				"1"
 
 		

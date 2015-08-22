@@ -24,6 +24,16 @@ if CHoldoutGameMode == nil then
 	--print (string.format( "Create Class") )
 end
 
+MAX_LEVEL = 125
+
+XP_PER_LEVEL_TABLE = {}
+XP_PER_LEVEL_TABLE[1] = 200
+for i=1, MAX_LEVEL - 1 do
+	XP_PER_LEVEL_TABLE[i+1] = XP_PER_LEVEL_TABLE[i] + i * 200
+	--print(XP_PER_LEVEL_TABLE[i])
+end
+
+
 
 -- Precache resources
 function Precache( context )
@@ -69,6 +79,8 @@ function CHoldoutGameMode:InitGameMode()
 	self._entAncient = Entities:FindByName( nil, "dota_goodguys_fort" )
 	self._entAncient:SetMana(100.0)
 	self._nTeam = DOTA_TEAM_GOODGUYS
+	self._nTeamEnemy = DOTA_TEAM_BADGUYS
+	self._vHeroes = {}
 
 	self._movementSystem = CMovementSystem()
 	self._movementSystem:Init(self, DOTA_TEAM_BADGUYS)
@@ -126,17 +138,9 @@ function CHoldoutGameMode:InitGameMode()
 	GameRules:GetGameModeEntity():SetTopBarTeamValuesOverride( true )
 	GameRules:GetGameModeEntity():SetTopBarTeamValuesVisible( false )
 	GameRules:GetGameModeEntity():SetLoseGoldOnDeath( false )
+
 	mode:SetUseCustomHeroLevels ( true )
-
-	MAX_LEVEL = 125
-
 	mode:SetCustomHeroMaxLevel ( MAX_LEVEL )
-
-
-	XP_PER_LEVEL_TABLE = {}
-	for i=1,MAX_LEVEL do
- 		XP_PER_LEVEL_TABLE[i] = (i-1) * 100
-	end
 
 	mode:SetCustomXPRequiredToReachNextLevel( XP_PER_LEVEL_TABLE )
 
@@ -440,9 +444,11 @@ end
 
 function CHoldoutGameMode:OnUnitEntersGoal(u, team)
 	if u.Holdout_CoreNum ~= nil and u:GetTeamNumber() ~= team and u.CanEnterGoal ~= false then
-	local goalValue = u.goalValue
+		local goalValue = u.goalValue
+		u.EnteredGoal = true
+
 		PopupNumbers(self._entAncient, "gold", Vector(255, 0, 0), 1.0, goalValue, POPUP_SYMBOL_PRE_PLUS, nil)
-		UTIL_RemoveImmediate( u )
+		u:ForceKill(false)
 		
 		self._vCoreUnitsReachedGoal[team] = self._vCoreUnitsReachedGoal[team] + 1
 		----print (string.format( "Units Reached Goal: %d", self._vCoreUnitsReachedGoal[team]  ) )
@@ -645,7 +651,7 @@ function CHoldoutGameMode:OnNPCSpawned( event )
 		self:OnHeroInGame(spawnedUnit)
 	end
 
-	if spawnedUnit:IsRealHero() then
+	if spawnedUnit:IsRealHero() and spawnedUnit:GetTeamNumber()	== self._nTeam then
 		self._bottleSystem:OnHeroSpawned(spawnedUnit)
 		self:_SpawnHeroClientEffects( spawnedUnit )
 	end
@@ -665,6 +671,7 @@ function CHoldoutGameMode:OnHeroInGame( hero )
 	ModifyLumber(player, START_LUMBER)
 	self._bottleSystem:OnHeroInGame(hero)
 
+	table.insert(self._vHeroes, hero)
 end
 
 function ModifyLumber( player, lumber_value )
@@ -696,20 +703,24 @@ function CHoldoutGameMode:OnEntityKilled( event )
 	self._movementSystem:OnEntityKilled(event)
 
 	local killedUnit = EntIndexToHScript( event.entindex_killed )
-	if killedUnit and killedUnit:IsRealHero() then
-		local newItem = CreateItem( "item_tombstone", killedUnit, killedUnit )
-		newItem:SetPurchaseTime( 0 )
-		newItem:SetPurchaser( killedUnit )
-		local tombstone = SpawnEntityFromTableSynchronous( "dota_item_tombstone_drop", {} )
-		----print (string.format( "TombstoneSpawned") )
-		tombstone:SetContainedItem( newItem )
-		tombstone:SetAngles( 0, RandomFloat( 0, 360 ), 0 )
-		FindClearSpaceForUnit( tombstone, killedUnit:GetAbsOrigin(), true )	
+	if killedUnit and killedUnit:GetTeamNumber() == self._nTeamEnemy then
+		if killedUnit:IsRealHero() then
+			local newItem = CreateItem( "item_tombstone", killedUnit, killedUnit )
+			newItem:SetPurchaseTime( 0 )
+			newItem:SetPurchaser( killedUnit )
+			local tombstone = SpawnEntityFromTableSynchronous( "dota_item_tombstone_drop", {} )
+			----print (string.format( "TombstoneSpawned") )
+			tombstone:SetContainedItem( newItem )
+			tombstone:SetAngles( 0, RandomFloat( 0, 360 ), 0 )
+			FindClearSpaceForUnit( tombstone, killedUnit:GetAbsOrigin(), true )
+		end
+
+		if killedUnit.Holdout_CoreNum ~= nil then
+			self._vRounds[killedUnit.Holdout_CoreNum]:OnEntityKilled( event )
+		end 
 	end
 	
-	if killedUnit.Holdout_CoreNum ~= nil then
-		self._vRounds[killedUnit.Holdout_CoreNum]:OnEntityKilled( event )
-	end
+	
 end
 
 function CHoldoutGameMode:OnItemPickedUp( event )
@@ -756,7 +767,7 @@ function CHoldoutGameMode:ComputeTowerBonusGold( nTowersTotal, nTowersStanding )
 end
 
 -- Leveling/gold data for console command "holdout_test_round"
-XP_PER_LEVEL_TABLE = {
+--[[XP_PER_LEVEL_TABLE = {
 	0,-- 1
 	200,-- 2
 	500,-- 3
@@ -801,7 +812,7 @@ ROUND_EXPECTED_VALUES_TABLE = {
 	{ gold = 19322+STARTING_GOLD, xp = XP_PER_LEVEL_TABLE[16] }, -- 13
 	{ gold = 21604+STARTING_GOLD, xp = XP_PER_LEVEL_TABLE[18] }, -- 14
 	{ gold = 23368+STARTING_GOLD, xp = XP_PER_LEVEL_TABLE[18] } -- 15
-}
+}]]
 
 -- Custom game specific console command "holdout_test_round"
 function CHoldoutGameMode:_TestRoundConsoleCommand( cmdName, roundNumber, delay )
