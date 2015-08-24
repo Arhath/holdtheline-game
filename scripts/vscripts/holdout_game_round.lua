@@ -9,6 +9,33 @@ end
 XP_BUFFER_PCT = 0.1
 GOLD_BUFFER_PCT = 0.1
 
+XP_VALUES_TEAMSIZE_ = {
+	{
+		10,
+		0,
+	},
+
+	{
+		7,
+		3,
+	},
+
+	{
+		5,
+		2.5,
+	},
+
+	{
+		4,
+		2,
+	},
+
+	{
+		3.2,
+		1.7,
+	},
+}
+
 
 function CHoldoutGameRound:ReadConfiguration( kv, gameMode, roundNumber )
 	self._gameMode = gameMode
@@ -38,22 +65,19 @@ function CHoldoutGameRound:ReadConfiguration( kv, gameMode, roundNumber )
 		self._vSpawners = {}
 		for k, v in pairs( kv ) do
 			if type( v ) == "table" and v.NPCName then
-				v.IsBoss = self._bIsBos
 				if v.SpawnerName == "all" then
-					if not v.IsBoss then
-						local spawners = self._gameMode:GetSpawnerList()
-						for _, sp in pairs(spawners) do
-							--print ( string.format( "spawner : %d name: %s",#self._vSpawners, sp.szSpawnerName ) )
-							local spawner = CHoldoutGameSpawner()
-							v.SpawnerName = sp.szSpawnerName
-							v.Waypoint = sp.szFirstWaypoint
-							--spawner:ReadConfiguration( #self._vSpawners, v, self )
-							--table.insert(self._vSpawners, spawner)
-							spawner:ReadConfiguration( k, v, self )
-							self._vSpawners[ k ] = spawner
-						end
-					else
-				
+					local spawners = self._gameMode:GetSpawnerList()
+					for _, sp in pairs(spawners) do
+						--print ( string.format( "spawner : %d name: %s",#self._vSpawners, sp.szSpawnerName ) )
+						local spawner = CHoldoutGameSpawner()
+						v.SpawnerName = sp.szSpawnerName
+						v.Waypoint = sp.szFirstWaypoint
+						v.WaitForUnit = v.WaitForUnit .. "_" .. v.SpawnerName
+						v.GroupWithUnit = v.GroupWithUnit .. "_" .. v.SpawnerName
+						--spawner:ReadConfiguration( #self._vSpawners, v, self )
+						--table.insert(self._vSpawners, spawner)
+						spawner:ReadConfiguration( k .. "_" .. v.SpawnerName, v, self )
+						table.insert(self._vSpawners, spawner)
 					end
 				else
 					local spawner = CHoldoutGameSpawner()
@@ -62,7 +86,7 @@ function CHoldoutGameRound:ReadConfiguration( kv, gameMode, roundNumber )
 
 					spawner:ReadConfiguration( k, v, self )
 					--table.insert(self._vSpawners, spawner)
-					self._vSpawners[ k ] = spawner
+					table.insert(self._vSpawners, spawner)
 				end
 			end
 		end
@@ -119,13 +143,15 @@ function CHoldoutGameRound:Begin()
 	self._nGoldBagsRemaining = self._nBagCount
 	self._nGoldBagsExpired = 0
 	self._nCoreUnitsTotal = 0
-	self._nCoreUnitsSpawned = 0	
+	self._nCoreValueTotal = 0
+	self._nCoreUnitsSpawnedValue = 0	
 	self._nCoreUnitsKilled = 0
 	
 	if self._bIsBoss == 0 then
 		for _, spawner in pairs( self._vSpawners ) do
 			spawner:Begin()
 			self._nCoreUnitsTotal = self._nCoreUnitsTotal + spawner:GetTotalUnitsToSpawn()
+			self._nCoreValueTotal = self._nCoreValueTotal + spawner:GetTotalCoreValue()
 		end
 
 		self._entQuest = SpawnEntityFromTableSynchronous( "quest", {
@@ -140,7 +166,7 @@ function CHoldoutGameRound:Begin()
 			progress_bar_hue_shift = -119
 		} )
 		self._entQuest:AddSubquest( self._entKillCountSubquest )
-		self._entKillCountSubquest:SetTextReplaceValue( SUBQUEST_TEXT_REPLACE_VALUE_TARGET_VALUE, self._nCoreUnitsTotal )
+		self._entKillCountSubquest:SetTextReplaceValue( SUBQUEST_TEXT_REPLACE_VALUE_TARGET_VALUE, self._nCoreValueTotal )
 	end
 end
 
@@ -260,7 +286,7 @@ function CHoldoutGameRound:GetXPPerCoreUnit()
 	if self._nCoreUnitsTotal == 0 then
 		return 0
 	else
-		return math.floor( self._nFixedXP / self._nCoreUnitsTotal )
+		return math.floor( self._nFixedXP / self._nCoreValueTotal )
 	end
 end
 
@@ -268,7 +294,7 @@ function CHoldoutGameRound:GetGoldPerCoreUnit()
 	if self._nCoreUnitsTotal == 0 then
 		return 0
 	else
-		return math.floor( self._nMaxGold / self._nCoreUnitsTotal )
+		return math.floor( self._nMaxGold / self._nCoreValueTotal)
 	end
 end
 
@@ -287,14 +313,7 @@ function CHoldoutGameRound:OnNPCSpawned( event )
 	if spawnedUnit:GetTeamNumber() == DOTA_TEAM_BADGUYS then
 		--spawnedUnit:SetMustReachEachGoalEntity(false)
 		table.insert( self._vEnemiesRemaining, spawnedUnit )
-		spawnedUnit:SetDeathXP( 0 )
 		spawnedUnit.unitName = spawnedUnit:GetUnitName()
-		self._nCoreUnitsSpawned = self._nCoreUnitsSpawned + 1
-		----print( string.format( "Enemies Spawned: %d", self._nCoreUnitsSpawned ) )
-	
-		if self._entKillCountSubquest then
-			self._entKillCountSubquest:SetTextReplaceValue( QUEST_TEXT_REPLACE_VALUE_CURRENT_VALUE, self._nCoreUnitsSpawned)
-		end
 	end
 end
 
@@ -307,29 +326,6 @@ function CHoldoutGameRound:OnEntityKilled( event )
 	end
 
 	local attackerUnit = EntIndexToHScript( event.entindex_attacker or -1 )
-
-
-	--[[if killedUnit:GetTeamNumber() == DOTA_TEAM_BADGUYS and killedunit.Holdout_CoreNum == self._nRoundNumber then
-		for nPlayerID = 0, DOTA_MAX_PLAYERS-1 do
-			local team = PlayerResource:GetTeam(nPlayerID)
-			if PlayerResource:IsValidPlayer( nPlayerID ) and team == DOTA_TEAM_GOODGUYS then
-				local hero = PlayerResource:GetSelectedHeroEntity(nPlayerID)
-
-				if killedUnit.RewardXP ~= nil then
-					hero:AddExperience(killedUnit.RewardXP, false)
-				end
-
-				if killedUnit.RewardGold ~= nil then
-					if attackerUnit ~= nil and hero == attackerUnit then
-						PlayerResource:ModifyGold(nPlayerID, killedUnit.RewardGold, true, DOTA_ModifyGold_CreepKill)
-					else
-						PlayerResource:ModifyGold(nPlayerID, killedUnit.RewardGold * 0.33, true, DOTA_ModifyGold_CreepKill)
-					end
-				end
-			end
-		end
-	end]]
-
 
 
 	for i, unit in pairs( self._vEnemiesRemaining ) do

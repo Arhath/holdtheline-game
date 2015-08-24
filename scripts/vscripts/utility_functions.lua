@@ -5,16 +5,16 @@
 ---------------------------------------------------------------------------
 
 
-function ApplyModifier(source, target, modifier_name, modifierArgs, overwrite)
+function ApplyDataModifier(source, target, modifier_name, modifierArgs, overwrite)
+    if source.ModifierApplier == nil then
+        source.ModifierApplier = CreateItem("item_modifier_applier", u, u)
+    end
+
     if not overwrite and target:HasModifier(modifier_name) then
         return nil
     end
 
-    if source.ModifierApplier == nil then
-        source.ModifierApplier = CreateItem("item_modifier_applier", source, source)
-    end
-    
-    source.ModifierApplier:ApplyDataDrivenModifier(source, target, modifier_name, modifierArgs)
+    return source.ModifierApplier:ApplyDataDrivenModifier(source, target, modifier_name, modifierArgs)
 end
 
 
@@ -470,11 +470,6 @@ function SetPhasing(unit, time)
 
         unit:RemoveModifierByName("modifier_phasing_passive")
     else
-        
-        if unit.phasingApplier == nil then
-            unit.phasingApplier = CreateItem("item_phasing_applier", unit, unit)
-        end
-
-        unit.phasingApplier:ApplyDataDrivenModifier(unit, unit, "modifier_phasing_passive", {duration=time})
+        ApplyModifier(unit, unit, "modifier_phasing_passive", {duration=time}, true)
     end
 end

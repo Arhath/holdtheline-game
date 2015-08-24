@@ -509,6 +509,7 @@ function CMovementSystem:UnitThinkMovement( unit )
 	local vWP = {nil, nil, nil}
 
 	if unit.MovementSystem.NextWaypoint == nil then
+		unit.MovementSystem.OrderPosition = nil
 		--print("finding next waypoint")
 		for i, str in pairs(self._vWaypoints) do
 			if str == "end" then
@@ -598,17 +599,23 @@ function CMovementSystem:UnitThinkMovement( unit )
 
 	if entWp ~= nil then
 		--print("found waypoint")
-		local loc = entWp:GetAbsOrigin()
-		local dist = GridNav:FindPathLength(posUnit, loc)
+		local pos = entWp:GetAbsOrigin()
+
+		if unit.MovementSystem.OrderPosition == nil then
+			unit.MovementSystem.OrderPosition = GetRandomPointInAoe(pos, RANGE_NEXT_WAYPOINT)
+		end
+
+		local dist = (pos - posUnit):Length() --GridNav:FindPathLength(posUnit, unit.MovementSystem.OrderPosition)
 
 		--DebugDrawCircle(loc + Vector(0, 0, 100), Vector(255, 255, 255), 0, RANGE_NEXT_WAYPOINT, false, 0.25)
 
-		self:UnitMoveToPosition(unit, loc)
+		self:UnitMoveToPosition(unit, unit.MovementSystem.OrderPosition)
 
 		if dist <= RANGE_NEXT_WAYPOINT then
 			if self._vWaypoints[n + 1] ~= "end" then
 				--print(string.format("waypoint reached setting next: %d", n + 1))
 				unit.MovementSystem.NextWaypoint = n + 1
+				unit.MovementSystem.OrderPosition = nil
 			end
 		end
 	end

@@ -1,5 +1,6 @@
 require( "bottle/moonwell_system" )
-require( "bottle/bottle_shop")
+require( "bottle/bottle_shop" )
+require( "utility_functions" )
 
 if CBottleSystem == nil then
 	CBottleSystem = class({})
@@ -22,13 +23,6 @@ MODIFIER_STACKS_ = {
 	"modifier_bottle_health_stacks",
 	"modifier_bottle_mana_stacks",
 }
-
-MODIFIER_APPLIER_ = {
-	"item_bottle_health_applier",
-	"item_bottle_mana_applier",
-}
-
-
 
 function CBottleSystem:Init( gameMode, team )
 	self._gameMode = gameMode
@@ -72,7 +66,7 @@ function CBottleSystem:GetTickrate()
 end
 
 function CBottleSystem:OnHeroSpawned( hero )
-	hero.BottleSystem[BOTTLE_HEALTH].BuffApplier:ApplyDataDrivenModifier(hero, hero, MODIFIER_STACKS_[BOTTLE_HEALTH], {duration=-1})
+	ApplyModifier(hero, hero, MODIFIER_STACKS_[BOTTLE_HEALTH], {duration=-1}, true)
 	--self:BottleAddCharges(hero, BOTTLE_HEALTH, hero.BottleSystem[BOTTLE_HEALTH].Charges)
 end
 
@@ -114,7 +108,7 @@ function CBottleSystem:OnHeroInGame( hero )
 
 	table.insert(self._vHeroes, hero)
 
-	hero.BottleSystem[BOTTLE_HEALTH].BuffApplier:ApplyDataDrivenModifier(hero, hero, MODIFIER_STACKS_[BOTTLE_HEALTH], {duration=-1})
+	ApplyModifier(hero, hero, MODIFIER_STACKS_[BOTTLE_HEALTH], {duration=-1}, true)
 	
 	self:BottleAddCharges(hero, BOTTLE_HEALTH, 100)
 end
@@ -160,8 +154,8 @@ function CBottleSystem:BottleActivate(hero, target, bottle)
 	target:RemoveModifierByName(MODIFIER_[bottle])
 	target:RemoveModifierByName(MODIFIER_FX_[bottle])
 
-	hero.BottleSystem[bottle].BuffApplier:ApplyDataDrivenModifier(hero, target, MODIFIER_[bottle], {duration=hero.BottleSystem[bottle].Think.TimeLeft})
-	hero.BottleSystem[bottle].BuffApplier:ApplyDataDrivenModifier(hero, target, MODIFIER_FX_[bottle], {duration=hero.BottleSystem[bottle].Think.TimeLeft})
+	ApplyModifier(hero, target, MODIFIER_[bottle], {duration=hero.BottleSystem[bottle].Think.TimeLeft}, true)
+	ApplyModifier(hero, target, MODIFIER_FX_[bottle], {duration=hero.BottleSystem[bottle].Think.TimeLeft}, true)
 
 	Timers:CreateTimer(function()
 		return CBottleSystem:BottleThink(hero, target, bottle)

@@ -444,15 +444,15 @@ end
 
 function CHoldoutGameMode:OnUnitEntersGoal(u, team)
 	if u.Holdout_CoreNum ~= nil and u:GetTeamNumber() ~= team and u.CanEnterGoal ~= false then
-		local goalValue = u.goalValue
+		local CoreValue = u.CoreValue
 		u.EnteredGoal = true
 
-		PopupNumbers(self._entAncient, "gold", Vector(255, 0, 0), 1.0, goalValue, POPUP_SYMBOL_PRE_PLUS, nil)
+		PopupNumbers(self._entAncient, "gold", Vector(255, 0, 0), 1.0, CoreValue, POPUP_SYMBOL_PRE_PLUS, nil)
 		u:ForceKill(false)
 		
 		self._vCoreUnitsReachedGoal[team] = self._vCoreUnitsReachedGoal[team] + 1
 		----print (string.format( "Units Reached Goal: %d", self._vCoreUnitsReachedGoal[team]  ) )
-		self._entAncient:SetMana(self._entAncient:GetMana() + goalValue)
+		self._entAncient:SetMana(self._entAncient:GetMana() + CoreValue)
 		if self._currentRound ~= nil then
 			if self._currentRound:IsBoss() == 1 then
 				self._currentRound:UpdateBossDifficulty()
@@ -463,7 +463,7 @@ end
 
 
 function CHoldoutGameMode:OnUnitEntersEnergyGate(u)
-	if u.Holdout_CoreNum ~= nil and u.netherApplier ~= nil then
+	if u.Holdout_CoreNum ~= nil and u:HasModifier("modifier_nether_buff_passive") then
 		--Timers:CreateTimer(
 			--function()
 				local nFXIndex = ParticleManager:CreateParticle( "particles/items2_fx/veil_of_discord.vpcf", PATTACH_CUSTOMORIGIN, u )
@@ -472,7 +472,6 @@ function CHoldoutGameMode:OnUnitEntersEnergyGate(u)
 				ParticleManager:ReleaseParticleIndex( nFXIndex )
 				u:RemoveModifierByName("modifier_nether_buff_passive")
 				u:RemoveModifierByName("modifier_nether_buff_fx")
-				u:RemoveItem(u.netherApplier)
 			--	return 1.0
 			--end
 		--)

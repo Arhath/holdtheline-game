@@ -1,6 +1,6 @@
 "DOTAAbilities"
 {
-	"item_modifier_applier"
+	"item_teleport_effect_applier"
 	{
 		"ID"							"1905"
 
@@ -37,9 +37,27 @@
 				"EffectName"			"particles/econ/items/tinker/boots_of_travel/teleport_end_bots.vpcf"
 				"EffectAttachType"		"follow_absorigin"
 			}
-			
-			
-			
+		}				
+	}
+
+	"item_bottle_health_applier"
+	{
+		"ID"							"1904"
+
+		// General
+		//---------------------------------------------------------------------------------------------------------
+		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_PASSIVE"
+		"BaseClass"                     "item_datadriven"
+		"AbilityTextureName"			"item_flask"
+	    "ItemBaseLevel"                 "1"
+
+	    // Stats
+	    //---------------------------------------------------------------------------------------------------------
+	    "AbilityCastRange"              "9999"
+	    "AbilityCastPoint"              "0.0"
+	
+		"Modifiers"
+		{
 			"modifier_bottle_health_passive"
 			{
 				"Passive"				"1"
@@ -67,10 +85,27 @@
 				"IsDebuff"				"0"
 				"TextureName"			"item_flask"
 			}
-			
-			
-			
-			
+		}				
+	}
+	
+	"item_nether_buff_applier"
+	{
+		"ID"							"1903"
+
+		// General
+		//---------------------------------------------------------------------------------------------------------
+		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_PASSIVE"
+		"BaseClass"                     "item_datadriven"
+		"AbilityTextureName"			"item_boss_difficulty_modifier_applier"
+	    "ItemBaseLevel"                 "1"
+
+	    // Stats
+	    //---------------------------------------------------------------------------------------------------------
+	    "AbilityCastRange"              "9999"
+	    "AbilityCastPoint"              "0.0"
+	
+		"Modifiers"
+		{
 			"modifier_nether_buff_passive"
 			{
 				"Attributes"       		"MODIFIER_ATTRIBUTE_MULTIPLE" 
@@ -94,81 +129,6 @@
 				"EffectName"			"particles/econ/items/drow/drow_head_mania/mask_of_madness_active_mania.vpcf"
 				"EffectAttachType"		"follow_overhead"
 			}
-			
-			
-			
-			
-			"modifier_phasing_passive"
-			{
-				"Passive"				"1"
-				"IsHidden"				"1"
-				"IsDebuff"				"0"
-				
-				"States"
-				{
-					"MODIFIER_STATE_NO_UNIT_COLLISION"		"MODIFIER_STATE_VALUE_ENABLED"
-				}
-			}
-			
-			
-			
-			"modifier_boss_difficulty_passive"
-			{
-				"Attributes"       		"MODIFIER_ATTRIBUTE_MULTIPLE" 
-				"Passive"				"1"
-				"IsHidden"				"0"
-				"IsDebuff"				"0"
-				"TextureName"			"item_boss_difficulty_modifier_applier"
-				"Properties"
-				{
-					"MODIFIER_PROPERTY_COOLDOWN_PERCENTAGE"				"0.1"
-					"MODIFIER_PROPERTY_DAMAGEOUTGOING_PERCENTAGE"      	"1"
-				}
-			}
-		}				
-	}
-
-	"item_bottle_health_applier"
-	{
-		"ID"							"1904"
-
-		// General
-		//---------------------------------------------------------------------------------------------------------
-		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_PASSIVE"
-		"BaseClass"                     "item_datadriven"
-		"AbilityTextureName"			"item_flask"
-	    "ItemBaseLevel"                 "1"
-
-	    // Stats
-	    //---------------------------------------------------------------------------------------------------------
-	    "AbilityCastRange"              "9999"
-	    "AbilityCastPoint"              "0.0"
-	
-		"Modifiers"
-		{
-			
-		}				
-	}
-	
-	"item_nether_buff_applier"
-	{
-		"ID"							"1903"
-
-		// General
-		//---------------------------------------------------------------------------------------------------------
-		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_PASSIVE"
-		"BaseClass"                     "item_datadriven"
-		"AbilityTextureName"			"item_boss_difficulty_modifier_applier"
-	    "ItemBaseLevel"                 "1"
-
-	    // Stats
-	    //---------------------------------------------------------------------------------------------------------
-	    "AbilityCastRange"              "9999"
-	    "AbilityCastPoint"              "0.0"
-	
-		"Modifiers"
-		{
-			
 		}				
 	}
 	
@@ -190,7 +150,17 @@
 	
 		"Modifiers"
 		{
-			
+			"modifier_phasing_passive"
+			{
+				"Passive"				"1"
+				"IsHidden"				"1"
+				"IsDebuff"				"0"
+				
+				"States"
+				{
+					"MODIFIER_STATE_NO_UNIT_COLLISION"		"MODIFIER_STATE_VALUE_ENABLED"
+				}
+			}
 		}				
 	}
 
@@ -212,7 +182,19 @@
 	
 		"Modifiers"
 		{
-			
+			"modifier_boss_difficulty_passive"
+			{
+				"Attributes"       		"MODIFIER_ATTRIBUTE_MULTIPLE" 
+				"Passive"				"1"
+				"IsHidden"				"0"
+				"IsDebuff"				"0"
+				"TextureName"			"item_boss_difficulty_modifier_applier"
+				"Properties"
+				{
+					"MODIFIER_PROPERTY_COOLDOWN_PERCENTAGE"				"0.1"
+					"MODIFIER_PROPERTY_DAMAGEOUTGOING_PERCENTAGE"      	"1"
+				}
+			}				
 		}				
 	}
 	

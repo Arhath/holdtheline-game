@@ -19,6 +19,7 @@ function CHoldoutGameSpawner:ReadConfiguration( name, kv, gameRound )
 	self._szWaypointName = kv.Waypoint or ""
 	self._waypointEntity = nil
 
+	self._nCoreValue = tonumber( kv.CoreValue or 1)
 	self._nChampionLevel = tonumber( kv.ChampionLevel or 1 )
 	self._nChampionMax = tonumber( kv.ChampionMax or 1 )
 	self._nCreatureLevel = tonumber( kv.CreatureLevel or 1 )
@@ -137,6 +138,10 @@ function CHoldoutGameSpawner:GetTotalUnitsToSpawn()
 	return self._nTotalUnitsToSpawn
 end
 
+function CHoldoutGameSpawner:GetTotalCoreValue()
+	return self._nTotalUnitsToSpawn * self._nCoreValue
+end
+
 
 function CHoldoutGameSpawner:IsFinishedSpawning()
 	return ( self._nTotalUnitsToSpawn <= self._nUnitsSpawnedThisRound ) or ( self._groupWithUnit ~= nil )
@@ -241,19 +246,21 @@ function CHoldoutGameSpawner:_DoSpawn()
 			end
 			self._nUnitsSpawnedThisRound = self._nUnitsSpawnedThisRound + 1
 			self._nUnitsCurrentlyAlive = self._nUnitsCurrentlyAlive + 1
+
+			ApplyModifier(entUnit, entUnit, "modifier_nether_buff_passive", {duration=-1}, false)
+			ApplyModifier(entUnit, entUnit, "modifier_nether_buff_fx", {duration=-1}, false)
 			
-			if entUnit.netherApplier == nil then
-				entUnit.netherApplier = CreateItem("item_nether_buff_applier", u, u)
-				entUnit.netherApplier:ApplyDataDrivenModifier(entUnit, entUnit, "modifier_nether_buff_passive", {duration=-1})
-				entUnit.netherApplier:ApplyDataDrivenModifier(entUnit, entUnit, "modifier_nether_buff_fx", {duration=-1})
-			end
-			
-			entUnit:AddNewModifier(entUnit, nil, "modifier_netherworld_buff" ,nil)
 			entUnit.Holdout_CoreNum = self._gameRound._nRoundNumber
-			entUnit.goalValue = 1
-			entUnit:SetDeathXP( 0 )
+			entUnit.CoreValue = self._nCoreValue
+			entUnit:SetDeathXP(0)
+			entUnit:SetMaximumGoldBounty(0)
 			entUnit.RewardXP = self._gameRound:GetXPPerCoreUnit()
 			entUnit.RewardGold = self._gameRound:GetGoldPerCoreUnit()
+			self._gameRound._nCoreUnitsSpawnedValue = self._gameRound._nCoreUnitsSpawnedValue + self._nCoreValue
+
+			if self._gameRound._entKillCountSubquest then
+				self._gameRound._entKillCountSubquest:SetTextReplaceValue( QUEST_TEXT_REPLACE_VALUE_CURRENT_VALUE, self._gameRound._nCoreUnitsSpawnedValue)
+			end
 		end
 	end
 end
