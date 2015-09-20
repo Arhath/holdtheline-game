@@ -42,10 +42,10 @@ end
 
 function AIThink()
 
-	--print( "BloodlustThink" )
+	----print( "BloodlustThink" )
 
 	if thisEntity == nil or thisEntity:IsNull() or not thisEntity:IsAlive() then
-		print("unit died stopping ai for unit")
+		--print("unit died stopping ai for unit")
 		return nil
 	end
 
@@ -71,12 +71,12 @@ function BehaviorMovementSystem:Evaluate()
 
 	if rand > 50 then
 		desire = 2.7
-		print("delaying abilities")
+		--print("delaying abilities")
 	else
-		print("no delay")
+		--print("no delay")
 	end
 
-	--print (string.format( "movement system Desire: %d", desire))
+	----print (string.format( "movement system Desire: %d", desire))
 	return desire
 end
 
@@ -101,7 +101,7 @@ end
 BehaviorAbility = {}
 
 function BehaviorAbility:Evaluate()
-	print("abilityealuate")
+	--print("abilityealuate")
 	self.ID = 7
 
 	self.unit = thisEntity
@@ -113,20 +113,20 @@ function BehaviorAbility:Evaluate()
 	local target = nil
 
 
-	print(string.format("ability count: %d", abilityCount))
+	--print(string.format("ability count: %d", abilityCount))
 
 	for i = 0, 8 do
 		local ability = self.unit:GetAbilityByIndex(i)
 
 		if ability ~= nil and ability:IsFullyCastable() then
-			print("ability: " .. ability:GetName())
+			--print("ability: " .. ability:GetName())
 			local behavior = ability:GetBehavior()
 			local level = ability:GetLevel()
 
-			print(string.format("level: %d", level))
-			print(bit.band(behavior, DOTA_ABILITY_BEHAVIOR_PASSIVE))
+			--print(string.format("level: %d", level))
+			--print(bit.band(behavior, DOTA_ABILITY_BEHAVIOR_PASSIVE))
 			if bit.band(behavior, DOTA_ABILITY_BEHAVIOR_PASSIVE) == 0 and level > 0 then
-				print("ability no passive and level > 0")
+				--print("ability no passive and level > 0")
 				local value = 0
 
 				local abilityType = ability:GetAbilityType()
@@ -153,7 +153,7 @@ function BehaviorAbility:Evaluate()
 				end
 
 				if bCasting then
-					print(string.format("castrange: %d", castRange))
+					--print(string.format("castrange: %d", castRange))
 					if search == 0 then
 						if castRange ~= 0 then
 							search = castRange * 1.5
@@ -161,12 +161,12 @@ function BehaviorAbility:Evaluate()
 							search = 700
 						end
 					end
-					print(string.format("radius: %d", radius))
+					--print(string.format("radius: %d", radius))
 
 					if bit.band(behavior, DOTA_ABILITY_BEHAVIOR_POINT) > 0 then
 						local team = DOTA_UNIT_TARGET_TEAM_ENEMY
 						local unitType = targetType
-						print("behavior point")
+						--print("behavior point")
 						if radius == 0 then
 							radius = 200.0
 						end
@@ -193,7 +193,7 @@ function BehaviorAbility:Evaluate()
 							value = 2.5
 						end
 					elseif bit.band(behavior, DOTA_ABILITY_BEHAVIOR_UNIT_TARGET) > 0 then
-						print("behavior target")
+						--print("behavior target")
 						local allAllys = FindUnitsInRadius( self.unit:GetTeamNumber(), self.unit:GetOrigin(), nil, search, targetTeam, targetType, 0, 0, false )
 
 						if utility == UTILITY_TYPE_MOVEMENT then
@@ -212,9 +212,9 @@ function BehaviorAbility:Evaluate()
 						end
 
 						if radius == 0 then
-							print("target without radius")
+							--print("target without radius")
 							if #allAllys > 0 then
-								print("found target")
+								--print("found target")
 								if category == ABILITY_TYPE_BUFF then
 									for _, unit in pairs(allAllys) do
 										local hPct = unit:GetHealth() / unit:GetMaxHealth()
@@ -276,7 +276,7 @@ function BehaviorAbility:Evaluate()
 								end
 							end
 						else
-							print("target with radius")
+							--print("target with radius")
 							if category == ABILITY_TYPE_BUFF then
 								for _, ally in pairs(allAllys) do
 									local units = FindUnitsInRadius( ally:GetTeamNumber(), ally:GetOrigin(), nil, radius, targetTeam, targetType, 0, 0, false )
@@ -369,12 +369,12 @@ function BehaviorAbility:Evaluate()
 						if unitType == 0 then
 							unitType = DOTA_UNIT_TARGET_ALL
 						end
-						print("behavior no target")
-						print(radius)
+						--print("behavior no target")
+						--print(radius)
 						if radius == 0 then
 
 							if utility == UTILITY_TYPE_MOVEMENT then
-								print("movement utility")
+								--print("movement utility")
 								if utilityValue ~= 0 then
 									local posUnit = self.unit:GetAbsOrigin()
 									local vec = self.unit:GetAnglesAsVector()
@@ -397,11 +397,11 @@ function BehaviorAbility:Evaluate()
 							end
 
 							if bCasting then
-							print("casting ability")
+							--print("casting ability")
 								local units = {}
 
 								if casting == CASTING_ONSIGHT then
-									print("casting onsight")
+									--print("casting onsight")
 									if category == ABILITY_TYPE_BUFF or category == ABILITY_TYPE_HEAL then
 										if abilityValue == 0 then
 											local hPct = self.unit:GetHealth() / self.unit:GetMaxHealth()
@@ -416,7 +416,7 @@ function BehaviorAbility:Evaluate()
 											end
 										end
 									else
-										print("dmg or other")
+										--print("dmg or other")
 										units = FindUnitsInRadius( self.unit:GetTeamNumber(), self.unit:GetOrigin(), nil, radius, DOTA_UNIT_TARGET_TEAM_ENEMY, unitType, 0, 0, false )
 									end
 
@@ -465,7 +465,7 @@ function BehaviorAbility:Evaluate()
 								value = #units
 							end
 						else
-							print("asdasdsada sdasdasdsadasdsad")
+							--print("asdasdsada sdasdasdsadasdsad")
 							local units = FindUnitsInRadius( self.unit:GetTeamNumber(), self.unit:GetOrigin(), nil, radius, DOTA_UNIT_TARGET_TEAM_ENEMY, unitType, 0, 0, false )
 
 							if utility == UTILITY_TYPE_STUN or utility == UTILITY_TYPE_MOVEMENT then
@@ -492,31 +492,31 @@ function BehaviorAbility:Evaluate()
 					end
 
 					if bit.band(behavior, DOTA_ABILITY_BEHAVIOR_CHANNELLED) > 0 then
-						print("behavior channeled")
+						--print("behavior channeled")
 					end
 
 
 					if value > bestValue then
 						bestValue = value
 						bestAbility = ability
-						print("setting best ability")
+						--print("setting best ability")
 					end
 				end
 			end
 		end
 	end
 
-	print(string.format("value: %f", bestValue))
+	--print(string.format("value: %f", bestValue))
 	local desire = 0
 
 	if bestAbility ~= nil then
-		print("found best ability")
+		--print("found best ability")
 
 		self.ability = bestAbility
 		desire = bestValue
 
 		if position ~= nil then
-			print("setting point order")	
+			--print("setting point order")	
 
 			self.order =
 			{
@@ -528,7 +528,7 @@ function BehaviorAbility:Evaluate()
 		end
 
 		if target ~= nil then
-			print("setting target order")	
+			--print("setting target order")	
 
 			self.order =
 			{
@@ -540,7 +540,7 @@ function BehaviorAbility:Evaluate()
 		end
 
 		if target == nil and position == nil then
-			print("setting no target order")	
+			--print("setting no target order")	
 
 			self.order =
 			{
@@ -549,7 +549,7 @@ function BehaviorAbility:Evaluate()
 				AbilityIndex = self.ability:entindex()
 			}
 		end
-		--print (string.format( "Earthsplitter Desire: %d", desire))
+		----print (string.format( "Earthsplitter Desire: %d", desire))
 	end
 
 	return desire

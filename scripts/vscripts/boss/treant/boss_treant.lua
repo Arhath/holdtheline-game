@@ -93,7 +93,6 @@ function BossTreant:Spawn()
 	entBossUnit.MovementSystemActive = false
 	entBossUnit.CanEnterGoal = false
 	self._bossOriginalHealth = entBossUnit:GetMaxHealth()
-	entBossUnit.difficultyApplier = nil
 	self:ApplyDifficultyBuff(entBossUnit)
 	behaviorSystemBoss = AICore:CreateBehaviorSystem( { BehaviorIdle , BehaviorEarthsplitter, BehaviorRootHero, BehaviorSpawnFlowers, BehaviorSpawnMushrooms, BehaviorSpawnTrees, BehaviorRaiseNature, BehaviorMoveToArena, BehaviorAttack } )
 	
@@ -121,11 +120,8 @@ end
 
 function BossTreant:ApplyDifficultyBuff(u)
 	local nDifficultyStacks = self._gameRound._gameMode._entAncient:GetMana()
-	if u.difficultyApplier == nil then
-		local difficultyApplier = CreateItem("item_boss_difficulty_modifier_applier", u, u)
-		u.difficultyApplier = difficultyApplier
-		difficultyApplier:ApplyDataDrivenModifier(u, u, "modifier_boss_difficulty_passive", {duration=-1})
-	end
+	
+	ApplyModifier(u, u, "modifier_boss_difficulty_passive", {duration=-1}, false)
 	
 	u:SetModifierStackCount("modifier_boss_difficulty_passive", nil, nDifficultyStacks)
 	local hpPercent = u:GetHealth() / u:GetMaxHealth()
@@ -201,7 +197,7 @@ function BossTreant:ShowScoreboard()
 		nTowersStandingGoldReward = 0,
 		nGoldBagsExpired = 0
 	}
-
+	
 	local playerSummaryCount = 0
 		
 	for i = 1, DOTA_MAX_TEAM_PLAYERS do

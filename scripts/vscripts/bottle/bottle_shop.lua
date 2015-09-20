@@ -44,13 +44,13 @@ function CBottleShop:Init(pedestal, bottle, hero, bottleSystem)
 
 	self._entPedestal = Entities:FindByName(nil, pedestal)
 	if self._entPedestal == nil then
-		print("Pedestal not found")
+		--print("Pedestal not found")
 		return nil
 	end
 	
 	self._entBottle = Entities:FindByName(nil, bottle)
 	if self._entBottle == nil then
-		print("Bottle not found")
+		--print("Bottle not found")
 		return nil
 	end
 
@@ -138,7 +138,7 @@ end
 
 
 function CBottleShop:TestCall()
- print("testcall")
+ --print("testcall")
 end
 
 
@@ -153,11 +153,11 @@ function CBottleShop:OnSpellStart( name )
 	if name == "bottle_shop_ability_toggle" then
 		self:ToggleAbilities()
 	else
-		print(name)
+		--print(name)
 		local state = self:GetToggledState()
 
 		for i, ability in pairs(SHOP_ABILITY_LIST_[state]) do
-			print(ability)
+			--print(ability)
 			if ability == name then
 				if self._vAbilityLevels[state][i] + 1 <= self._vAbilityLevelsMax[state][i] then
 					self._vAbilityLevels[state][i] = self._vAbilityLevels[state][i] + 1
@@ -190,8 +190,8 @@ function CBottleShop:UpdateShop()
 	local state = self._shopToggleState
 	local counterState = self:GetToggledState()
 
-	print(string.format("shopstate: %d", self._shopToggleState))
-	print(string.format("counterState: %d", counterState))
+	--print(string.format("shopstate: %d", self._shopToggleState))
+	--print(string.format("counterState: %d", counterState))
 
 	if state ~= self._state then
 		for _, ability in pairs(SHOP_ABILITY_LIST_[state]) do
@@ -201,10 +201,10 @@ function CBottleShop:UpdateShop()
 
 		for i, ability in pairs(SHOP_ABILITY_LIST_[counterState]) do
 			local spell = self._entBottle:AddAbility(ability)
-			--print(ability)
+			----print(ability)
 			if ability ~= "bottle_shop_ability_toggle" then
-				print(string.format("abilitylevel: %d", self._vAbilityLevels[counterState][i]))
-				print(string.format("abilitylevel max: %d", self._vAbilityLevelsMax[counterState][i]))
+				--print(string.format("abilitylevel: %d", self._vAbilityLevels[counterState][i]))
+				--print(string.format("abilitylevel max: %d", self._vAbilityLevelsMax[counterState][i]))
 
 				spell:SetLevel(self._vAbilityLevels[counterState][i])
 				table.insert(self._vAbilities, spell)
@@ -215,7 +215,7 @@ function CBottleShop:UpdateShop()
 
 		self._state = self._shopToggleState
 	else
-		--print("just setting levels")
+		----print("just setting levels")
 		for i, ability in pairs(self._vAbilities) do
 			ability:SetLevel(self._vAbilityLevels[counterState][i])
 		end
@@ -242,7 +242,7 @@ function CBottleShop:AnimateShop()
 		self._fAnimationClock = self._fAnimationClock - self._fAnimationDuration
 	end
 
-	--print(self._fAnimationClock)
+	----print(self._fAnimationClock)
 
 
 	local pos = self._entBottle:GetOrigin()

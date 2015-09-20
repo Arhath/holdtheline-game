@@ -18,6 +18,7 @@ require( "misc/utility_functions" )
 require( "boss/holdout_game_bosshandler" )
 require( "ai/movement_system" )
 require( "bottle/bottle_system" )
+require( "misc/gate_system")
 
 if CHoldoutGameMode == nil then
 	CHoldoutGameMode = class({})
@@ -87,6 +88,9 @@ function CHoldoutGameMode:InitGameMode()
 
 	self._bottleSystem = CBottleSystem()
 	self._bottleSystem:Init(self, DOTA_TEAM_GOODGUYS)
+
+	self._gateSystem = CGateSystem()
+	self._gateSystem:Init(self, DOTA_TEAM_GOODGUYS)
 	
 	Timers:CreateTimer(5, function()
 		TestSpawn("treant_mushroom_creature_big","testspawner_2", 0, DOTA_TEAM_GOODGUYS)
@@ -110,7 +114,7 @@ function CHoldoutGameMode:InitGameMode()
 		--print("shepfound")
 	end
 	entShopSheep:AddNewModifier( entShopSheep, nil, "modifier_invulnerable", {} )
-
+	
 	fSheepIdleRange = 200.0
 	fSheepNextIdle = GameRules:GetGameTime()
 	fSheepIdleIntervall = 4.0

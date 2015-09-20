@@ -4,47 +4,43 @@ function OnEnterEnergyGate(trigger)
 	--print("Cleansing Water")
 end
 
+
+function OnEnterGate(trigger)
+	local u = trigger.activator
+	local gate = thisEntity
+	
+	if u:IsRealHero() then
+		print("enter gate")
+		if gate.Gate ~= nil then
+			gate.Gate:AddGateUnit(u)
+		end
+	end
+end
+
+
+function OnLeaveGate(trigger)
+	local u = trigger.activator
+	local gate = thisEntity
+
+	if u:IsRealHero() then
+		print("leave gate")
+		if gate.Gate ~= nil then
+			gate.Gate:RemoveGateUnit(u)
+		end
+	end
+end
+
+
 function OnLeaveCleansingWater(trigger)
 	local u = trigger.activator
 	GameRules.holdOut:OnUnitLeavesCleansingWater(u)
 end
 
+
 function OnRadiantGoalEnter(trigger)
 	print(trigger.activator)
 	local u = trigger.activator
 	GameRules.holdOut:OnUnitEntersGoal(u, DOTA_TEAM_GOODGUYS)
-end
-
-function OnRadiantTeleportLeft(event)
-	local unit = event.activator
-	local ent = Entities:FindByName( nil, "RadiantTeleportMarkLeft")
-	local point = ent:GetAbsOrigin() 
-
-	UnitTeleportToPosition(unit, point, true)
-end
-
-function OnRadiantTeleportLeftFar(event)
-	local unit = event.activator
-	local ent = Entities:FindByName( nil, "RadiantTeleportMarkLeftFar")
-	local point = ent:GetAbsOrigin() 
-	
-	UnitTeleportToPosition(unit, point, true)
-end
-
-function OnRadiantTeleportRight(event)
-	local unit = event.activator
-	local ent = Entities:FindByName( nil, "RadiantTeleportMarkRight")
-	local point = ent:GetAbsOrigin() 
-
-	UnitTeleportToPosition(unit, point, true)
-end
-
-function OnRadiantTeleportRightFar(event)
-	local unit = event.activator
-	local ent = Entities:FindByName( nil, "RadiantTeleportMarkRightFar")
-	local point = ent:GetAbsOrigin() 
-
-	UnitTeleportToPosition(unit, point, true)
 end
 
 
@@ -58,13 +54,10 @@ function TeleportStart(event)
 	if unit.TeleportTime == nil then
 		unit.TeleportTime = GameRules:GetGameTime() + time
 
-		if unit.teleportApplier == nil then
-			unit.teleportApplier = CreateItem("item_teleport_effect_applier", unit, unit)
-		end
 
-		unit.teleportApplier:ApplyDataDrivenModifier(unit, unit, "modifier_teleport_start_fx", {duration=time + 0.8})
+		ApplyModifier(unit, unit, "modifier_teleport_start_fx", {duration=time + 0.8})
 
-		unit.teleportApplier:ApplyDataDrivenModifier(unit, unit, "modifier_teleport_end_fx", {duration=time + 0.8})
+		ApplyModifier(unit, unit, "modifier_teleport_end_fx", {duration=time + 0.8})
 		unit:EmitSound("Portal.Loop_Appear")
 
 		Timers:CreateTimer(function()

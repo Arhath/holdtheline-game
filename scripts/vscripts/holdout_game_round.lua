@@ -76,8 +76,8 @@ function CHoldoutGameRound:ReadConfiguration( kv, gameMode, roundNumber )
 						v.GroupWithUnit = v.GroupWithUnit .. "_" .. v.SpawnerName
 						--spawner:ReadConfiguration( #self._vSpawners, v, self )
 						--table.insert(self._vSpawners, spawner)
-						spawner:ReadConfiguration( k .. "_" .. v.SpawnerName, v, self )
-						table.insert(self._vSpawners, spawner)
+						spawner:ReadConfiguration( k, v, self )
+						self._vSpawners[ k ] = spawner
 					end
 				else
 					local spawner = CHoldoutGameSpawner()
@@ -86,7 +86,7 @@ function CHoldoutGameRound:ReadConfiguration( kv, gameMode, roundNumber )
 
 					spawner:ReadConfiguration( k, v, self )
 					--table.insert(self._vSpawners, spawner)
-					table.insert(self._vSpawners, spawner)
+					self._vSpawners[ k ] = spawner
 				end
 			end
 		end

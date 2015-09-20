@@ -61,29 +61,7 @@
 		}
 	}
 	
-	"Round1" // Kobolds
-	{
-		"round_quest_title"			"#DOTA_Holdout_Round_Kobolds_Quest_Title"
-		"round_title"				"#DOTA_Holdout_Round_Kobolds_Title"
-		"MaxGold"					"5600"
-		"BagCount"					"50"
-		"BagVariance"				"30"
-		"FixedXP"					"5500"
-		
-		// Stage 1 ================================================
-		"UnitFodder_1a" // Duration 80s - Continues with UnitFodderGrouped_2a & 3a to 120s total
-		{
-			"NPCName"				"npc_dota_creature_kobold_tunneler"  //"npc_dota_creature_lesser_nightcrawler" //"npc_dota_creature_ogre_tank"//"npc_dota_creature_lesser_nightcrawler"//////"npc_dota_creature_slithereen"//"npc_dota_creature_lesser_nightcrawler"////"treant_flower_creature"//"npc_dota_creature_kobold_tunneler"//"npc_dota_creature_lesser_nightcrawler"//"npc_dota_creature_corpselord"////"npc_dota_creature_tormented_soul"//"npc_dota_creature_missile_launcher"////"npc_dota_creature_mini_roshan"//"treant_flower_creature"////"npc_dota_creature_kobold_tunneler"
-			"TotalUnitsToSpawn"		"1"
-			"UnitsPerSpawn"			"1"
-			"SpawnInterval"			"1"
-
-			"SpawnerName"			"path_invader1_1"
-		}
-
-	}
-
-	"Round2" // Kobolde
+	"Round1" // Kobolde - Duration 100s + 4s Break
 	{
 		"round_quest_title"			"#DOTA_Holdout_Round_Kobolds_Quest_Title"
 		"round_title"				"#DOTA_Holdout_Round_Kobolds_Title"
@@ -94,7 +72,7 @@
 		
 		// Stage 1 - Duration 28s ================================================
 
-		"UnitFodder_1a" // Duration 14s 
+		"UnitFodder_1a" // Duration 12s 
 		{
 			"NPCName"				"npc_dota_creature_kobold_tunneler"
 			"TotalUnitsToSpawn"		"12"
@@ -103,7 +81,7 @@
 			"SpawnerName"			"path_invader1_1"
 		}
 
-		"UnitFodder_1b" // Duration 14s 
+		"UnitFodder_1b" // Duration 12s 
 		{
 			"WaitForUnit"			"UnitFodder_1a"
 			"WaitForTime"			"4"
@@ -126,7 +104,7 @@
 			"SpawnerName"			"path_invader1_1"
 		}
 
-		// Stage 2 - Duration 80 s ================================================
+		// Stage 2 - Duration 72 s ================================================
 
 		"UnitFodder_2a"  
 		{
@@ -187,30 +165,690 @@
 			"SpawnInterval"			"16"
 			"SpawnerName"			"path_invader1_1"
 		}
+
+		"Taskmaster_1"
+		{
+			"GroupWithUnit"			"UnitFodder_2b"
+			"WaitForTime"			"8"
+			
+			"NPCName"				"npc_dota_neutral_kobold_taskmaster"
+			"TotalUnitsToSpawn"		"2"
+			"UnitsPerSpawn"			"1"
+			"SpawnInterval"			"32"
+			"SpawnerName"			"path_invader1_1"
+		}
+		
 	}
 
-	"Round3"
+	"Round2" // Zombies - Duration 110s + 20s Break
 	{
-		"round_quest_title"			"#DOTA_Holdout_Round_Kobolds_Quest_Title"
-		"round_title"				"#DOTA_Holdout_Round_Kobolds_Title"
-		"MaxGold"					"5600"
-		"BagCount"					"50"
-		"BagVariance"				"30"
-		"FixedXP"					"5500"
-		"PrepTime"					"100"
+		"round_quest_title"			"#DOTA_Holdout_Round_Zombies_Quest_Title"
+		"round_title"				"#DOTA_Holdout_Round_Zombies_Title"
+		"MaxGold"					"6150"
+		"BagCount"					"40"
+		"BagVariance"				"10"
+		"FixedXP"					"3500"
 
-		"IsBoss"					"1"
-		"BossNumber"				"1"
+		// Stage 1 - Duration 30s ================================================
+		"UnitZombie_1a"
+		{
+			"NPCName"				"npc_dota_creature_basic_zombie"
+			"TotalUnitsToSpawn"		"21"
+			"UnitsPerSpawn"			"3"
+			"SpawnInterval"			"5"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+
+		"UnitZombie_1b"
+		{
+			"WaitForTime"			"5"
+			
+			"NPCName"				"npc_dota_creature_basic_zombie"
+			"TotalUnitsToSpawn"		"6"
+			"UnitsPerSpawn"			"3"
+			"SpawnInterval"			"20"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+
+		"UnitZombie_1c"
+		{
+			"WaitForTime"			"10"
+			
+			"NPCName"				"npc_dota_creature_basic_zombie"
+			"TotalUnitsToSpawn"		"6"
+			"UnitsPerSpawn"			"3"
+			"SpawnInterval"			"20"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+
+		"UnitZombieExploding_1"
+		{
+			"WaitForTime"			"20"
+			
+			"NPCName"				"npc_dota_creature_basic_zombie_exploding"
+			"TotalUnitsToSpawn"		"1"
+			"UnitsPerSpawn"			"1"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+
+
+		// Stage 2 - Duration 30s ================================================
+		"UnitZombie_2a"
+		{
+			"WaitForUnit"			"UnitZombie_1c"
+			"WaitForTime"			"5"
+			
+			"NPCName"				"npc_dota_creature_basic_zombie"
+			"TotalUnitsToSpawn"		"28"
+			"UnitsPerSpawn"			"4"
+			"SpawnInterval"			"5"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+
+		"UnitZombie_2b"
+		{
+			"WaitForUnit"			"UnitZombie_1c"
+			"WaitForTime"			"10"
+			
+			"NPCName"				"npc_dota_creature_basic_zombie"
+			"TotalUnitsToSpawn"		"8"
+			"UnitsPerSpawn"			"4"
+			"SpawnInterval"			"20"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+
+		"UnitZombie_2c"
+		{
+			"WaitForUnit"			"UnitZombie_1c"
+			"WaitForTime"			"15"
+			
+			"NPCName"				"npc_dota_creature_basic_zombie"
+			"TotalUnitsToSpawn"		"8"
+			"UnitsPerSpawn"			"4"
+			"SpawnInterval"			"20"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+		
+		"UnitZombieExploding_2"
+		{
+			"WaitForUnit"			"UnitZombie_1c"
+			"WaitForTime"			"5"
+			
+			"NPCName"				"npc_dota_creature_basic_zombie_exploding"
+			"TotalUnitsToSpawn"		"2"
+			"UnitsPerSpawn"			"1"
+			"SpawnInterval"			"20"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+
+		// Stage 3 - Duration 30s ================================================
+
+		"UnitZombie_3"
+		{
+			"WaitForUnit"			"UnitZombie_2a"
+			"WaitForTime"			"15"
+			
+			"NPCName"				"npc_dota_creature_basic_zombie"
+			"TotalUnitsToSpawn"		"10"
+			"UnitsPerSpawn"			"10"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+		
+		"UnitZombieExploding_3"
+		{
+			"WaitForUnit"			"UnitZombie_2a"
+			"WaitForTime"			"5"
+			
+			"NPCName"				"npc_dota_creature_basic_zombie_exploding"
+			"TotalUnitsToSpawn"		"2"
+			"UnitsPerSpawn"			"1"
+			"SpawnInterval"			"15"
+
+			"SpawnerName"			"path_invader1_1"
+		}	
+
+		"UnitZombieCorpseLord_3"
+		{
+			"WaitForUnit"			"UnitZombie_2a"
+			"WaitForTime"			"5"
+			
+			"NPCName"				"npc_dota_creature_corpselord"
+			"TotalUnitsToSpawn"		"2"
+			"UnitsPerSpawn"			"1"
+			"SpawnInterval"			"15"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+
+		// Stage 4 - Finale - Duration 20s ================================================
+
+		"UnitZombieExploding_4"
+		{
+			"WaitForUnit"			"UnitZombieCorpseLord_3"
+			"WaitForTime"			"20"
+			
+			"NPCName"				"npc_dota_creature_basic_zombie_exploding"
+			"TotalUnitsToSpawn"		"2"
+			"UnitsPerSpawn"			"2"
+
+			"SpawnerName"			"path_invader1_1"
+		}	
+
+		"UnitZombie_4"
+		{
+			"WaitForUnit"			"UnitZombieCorpseLord_3"
+			"WaitForTime"			"10"
+			
+			"NPCName"				"npc_dota_creature_basic_zombie"
+			"TotalUnitsToSpawn"		"20"
+			"UnitsPerSpawn"			"10"
+			"SpawnInterval"			"20"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+
+		"UnitZombieCorpseLord_4"
+		{
+			"WaitForUnit"			"UnitZombieCorpseLord_3"
+			"WaitForTime"			"20"
+			
+			"NPCName"				"npc_dota_creature_corpselord"
+			"TotalUnitsToSpawn"		"2"
+			"UnitsPerSpawn"			"2"
+
+			"SpawnerName"			"path_invader1_1"
+		}	
+	}
+
+	"Round3" // Oger 3x28s = 84s + 20s Break
+	{
+		"round_quest_title"			"#DOTA_Holdout_Round_Ogre_Quest_Title"
+		"round_title"				"#DOTA_Holdout_Round_Ogre_Title"
+		"MaxGold"					"6000" //600g from gold fountain ability
+		"BagCount"					"20"
+		"BagVariance"				"75"
+		"FixedXP"					"4000"
 		
 		// Stage 1 ================================================
-		"UnitFodder_1a" // Duration 80s - Continues with UnitFodderGrouped_2a & 3a to 120s total
+		"UnitMelee_1" // Duration 28s
 		{
-			"NPCName"				"npc_dota_creature_kobold_tunneler"  //"npc_dota_creature_lesser_nightcrawler" //"npc_dota_creature_ogre_tank"//"npc_dota_creature_lesser_nightcrawler"//////"npc_dota_creature_slithereen"//"npc_dota_creature_lesser_nightcrawler"////"treant_flower_creature"//"npc_dota_creature_kobold_tunneler"//"npc_dota_creature_lesser_nightcrawler"//"npc_dota_creature_corpselord"////"npc_dota_creature_tormented_soul"//"npc_dota_creature_missile_launcher"////"npc_dota_creature_mini_roshan"//"treant_flower_creature"////"npc_dota_creature_kobold_tunneler"
+			"NPCName"				"npc_dota_creature_ogre_melee"
+			"TotalUnitsToSpawn"		"10"
+			"UnitsPerSpawn"			"2"
+			"SpawnInterval"			"7"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+		
+		"UnitRanged_1"
+		{			
+			"NPCName"				"npc_dota_creature_ogre_magi"
+			"TotalUnitsToSpawn"		"5"
+			"UnitsPerSpawn"			"1"
+			"SpawnInterval"			"7"
+
+			"SpawnerName"			"path_invader1_1"
+		}	
+
+		"UnitOgreTank_1"
+		{
+			"WaitForTime"			"20"
+
+			"NPCName"				"npc_dota_creature_ogre_tank"
+			"TotalUnitsToSpawn"		"2"
+			"UnitsPerSpawn"			"1"
+
+			"SpawnInterval"			"28"
+		}
+
+		// Stage 2 ================================================
+		"UnitMelee_2" // Duration 28s
+		{
+			"WaitForUnit"			"UnitMelee_1"
+			"WaitForTime"			"10"
+
+			"NPCName"				"npc_dota_creature_ogre_melee"
+			"TotalUnitsToSpawn"		"10"
+			"UnitsPerSpawn"			"2"
+			"SpawnInterval"			"7"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+		
+		"UnitRanged_2"
+		{		
+			"WaitForUnit"			"UnitMelee_1"
+			"WaitForTime"			"10"
+
+			"NPCName"				"npc_dota_creature_ogre_magi"
+			"TotalUnitsToSpawn"		"5"
+			"UnitsPerSpawn"			"1"
+			"SpawnInterval"			"7"
+
+			"SpawnerName"			"path_invader1_1"
+		}	
+
+		"UnitOgreTank_2"
+		{
+			"WaitForUnit"			"UnitMelee_1"
+			"WaitForTime"			"30"
+
+			"NPCName"				"npc_dota_creature_ogre_tank"
+			"TotalUnitsToSpawn"		"1"
+			"UnitsPerSpawn"			"1"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+
+		// Stage 3 ================================================
+		"UnitMelee_3" // Duration 28s
+		{
+			"WaitForUnit"			"UnitMelee_2"
+			"WaitForTime"			"10"
+
+			"NPCName"				"npc_dota_creature_ogre_melee"
+			"TotalUnitsToSpawn"		"10"
+			"UnitsPerSpawn"			"2"
+			"SpawnInterval"			"7"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+		
+		"UnitRanged_3"
+		{		
+			"WaitForUnit"			"UnitMelee_2"
+			"WaitForTime"			"10"
+
+			"NPCName"				"npc_dota_creature_ogre_magi"
+			"TotalUnitsToSpawn"		"5"
+			"UnitsPerSpawn"			"1"
+			"SpawnInterval"			"7"
+
+			"SpawnerName"			"path_invader1_1"
+		}	
+
+		"UnitOgreTank_3"
+		{
+			"WaitForUnit"			"UnitMelee_2"
+			"WaitForTime"			"30"
+
+			"NPCName"				"npc_dota_creature_ogre_tank"
+			"TotalUnitsToSpawn"		"2"
+			"UnitsPerSpawn"			"2"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+	}
+
+	"Round4" // Jumper - Duration 3 x 21s = 63s + 10 sec Break
+	{
+		"round_quest_title"			"#DOTA_Holdout_Round_Slithereen_Quest_Title"
+		"round_title"				"#DOTA_Holdout_Round_Slithereen_Title"
+		"MaxGold"					"7150"
+		"BagCount"					"40"
+		"BagVariance"				"50"
+		"FixedXP"					"6500"
+
+		// Stage 1 - Duration 21s ================================================
+		"UnitJumper_1"
+		{
+			"NPCName"				"npc_dota_creature_lesser_nightcrawler"
+			"TotalUnitsToSpawn"		"24"
+			"UnitsPerSpawn"			"3"
+			"SpawnInterval"			"3"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+		
+		"UnitStun_1"
+		{
+			"WaitForTime"			"3"	
+
+			"NPCName"				"npc_dota_creature_slithereen"
+			"TotalUnitsToSpawn"		"6"
+			"UnitsPerSpawn"			"2"
+			"SpawnInterval"			"7"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+
+		// Stage 2 - Duration 21s ================================================
+		"UnitJumper_2"
+		{
+			"WaitForUnit"			"UnitJumper_1"
+			"WaitForTime"			"5"
+
+			"NPCName"				"npc_dota_creature_lesser_nightcrawler"
+			"TotalUnitsToSpawn"		"24"
+			"UnitsPerSpawn"			"3"
+			"SpawnInterval"			"3"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+
+		"UnitStun_2"
+		{
+			"WaitForUnit"			"UnitJumper_1"
+			"WaitForTime"			"8"	
+
+			"NPCName"				"npc_dota_creature_slithereen"
+			"TotalUnitsToSpawn"		"6"
+			"UnitsPerSpawn"			"2"
+			"SpawnInterval"			"7"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+
+		// Stage 2 - Duration 21s ================================================
+		"UnitJumper_3"
+		{
+			"WaitForUnit"			"UnitJumper_2"
+			"WaitForTime"			"5"
+
+			"NPCName"				"npc_dota_creature_lesser_nightcrawler"
+			"TotalUnitsToSpawn"		"24"
+			"UnitsPerSpawn"			"3"
+			"SpawnInterval"			"3"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+
+		"UnitStun_3"
+		{
+			"WaitForUnit"			"UnitJumper_2"
+			"WaitForTime"			"8"	
+
+			"NPCName"				"npc_dota_creature_slithereen"
+			"TotalUnitsToSpawn"		"6"
+			"UnitsPerSpawn"			"2"
+			"SpawnInterval"			"7"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+	}
+
+	"Round5" //Broodqueen - Miniboss
+	{
+		"round_quest_title"			"#DOTA_Holdout_Round_Broodking_Quest_Title"
+		"round_title"				"#DOTA_Holdout_Round_Broodking_Title"
+		"MaxGold"					"0" // 8300 from gold fountain ability
+		"BagCount"					"0"
+		"BagVariance"				"0"
+		"FixedXP"					"250"
+
+		// Stage 1 ================================================
+		"UnitMelee_1"
+		{
+			"NPCName"				"npc_dota_creature_broodking"
+			"TotalUnitsToSpawn"		"1"
+			"UnitsPerSpawn"			"1"
+			"DontGiveGoal"    		"1"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+	}
+
+	"Round6" //Splitter - Duration 100s
+	{
+		"round_quest_title"			"#DOTA_Holdout_Round_Splitter_Quest_Title"
+		"round_title"				"#DOTA_Holdout_Round_Splitter_Title"
+		"MaxGold"					"9350"
+		"BagCount"					"15"
+		"BagVariance"				"40"
+		"FixedXP"					"5500"
+
+		"PrepTime"					"150"
+
+		// Stage 1 ================================================
+		"UnitSplitter_1"
+		{
+			"NPCName"				"npc_dota_splitter_a"
+			"TotalUnitsToSpawn"		"10"
+			"UnitsPerSpawn"			"2"
+			"SpawnInterval"			"10"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+
+		// Stage 2 ================================================
+		"UnitSplitter_2"
+		{
+			"WaitForUnit"			"UnitSplitter_1"
+			"WaitForTime"			"20"	
+
+			"NPCName"				"npc_dota_splitter_a"
+			"TotalUnitsToSpawn"		"10"
+			"UnitsPerSpawn"			"2"
+			"SpawnInterval"			"10"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+
+		"UnitTankSupport_1"
+		{
+			"WaitForUnit"			"UnitSplitter_1"
+			"WaitForTime"			"25"	
+
+			"NPCName"				"npc_dota_neutral_granite_golem"
+			"TotalUnitsToSpawn"		"2"
+			"UnitsPerSpawn"			"1"
+			"SpawnInterval"			"20"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+	}
+
+	"Round7" // Bears
+	{
+		// Duration 60s + 30 s Break
+		"round_quest_title"			"#DOTA_Holdout_Round_BearForceOne_Quest_Title"
+		"round_title"				"#DOTA_Holdout_Round_BearForceOne_Title"
+		"MaxGold"					"9900"
+		"BagCount"					"45"
+		"BagVariance"				"100"
+		"FixedXP"					"12000"
+
+		// Stage 1 - Duration 20s
+		"SmallUnit_1"
+		{
+			"NPCName"				"npc_dota_creature_small_spirit_bear"
+			"TotalUnitsToSpawn"		"10"
+			"UnitsPerSpawn"			"2"
+			"SpawnInterval"			"5"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+
+		"BigUnit_1"
+		{
+
+			"NPCName"				"npc_dota_creature_large_spirit_bear"
+			"TotalUnitsToSpawn"		"5"
+			"UnitsPerSpawn"			"1"
+			"SpawnInterval"			"5"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+
+		"Chief_1"
+		{
+			"WaitForTime"			"10"	
+
+			"NPCName"				"npc_dota_creature_bear_chieftain"
 			"TotalUnitsToSpawn"		"1"
 			"UnitsPerSpawn"			"1"
 			"SpawnInterval"			"1"
 
 			"SpawnerName"			"path_invader1_1"
 		}
+
+
+		// Stage 2 - Duration 20s
+		"SmallUnit_2"
+		{
+			"WaitForUnit"			"SmallUnit_1"
+			"WaitForTime"			"15"	
+
+			"NPCName"				"npc_dota_creature_small_spirit_bear"
+			"TotalUnitsToSpawn"		"10"
+			"UnitsPerSpawn"			"2"
+			"SpawnInterval"			"5"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+
+		"BigUnit_2"
+		{
+			"WaitForUnit"			"SmallUnit_1"
+			"WaitForTime"			"15"	
+
+			"NPCName"				"npc_dota_creature_large_spirit_bear"
+			"TotalUnitsToSpawn"		"5"
+			"UnitsPerSpawn"			"1"
+			"SpawnInterval"			"5"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+
+		"Chief_2"
+		{
+			"WaitForUnit"			"SmallUnit_1"
+			"WaitForTime"			"20"	
+
+			"NPCName"				"npc_dota_creature_bear_chieftain"
+			"TotalUnitsToSpawn"		"2"
+			"UnitsPerSpawn"			"1"
+			"SpawnInterval"			"10"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+
+		// Stage 3 - Duration 20s
+		"SmallUnit_3"
+		{
+			"WaitForUnit"			"SmallUnit_2"
+			"WaitForTime"			"15"	
+
+			"NPCName"				"npc_dota_creature_small_spirit_bear"
+			"TotalUnitsToSpawn"		"10"
+			"UnitsPerSpawn"			"2"
+			"SpawnInterval"			"5"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+
+		"BigUnit_3"
+		{
+			"WaitForUnit"			"SmallUnit_2"
+			"WaitForTime"			"15"	
+
+			"NPCName"				"npc_dota_creature_large_spirit_bear"
+			"TotalUnitsToSpawn"		"5"
+			"UnitsPerSpawn"			"1"
+			"SpawnInterval"			"5"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+
+		"Chief_3"
+		{
+			"WaitForUnit"			"SmallUnit_2"
+			"WaitForTime"			"20"	
+
+			"NPCName"				"npc_dota_creature_bear_chieftain"
+			"TotalUnitsToSpawn"		"2"
+			"UnitsPerSpawn"			"1"
+			"SpawnInterval"			"10"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+		"Ursa_1"
+		{	
+			"WaitForUnit"			"SmallUnit_2"
+			"WaitForTime"			"20"	
+			
+			"NPCName"				"npc_dota_creature_big_bear"
+			"TotalUnitsToSpawn"		"1"
+			"UnitsPerSpawn"			"1"
+			"SpawnInterval"			"1"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+	}
+
+	"Round8" // Satyr
+	{
+		// Duration 60s + 30 s Break
+		"round_quest_title"			"#DOTA_Holdout_Round_BearForceOne_Quest_Title"
+		"round_title"				"#DOTA_Holdout_Round_BearForceOne_Title"
+		"MaxGold"					"9900"
+		"BagCount"					"45"
+		"BagVariance"				"100"
+		"FixedXP"					"12000"
+
+		"Unit1"
+		{
+			"NPCName"				"npc_dota_neutral_satyr_trickster"
+			"TotalUnitsToSpawn"		"1"
+			"UnitsPerSpawn"			"1"
+			"SpawnInterval"			"18"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+		"Unit2"
+		{
+			"NPCName"				"npc_dota_neutral_satyr_soulstealer"
+			"TotalUnitsToSpawn"		"1"
+			"UnitsPerSpawn"			"1"
+			"SpawnInterval"			"18"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+		"Unit3"
+		{
+			"NPCName"				"npc_dota_neutral_satyr_hellcaller"
+			"TotalUnitsToSpawn"		"1"
+			"UnitsPerSpawn"			"1"
+			"SpawnInterval"			"18"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+		"Unit4"
+		{
+			"NPCName"				"npc_dota_neutral_wildkin"
+			"TotalUnitsToSpawn"		"1"
+			"UnitsPerSpawn"			"1"
+			"SpawnInterval"			"18"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+		"Unit5"
+		{
+			"NPCName"				"npc_dota_neutral_enraged_wildkin"
+			"TotalUnitsToSpawn"		"1"
+			"UnitsPerSpawn"			"1"
+			"SpawnInterval"			"18"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+	}
+
+	"Round9"
+	{
+		
+	}
+
+	"Round10"
+	{
+		
 	}
 }

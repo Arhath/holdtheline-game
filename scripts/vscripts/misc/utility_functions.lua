@@ -467,14 +467,8 @@ function SetPhasing(unit, time)
     end
     
     if time == 0 then
-
         unit:RemoveModifierByName("modifier_phasing_passive")
     else
-        
-        if unit.phasingApplier == nil then
-            unit.phasingApplier = CreateItem("item_phasing_applier", unit, unit)
-        end
-
-        unit.phasingApplier:ApplyDataDrivenModifier(unit, unit, "modifier_phasing_passive", {duration=time})
+        ApplyModifier(unit, unit, "modifier_phasing_passive", {duration=time})
     end
 end

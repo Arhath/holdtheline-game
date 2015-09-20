@@ -565,16 +565,14 @@ function CMovementSystem:UnitThinkMovement( unit )
 				local waypoint1 = Entities:FindByName(nil, self._vWaypoints[nBest])
 				local waypoint2 = Entities:FindByName(nil, self._vWaypoints[nBest + 1])
 				local pos1 = waypoint1:GetOrigin()
-				pos1.z = 256
+				pos1.z = GetGroundHeight(pos1, nil)
 				local pos2 = waypoint2:GetOrigin()
-				pos2.z = 256
-				local pos3 = unit:GetOrigin()
-				pos3.z = 256
+				pos2.z = GetGroundHeight(pos2, nil)
 
 				if pos3 == pos1 then
 					nBest = nBest + 1
 				else
-					local angletest = GetAngleBetweenVectors(pos1 - pos2, pos1 - pos3)
+					local angletest = GetAngleBetweenVectors(pos1 - pos2, pos1 - posUnit)
 						--print(string.format("angletest: %d", angletest))
 
 					--DebugDrawText(pos1, string.format("angle diff: %d", angletest), false, 2)
@@ -600,22 +598,33 @@ function CMovementSystem:UnitThinkMovement( unit )
 	if entWp ~= nil then
 		--print("found waypoint")
 		local pos = entWp:GetAbsOrigin()
+		pos.z = GetGroundHeight(pos, nil)
 
 		if unit.MovementSystem.OrderPosition == nil then
-			unit.MovementSystem.OrderPosition = GetRandomPointInAoe(pos, RANGE_NEXT_WAYPOINT)
+			unit.MovementSystem.OrderPosition = GetRandomPointInAoe(pos, RANGE_NEXT_WAYPOINT * 0.7)
+			unit.MovementSystem.OrderPosition.z = GetGroundHeight(unit.MovementSystem.OrderPosition, nil)
 		end
 
-		local dist = (pos - posUnit):Length() --GridNav:FindPathLength(posUnit, unit.MovementSystem.OrderPosition)
+		local dist1 = (pos - posUnit):Length()
+		local dist2 = (unit.MovementSystem.OrderPosition - posUnit):Length() --GridNav:FindPathLength(posUnit, unit.MovementSystem.OrderPosition)
+
 
 		--DebugDrawCircle(loc + Vector(0, 0, 100), Vector(255, 255, 255), 0, RANGE_NEXT_WAYPOINT, false, 0.25)
+		--DebugDrawText(posUnit, string.format("z: %d / %d", posUnit.z, unit.MovementSystem.OrderPosition.z), true, 0.25)
+		--DebugDrawLine(posUnit, unit.MovementSystem.OrderPosition, 0, 255, 0, true, 0.25)
 
 		self:UnitMoveToPosition(unit, unit.MovementSystem.OrderPosition)
 
-		if dist <= RANGE_NEXT_WAYPOINT then
+		if dist1 <= RANGE_NEXT_WAYPOINT and dist2 <= RANGE_NEXT_WAYPOINT / 4 then
 			if self._vWaypoints[n + 1] ~= "end" then
 				--print(string.format("waypoint reached setting next: %d", n + 1))
 				unit.MovementSystem.NextWaypoint = n + 1
-				unit.MovementSystem.OrderPosition = nil
+
+				local posWp1 = Entities:FindByName(nil, self._vWaypoints[n]):GetOrigin()
+				local posWp2 = Entities:FindByName(nil, self._vWaypoints[n + 1]):GetOrigin()
+
+				unit.MovementSystem.OrderPosition = posUnit + posWp2 - posWp1
+				unit.MovementSystem.OrderPosition.z = GetGroundHeight(unit.MovementSystem.OrderPosition, nil)
 			end
 		end
 	end

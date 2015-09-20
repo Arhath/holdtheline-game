@@ -1,6 +1,5 @@
 require( "bottle/moonwell_system" )
-require( "bottle/bottle_shop" )
-require( "utility_functions" )
+require( "bottle/bottle_shop")
 
 if CBottleSystem == nil then
 	CBottleSystem = class({})
@@ -24,6 +23,13 @@ MODIFIER_STACKS_ = {
 	"modifier_bottle_mana_stacks",
 }
 
+MODIFIER_APPLIER_ = {
+	"item_bottle_health_applier",
+	"item_bottle_mana_applier",
+}
+
+
+
 function CBottleSystem:Init( gameMode, team )
 	self._gameMode = gameMode
 	self._nTeam = team
@@ -42,7 +48,7 @@ end
 
 function CBottleSystem:InitBottleShop(hero)
 	local id = hero:GetPlayerOwnerID()
-	print(string.format("player owner: %d", id))
+	--print(string.format("player owner: %d", id))
 
 	if Entities:FindByName(nil, "BottleShopPedestal" .. id) ~= nil then
 		local bottleShopObj = CBottleShop:CreateBottleShop("BottleShopPedestal" .. id, "BottleShopBottle" .. id, hero, self)
@@ -66,8 +72,8 @@ function CBottleSystem:GetTickrate()
 end
 
 function CBottleSystem:OnHeroSpawned( hero )
-	ApplyModifier(hero, hero, MODIFIER_STACKS_[BOTTLE_HEALTH], {duration=-1}, true)
-	--self:BottleAddCharges(hero, BOTTLE_HEALTH, hero.BottleSystem[BOTTLE_HEALTH].Charges)
+	ApplyModifier(hero, hero, MODIFIER_STACKS_[BOTTLE_HEALTH], {duration=-1})
+	self:BottleAddCharges(hero, BOTTLE_HEALTH, hero.BottleSystem[BOTTLE_HEALTH].Charges)
 end
 
 
@@ -84,7 +90,6 @@ function CBottleSystem:OnHeroInGame( hero )
 			ChargesCost = 25,
 			Lvl = 1,
 			Ability = hero:AddAbility("bottle_health"),
-			BuffApplier = CreateItem("item_bottle_health_applier", hero, hero),
 			Think = {
 				TimeLeft = 0,
 				Healing = 0,
@@ -108,7 +113,7 @@ function CBottleSystem:OnHeroInGame( hero )
 
 	table.insert(self._vHeroes, hero)
 
-	ApplyModifier(hero, hero, MODIFIER_STACKS_[BOTTLE_HEALTH], {duration=-1}, true)
+	ApplyModifier(hero, hero, MODIFIER_STACKS_[BOTTLE_HEALTH], {duration=-1})
 	
 	self:BottleAddCharges(hero, BOTTLE_HEALTH, 100)
 end
@@ -154,8 +159,8 @@ function CBottleSystem:BottleActivate(hero, target, bottle)
 	target:RemoveModifierByName(MODIFIER_[bottle])
 	target:RemoveModifierByName(MODIFIER_FX_[bottle])
 
-	ApplyModifier(hero, target, MODIFIER_[bottle], {duration=hero.BottleSystem[bottle].Think.TimeLeft}, true)
-	ApplyModifier(hero, target, MODIFIER_FX_[bottle], {duration=hero.BottleSystem[bottle].Think.TimeLeft}, true)
+	ApplyModifier(hero, target, MODIFIER_[bottle], {duration=hero.BottleSystem[bottle].Think.TimeLeft})
+	ApplyModifier(hero, target, MODIFIER_FX_[bottle], {duration=hero.BottleSystem[bottle].Think.TimeLeft})
 
 	Timers:CreateTimer(function()
 		return CBottleSystem:BottleThink(hero, target, bottle)
@@ -263,8 +268,8 @@ function CBottleSystem:BottleAddCharges( hero, bottle, charges)
 	end
 
 	hero:SetModifierStackCount(MODIFIER_STACKS_[bottle], hero, math.floor(hero.BottleSystem[bottle].Charges))
-	print(string.format("charges: %f", hero.BottleSystem[bottle].Charges))
-	print(string.format("refilled: %f", chargesUsed))
+	--print(string.format("charges: %f", hero.BottleSystem[bottle].Charges))
+	--print(string.format("refilled: %f", chargesUsed))
 	return chargesUsed
 end
 
