@@ -40,6 +40,7 @@ end
 function Precache( context )
 	--PrecacheResource( "particle", "particles/generic_gameplay/winter_effects_hero.vpcf", context )
 	PrecacheUnitByNameSync("treant_mushroom_creature_big", context)
+	PrecacheUnitByNameSync("treant_flower_creature_big", context)
 	PrecacheResource( "particle", "particles/items2_fx/veil_of_discord.vpcf", context )	
 	PrecacheResource( "particle_folder", "particles/frostivus_gameplay", context )
 	PrecacheResource( "particle_folder", "particles/units/heroes/hero_elder_titan", context )

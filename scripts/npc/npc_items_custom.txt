@@ -60,7 +60,7 @@
 
 				"EffectName"			"particles/econ/items/effigies/status_fx_effigies/jade_effigy_ambient_b.vpcf"
 				"EffectAttachType"		"follow_overhead"
-			
+			}
 
 			"modifier_glyph_mana"
 			{

@@ -261,7 +261,7 @@ function CGateObj:Update()
 					self._bNeedUpdate = false
 				end
 			else
-				self._fCapTime = self._fCapTime	- timePassed * self._fCapSpeed
+				self._fCapTime = self._fCapTime	- timePassed
 			end
 		end
 
