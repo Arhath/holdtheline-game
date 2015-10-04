@@ -431,13 +431,12 @@ function CHoldoutGameRound:_CheckForGoldBagDrop( killedUnit )
 	self._nGoldRemainingInRound = math.max( 0, self._nGoldRemainingInRound - nGoldToDrop )
 	self._nGoldBagsRemaining = math.max( 0, self._nGoldBagsRemaining - 1 )
 
-	--[[local newItem = CreateItem( "item_bag_of_gold", nil, nil )
+	local newItem = CreateItem( "item_bag_of_gold", nil, nil )
 	newItem:SetPurchaseTime( nGoldToDrop )
 	newItem:SetCurrentCharges( 0 )
 	local drop = CreateItemOnPositionSync( killedUnit:GetAbsOrigin(), newItem )
 	local dropTarget = killedUnit:GetAbsOrigin() + RandomVector( RandomFloat( 50, 350 ) )
 	newItem:LaunchLoot( true, 300, 0.75, dropTarget )
-	]]
 end
 
 

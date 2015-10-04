@@ -18,19 +18,6 @@
 	
 		"Modifiers"
 		{
-			"modifier_glyph_mana"
-			{
-				"Passive"				"1"
-				"IsHidden"				"0"
-				"IsDebuff"				"0"
-				"TextureName"			"item_arcane_boots"
-				
-				"EffectName"			"particles/items_fx/healing_clarity.vpcf"
-				"EffectAttachType"		"follow_absorigin"
-			}
-
-
-
 			"modifier_teleport_start_fx"
 			{
 				"Passive"				"1"
@@ -63,7 +50,6 @@
 				"EffectName"			"particles/items_fx/healing_flask.vpcf"
 				"EffectAttachType"		"follow_absorigin"
 			}
-
 			"modifier_bottle_health_fx"
 			{
 				"Passive"				"1"
@@ -80,37 +66,6 @@
 				"IsHidden"				"0"
 				"IsDebuff"				"0"
 				"TextureName"			"item_flask"
-			}
-
-
-
-			"modifier_bottle_mana_passive"
-			{
-				"Passive"				"1"
-				"IsHidden"				"0"
-				"IsDebuff"				"0"
-				"TextureName"			"item_clarity"
-				
-				"EffectName"			"particles/items_fx/healing_clarity.vpcf"
-				"EffectAttachType"		"follow_absorigin"
-			}
-
-			"modifier_bottle_mana_fx"
-			{
-				"Passive"				"1"
-				"IsHidden"				"1"
-				"IsDebuff"				"0"
-				
-				"EffectName"			"particles/items_fx/healing_clarity_b.vpcf"
-				"EffectAttachType"		"follow_overhead"
-			}
-			
-			"modifier_bottle_mana_stacks"
-			{
-				"Passive"				"1"
-				"IsHidden"				"0"
-				"IsDebuff"				"0"
-				"TextureName"			"item_clarity"
 			}
 			
 			
@@ -178,17 +133,15 @@
 	//=================================================================================================================
 	"item_glyph_mana"
 	{
-		"ID"							"1906"	
 		// General
 		//-------------------------------------------------------------------------------------------------------------
+		"AbilityName"					"item_glyph_mana"
 		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_UNIT_TARGET | DOTA_ABILITY_BEHAVIOR_IMMEDIATE | DOTA_ABILITY_BEHAVIOR_DONT_RESUME_ATTACK"
 		"AbilityUnitTargetTeam"			"DOTA_UNIT_TARGET_TEAM_FRIENDLY"
 		"AbilityUnitTargetType"			"DOTA_UNIT_TARGET_HERO"
-		"Model"							"models/props_gameplay/rune_doubledamage01.vmdl"
-		"ModelScale"  					"2.5"
-		"BaseClass"						"item_datadriven"
+		"Model"							"models/props_gameplay/rune_doubledamage01.vmdll"
 		"ItemKillable"					"0"
-
+		
 		// Stats
 		//-------------------------------------------------------------------------------------------------------------
 		"AbilityCastRange"				"100"
@@ -204,7 +157,7 @@
 		"ItemShareability"				"ITEM_FULLY_SHAREABLE"
 		"ItemPermanent"					"0"
 		"ItemInitialCharges"			"1"
-		"SideShop"						"0"
+		"ItemKillable"					"0"
 	}
 	
 	//=================================================================================================================

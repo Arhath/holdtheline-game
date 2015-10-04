@@ -48,9 +48,7 @@ function CGateObj:AddGateUnit( unit )
 		return
 	end
 	print("add gate unit")
-	--self._entGate:SetControllableByPlayer(unit:GetPlayerOwnerID(), true)
 	table.insert(self._vHeroes, unit)
-	self:UpdateCapSpeed()
 	self._bNeedUpdate = true
 end
 
@@ -59,7 +57,6 @@ function CGateObj:RemoveGateUnit( unit )
 	for i, u in pairs(self._vHeroes) do
 		if unit == u then
 			table.remove(self._vHeroes, i)
-			self:UpdateCapSpeed()
 			self._bNeedUpdate = true
 			print("remove gate unit")
 		end
@@ -68,21 +65,12 @@ end
 
 
 function CGateObj:CreateGate( str , gateSystem, team )
-	local gateObj = CGateObj()
+	local moonwellObj = CGateObj()
 	if CGateObj:Init(str , gateSystem, team) then
 		return CGateObj
 	end
 	
 	return nil
-end
-
-
-function CGateObj:UpdateCapSpeed()
-	self._fCapSpeed = 0
-
-	for i = 1, #self._vHeroes do
-		self._fCapSpeed = self._fCapSpeed + 1 / i
-	end
 end
 
 
@@ -236,6 +224,7 @@ function CGateObj:Fortifie()
 	self._bFortifieTime = 10.0
 end
 
+
 function CGateObj:Update()
 	local timePassed = GameRules:GetGameTime() - self._fLastFrame
 	if self._bNeedUpdate or self._bFortifie then
@@ -249,7 +238,7 @@ function CGateObj:Update()
 					self._bNeedUpdate = false
 				end
 			else
-				self._fCapTime = self._fCapTime	+ timePassed * self._fCapSpeed
+				self._fCapTime = self._fCapTime	+ timePassed --* 7
 			end
 		else
 			if self._fCapTime <= 0 then
@@ -261,7 +250,7 @@ function CGateObj:Update()
 					self._bNeedUpdate = false
 				end
 			else
-				self._fCapTime = self._fCapTime	- timePassed * self._fCapSpeed
+				self._fCapTime = self._fCapTime	- timePassed --* 7
 			end
 		end
 

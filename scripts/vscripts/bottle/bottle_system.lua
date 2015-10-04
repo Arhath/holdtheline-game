@@ -1,6 +1,5 @@
 require( "bottle/moonwell_system" )
 require( "bottle/bottle_shop")
-require( "bottle/glyph_system")
 
 if CBottleSystem == nil then
 	CBottleSystem = class({})
@@ -29,11 +28,6 @@ MODIFIER_APPLIER_ = {
 	"item_bottle_mana_applier",
 }
 
-ABILITY_ = {
-	"bottle_health",
-	"bottle_mana",
-}
-
 
 
 function CBottleSystem:Init( gameMode, team )
@@ -43,8 +37,6 @@ function CBottleSystem:Init( gameMode, team )
 	self._vMoonwells = {}
 	self._vBottleShops = {}
 	self:InitMoonwells()
-
-	self._vGlyphs = {}
 
 	--Timers:CreateTimer(function()
 		--CBottleSystem:Update()
@@ -79,86 +71,9 @@ function CBottleSystem:GetTickrate()
 	return 0.25
 end
 
-
-function CBottleSystem:OnItemPickedUp( event )
-	local item = EntIndexToHScript(event.ItemEntityIndex)
-	local hero = EntIndexToHScript(event.HeroEntityIndex)
-	local player = hero:GetPlayerOwner()
-	print("try pickup")
-
-	if item ~= nil then
-		print("item exists")
-	end
-
-	local glyph = self:GetGlyph(item)
-
-	if glyph ~= nil then
-		print("picking up")
-		UTIL_Remove(item)
-		self:HeroPickUpGlyph(hero, glyph)
-	end
-end
-
-
-function CBottleSystem:GetGlyph(item)
-	for _, glyph in pairs(self._vGlyphs) do
-		if item:entindex() == glyph._entGlyphIndex then
-			return glyph
-		end
-	end
-
-	return nil
-end
-
-
-function CBottleSystem:SpawnGlyphOnPosition( pos, nType, lvl )
-	if not IsValidGlyph(nType) then
-		return false
-	end
-
-	print("spawning glyph")
-
-	local glyphObj = CGlyphObj:CreateGlyph(nType, lvl, self)
-
-	if glyphObj == nil then
-		return
-	end
-
-	table.insert(self._vGlyphs, glyphObj)
-
-	print("glyph created")
-
-	glyphObj:SpawnOnPosition(pos)
-
-	return true
-end
-
-
-function CBottleSystem:HeroPickUpGlyph( hero, glyph )
-	local glyphBottle = glyph:GetBottleType()
-
-	if hero.BottleSystem[glyphBottle].Glyph == nil then
-		hero:RemoveAbility(ABILITY_[glyphBottle])
-	else
-		hero.BottleSystem[glyphBottle].Glyph:Activate()
-		hero:RemoveAbility(GLYPH_ABILITY_[hero.BottleSystem[glyphBottle].Glyph._nType])
-		hero.BottleSystem[glyphBottle].Glyph = nil
-	end
-
-	hero.BottleSystem[glyphBottle].Glyph = glyph
-	hero.BottleSystem[glyphBottle].Ability = hero:AddAbility(GLYPH_ABILITY_[glyph._nType])
-	hero.BottleSystem[glyphBottle].Ability:SetLevel(glyph._nLevel)
-	glyph:PickUp(hero)
-
-	self:HeroUpdateBottle(hero, glyphBottle)
-end
-
-
 function CBottleSystem:OnHeroSpawned( hero )
-	for i = 1, 2 do
-		ApplyModifier(hero, hero, MODIFIER_STACKS_[i], {duration=-1})
-		self:BottleAddCharges(hero, i, hero.BottleSystem[i].ChargesMax)
-	end
+	ApplyModifier(hero, hero, MODIFIER_STACKS_[BOTTLE_HEALTH], {duration=-1})
+	self:BottleAddCharges(hero, BOTTLE_HEALTH, hero.BottleSystem[BOTTLE_HEALTH].Charges)
 end
 
 
@@ -174,31 +89,20 @@ function CBottleSystem:OnHeroInGame( hero )
 			ChargesMax = 100,
 			ChargesCost = 25,
 			Lvl = 1,
-			Ability = hero:AddAbility(ABILITY_[1]),
+			Ability = hero:AddAbility("bottle_health"),
 			Think = {
 				TimeLeft = 0,
 				Healing = 0,
 				HealInstant = 0,
 				Hps = 0,
 				Tickrate = 0.2,
-			},
-			Glyph = nil,
+			}
 		},
 		--Mana Bottle
 		{
-			Charges = 0,
-			ChargesMax = 100,
-			ChargesCost = 25,
+			Charges = 3,
+			ChargesMax = 3,
 			Lvl = 1,
-			Ability = hero:AddAbility(ABILITY_[2]),
-			Think = {
-				TimeLeft = 0,
-				Healing = 0,
-				HealInstant = 0,
-				Hps = 0,
-				Tickrate = 0.2,
-			},
-			Glyph = nil,
 		},
 
 		BottleShop = nil
@@ -209,117 +113,41 @@ function CBottleSystem:OnHeroInGame( hero )
 
 	table.insert(self._vHeroes, hero)
 
-	for i = 1, 2 do
-		ApplyModifier(hero, hero, MODIFIER_STACKS_[i], {duration=-1})
-
-		self:BottleAddCharges(hero, i, 100)
-	end
+	ApplyModifier(hero, hero, MODIFIER_STACKS_[BOTTLE_HEALTH], {duration=-1})
+	
+	self:BottleAddCharges(hero, BOTTLE_HEALTH, 100)
 end
 
 function CBottleSystem:HeroUpdateBottle(hero, bottle)
-	--if bottle ~= 1 then
-	--	return
-	--end
-
 	local data = hero.BottleSystem.BottleShop:GetUpgradeLevels(bottle)
 
 	hero.BottleSystem[bottle].ChargesMax = 100 + (data[6]-1) * 10
 	hero.BottleSystem[bottle].ChargesCost = 20 - (data[5]-1) * 2
-
-	if hero:HasAbility(ABILITY_[bottle]) then
-
-		local pctCharges = hero.BottleSystem[bottle].Charges / hero.BottleSystem[bottle].ChargesMax
-
-		if hero.BottleSystem[bottle].Charges < hero.BottleSystem[bottle].ChargesCost then
-			if hero.BottleSystem[bottle].Ability:GetLevel() ~= 0 then
-				hero.BottleSystem[bottle].Ability:SetLevel(0)
-			end
-		elseif pctCharges >= 1 then
-			if hero.BottleSystem[bottle].Ability:GetLevel() ~= 4 then
-				hero.BottleSystem[bottle].Ability:SetLevel(4)
-			end
-		elseif pctCharges >= 0.75 then
-				if hero.BottleSystem[bottle].Ability:GetLevel() ~= 3 then
-				hero.BottleSystem[bottle].Ability:SetLevel(3)
-			end
-		elseif pctCharges >= 0.5 then
-			if hero.BottleSystem[bottle].Ability:GetLevel() ~= 2 then
-				hero.BottleSystem[bottle].Ability:SetLevel(2)
-			end
-		elseif pctCharges >= 0.25 then
-			if hero.BottleSystem[bottle].Ability:GetLevel() ~= 1 then
-				hero.BottleSystem[bottle].Ability:SetLevel(1)
-			end
-		end
-	end
 end
 
 
 function CBottleSystem:HeroUseBottle( hero, target, bottle )
-	local bReturn = false
-
-	if hero.BottleSystem[bottle].Glyph ~= nil then
-		print("glyph")
-		hero.BottleSystem[bottle].Glyph:Activate()
-		hero:RemoveAbility(GLYPH_ABILITY_[hero.BottleSystem[bottle].Glyph._nType])
-		hero.BottleSystem[bottle].Glyph = nil
-		hero.BottleSystem[bottle].Ability = hero:AddAbility(ABILITY_[bottle])
-
-		bReturn = true
-	else
-		print("no glyph")
-		if hero.BottleSystem[bottle].Charges >= hero.BottleSystem[bottle].ChargesCost then
-			self:BottleAddCharges(hero, bottle, -hero.BottleSystem[bottle].ChargesCost)
-			self:BottleActivate(hero, target, bottle)
-			bReturn = true
-		end
+	if hero.BottleSystem[bottle].Charges >= hero.BottleSystem[bottle].ChargesCost then
+		self:BottleAddCharges(hero, bottle, -hero.BottleSystem[bottle].ChargesCost)
+		self:BottleActivate(hero, target, bottle)
+		return true
 	end
-
-	self:HeroUpdateBottle(hero, bottle)
-
-	return bReturn
-end
-
-function CBottleSystem:HeroGetUpgradeLevelsCombined( hero, bottle )
-	local data = hero.BottleSystem.BottleShop:GetUpgradeLevels(bottle)
-
-	local sum = 0
-
-	for i = 1, #data do
-		sum = sum + data[i]
-	end
-
-	return sum
+	return false
 end
 
 
 function CBottleSystem:BottleCalcThink( hero, bottle )
 	local data = hero.BottleSystem.BottleShop:GetUpgradeLevels(bottle)
 
-	if bottle == BOTTLE_HEALTH then
+	local healTime = 		4 + 1 * ( data[3] - 1 )
+	local healPct = 		( 0.3 + ( data[1] - 1 ) * 0.1 ) * healTime / 4
+	local healPctInstant = 	0.2 + ( data[2] - 1 ) * 0.5 * healPct
+	local hps =				1 + ( data[4] - 1 ) * 0.1
 
-		local healTime = 		4 + 1 * ( data[3] - 1 )
-		local healPct = 		( 0.3 + ( data[1] - 1 ) * 0.1 ) * healTime / 4
-		local healPctInstant = 	0.2 + ( data[2] - 1 ) * 0.5 * healPct
-		local hps =				1 + ( data[4] - 1 ) * 0.1
-
-		hero.BottleSystem[bottle].Think.HealInstant = hero:GetMaxHealth() * healPctInstant
-		hero.BottleSystem[bottle].Think.Healing = hero:GetMaxHealth() * healPct * hps
-		hero.BottleSystem[bottle].Think.TimeLeft = healTime
-		hero.BottleSystem[bottle].Think.Hps = hero.BottleSystem[bottle].Think.Healing / healTime
-
-	elseif bottle == BOTTLE_MANA then
-
-		local healTime = 		4 + 1 * ( data[3] - 1 )
-		local healPct = 		( 0.3 + ( data[1] - 1 ) * 0.1 ) * healTime / 4
-		local healPctInstant = 	0.2 + ( data[2] - 1 ) * 0.5 * healPct
-		local hps =				1 + ( data[4] - 1 ) * 0.1
-
-		hero.BottleSystem[bottle].Think.HealInstant = hero:GetMaxMana() * healPctInstant
-		hero.BottleSystem[bottle].Think.Healing = hero:GetMaxMana() * healPct * hps
-		hero.BottleSystem[bottle].Think.TimeLeft = healTime
-		hero.BottleSystem[bottle].Think.Hps = hero.BottleSystem[bottle].Think.Healing / healTime
-	end
+	hero.BottleSystem[bottle].Think.HealInstant = hero:GetMaxHealth() * healPctInstant
+	hero.BottleSystem[bottle].Think.Healing = hero:GetMaxHealth() * healPct * hps
+	hero.BottleSystem[bottle].Think.TimeLeft = healTime
+	hero.BottleSystem[bottle].Think.Hps = hero.BottleSystem[bottle].Think.Healing / healTime
 end
 
 
@@ -415,8 +243,29 @@ function CBottleSystem:BottleAddCharges( hero, bottle, charges)
 		end
 	end
 
-	self:HeroUpdateBottle(hero, bottle)
-	
+	local pctCharges = hero.BottleSystem[bottle].Charges / hero.BottleSystem[bottle].ChargesMax
+
+	if hero.BottleSystem[bottle].Charges < hero.BottleSystem[bottle].ChargesCost then
+		if hero.BottleSystem[bottle].Ability:GetLevel() ~= 0 then
+			hero.BottleSystem[bottle].Ability:SetLevel(0)
+		end
+	elseif pctCharges >= 1 then
+		if hero.BottleSystem[bottle].Ability:GetLevel() ~= 4 then
+			hero.BottleSystem[bottle].Ability:SetLevel(4)
+		end
+	elseif pctCharges >= 0.75 then
+			if hero.BottleSystem[bottle].Ability:GetLevel() ~= 3 then
+			hero.BottleSystem[bottle].Ability:SetLevel(3)
+		end
+	elseif pctCharges >= 0.5 then
+		if hero.BottleSystem[bottle].Ability:GetLevel() ~= 2 then
+			hero.BottleSystem[bottle].Ability:SetLevel(2)
+		end
+	elseif pctCharges >= 0.25 then
+		if hero.BottleSystem[bottle].Ability:GetLevel() ~= 1 then
+			hero.BottleSystem[bottle].Ability:SetLevel(1)
+		end
+	end
 
 	hero:SetModifierStackCount(MODIFIER_STACKS_[bottle], hero, math.floor(hero.BottleSystem[bottle].Charges))
 	--print(string.format("charges: %f", hero.BottleSystem[bottle].Charges))

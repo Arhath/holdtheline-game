@@ -4,27 +4,6 @@
 {
 	"Version"		"1"
 
-	"glyph_ability_mana"
-	{
-		// General
-		//-------------------------------------------------------------------------------------------------------------
-		"AbilityName"					"glyph_ability_mana"
-		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_IMMEDIATE | DOTA_ABILITY_BEHAVIOR_NO_TARGET | DOTA_ABILITY_BEHAVIOR_IGNORE_CHANNEL"
-		"BaseClass" 					"ability_lua"
-		"ScriptFile"					"abilities/bottle_abilities.lua"
-		"AbilityTextureName"            "keeper_of_the_light_chakra_magic"
-
-		// Stats		
-		//-------------------------------------------------------------------------------------------------------------
-		"AbilityCooldown"				"1.0"
-
-		"RequiredLevel"					"1000"
-
-		// Item Info
-		//-------------------------------------------------------------------------------------------------------------
-		"AbilityManaCost"				"0"
-	}
-
 	"ability_placeholder"
 	{
 		// General
@@ -69,7 +48,7 @@
 		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_IMMEDIATE | DOTA_ABILITY_BEHAVIOR_NO_TARGET | DOTA_ABILITY_BEHAVIOR_IGNORE_CHANNEL"
 		"BaseClass" 					"ability_lua"
 		"ScriptFile"					"abilities/bottle_abilities.lua"
-		"AbilityTextureName"            "bottle_shop_ability_toggle"
+		"AbilityTextureName"            "alchemist_unstable_concoction"
 
 		// Stats		
 		//-------------------------------------------------------------------------------------------------------------
@@ -362,8 +341,6 @@
 		//-------------------------------------------------------------------------------------------------------------
 		"AbilityCooldown"				"0.2"
 
-		"RequiredLevel"					"1000"
-
 		// Item Info
 		//-------------------------------------------------------------------------------------------------------------
 		"AbilityManaCost"				"0"
@@ -396,14 +373,12 @@
 		"AbilityUnitTargetType"			"DOTA_UNIT_TARGET_HERO | DOTA_UNIT_TARGET_CREEP"
 		"BaseClass" 					"ability_lua"
 		"ScriptFile"					"abilities/bottle_abilities.lua"
-		"AbilityTextureName"            "keeper_of_the_light_mana_leak"
+		"AbilityTextureName"            "alchemist_unstable_concoction"
 
 		// Stats		
 		//-------------------------------------------------------------------------------------------------------------
 		"AbilityCooldown"				"0.2"
 
-		"RequiredLevel"					"1000"
-		
 		// Item Info
 		//-------------------------------------------------------------------------------------------------------------
 		"AbilityManaCost"				"0"

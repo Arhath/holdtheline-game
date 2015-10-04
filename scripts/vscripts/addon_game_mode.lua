@@ -54,7 +54,6 @@ function Precache( context )
 	PrecacheResource( "particle", "particles/econ/items/tinker/boots_of_travel/teleport_end_bots.vpcf", context )
 	PrecacheItemByNameSync( "item_tombstone", context )
 	PrecacheItemByNameSync( "item_bag_of_gold", context )
-	PrecacheItemByNameSync( "item_glyph_mana", context )
 	PrecacheItemByNameSync( "item_slippers_of_halcyon", context )
 	PrecacheItemByNameSync( "item_greater_clarity", context )
 end
@@ -190,7 +189,6 @@ function CHoldoutGameMode:InitGameMode()
 
 
 	CustomGameEventManager:RegisterListener( "unit_right_click", Dynamic_Wrap(CHoldoutGameMode, "OnUnitRightClick"))
-	CustomGameEventManager:RegisterListener( "unit_left_click", Dynamic_Wrap(CHoldoutGameMode, "OnUnitLeftClick"))
 	
 
 
@@ -344,27 +342,6 @@ function CHoldoutGameMode:OnUnitRightClick( event )
 		UnitTeleportToPosition(unit, mPos, true)
 		print(eventName)
 	end
-
-	--
-end
-
-function CHoldoutGameMode:OnUnitLeftClick( event )
-	local pID = event.pID
-	local unit = EntIndexToHScript(event.mainSelected)
-	local mPos = Vector(0, 0, 0)
-	local eventName = event.name
-
-	mPos.x = event.mouseX
-	mPos.y = event.mouseY
-	--mPos.z = GetGroundHeight(mPos, nil)
-
-	--if eventName == "doublepressed" then
-
-		--SafeSpawnCreature("npc_dota_creature_kobold_tunneler", mPos, 50, mPos.z, nil, nil, DOTA_TEAM_BADGUYS)
-		unit:SetControllableByPlayer(pID, true)
-		--UnitTeleportToPosition(unit, mPos, true)
-		print(eventName)
-	--end
 
 	--
 end
@@ -549,7 +526,7 @@ function CHoldoutGameMode:_ThinkPrepTime()
 	if GameRules:GetGameTime() >= self._flPrepTimeEnd then
 		self._flPrepTimeEnd = nil
 		if self._entPrepTimeQuest then
-			UTIL_Remove( self._entPrepTimeQuest )
+			UTIL_RemoveImmediate( self._entPrepTimeQuest )
 			self._entPrepTimeQuest = nil
 		end
 
@@ -610,9 +587,9 @@ function CHoldoutGameMode:_ProcessItemForLootExpiry( item, flCutoffTime )
 	ParticleManager:ReleaseParticleIndex( nFXIndex )
 	local inventoryItem = item:GetContainedItem()
 	if inventoryItem then
-		UTIL_Remove( inventoryItem )
+		UTIL_RemoveImmediate( inventoryItem )
 	end
-	UTIL_Remove( item )
+	UTIL_RemoveImmediate( item )
 	return false
 end
 
@@ -743,7 +720,6 @@ function CHoldoutGameMode:OnEntityKilled( event )
 
 		if killedUnit.Holdout_CoreNum ~= nil then
 			self._vRounds[killedUnit.Holdout_CoreNum]:OnEntityKilled( event )
-			self._bottleSystem:SpawnGlyphOnPosition(killedUnit:GetAbsOrigin(), 1, 1)
 		end 
 	end
 	
@@ -751,9 +727,6 @@ function CHoldoutGameMode:OnEntityKilled( event )
 end
 
 function CHoldoutGameMode:OnItemPickedUp( event )
-
-	self._bottleSystem:OnItemPickedUp(event)
-
 	if event.itemname == "item_bag_of_gold" then
 
 		local item = EntIndexToHScript(event.ItemEntityIndex)
@@ -865,7 +838,7 @@ function CHoldoutGameMode:_TestRoundConsoleCommand( cmdName, roundNumber, delay 
 	end
 
 	if self._entPrepTimeQuest then
-		UTIL_Remove( self._entPrepTimeQuest )
+		UTIL_RemoveImmediate( self._entPrepTimeQuest )
 		self._entPrepTimeQuest = nil
 	end
 
@@ -877,9 +850,9 @@ function CHoldoutGameMode:_TestRoundConsoleCommand( cmdName, roundNumber, delay 
 	for _,item in pairs( Entities:FindAllByClassname( "dota_item_drop")) do
 		local containedItem = item:GetContainedItem()
 		if containedItem then
-			UTIL_Remove( containedItem )
+			UTIL_RemoveImmediate( containedItem )
 		end
-		UTIL_Remove( item )
+		UTIL_RemoveImmediate( item )
 	end
 
 	if self._entAncient and not self._entAncient:IsNull() then
