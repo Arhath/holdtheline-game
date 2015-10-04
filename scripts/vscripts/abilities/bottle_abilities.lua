@@ -82,6 +82,97 @@ end
 --------------------------------------------------------------------------------
 
 
+bottle_mana = class({})
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_mana:CastFilterResultTarget( hTarget )
+	return UF_SUCCESS
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_mana:GetCustomCastErrorTarget( hTarget )
+	return ""
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_mana:GetCooldown( nLevel )
+	return self.BaseClass.GetCooldown( self, nLevel )
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function bottle_mana:OnSpellStart()
+
+	local hCaster = self:GetCaster()
+	local hTarget = self:GetCursorTarget()
+
+	if hCaster == nil or hTarget == nil then
+		return
+	end
+
+	if hCaster.BottleSystem == nil then
+		return
+	end
+
+	local bUseBottle = GameRules.holdOut._bottleSystem:HeroUseBottle(hCaster, hTarget, BOTTLE_MANA)
+
+	if bUseBottle then
+		print("ability used health bottle !!!")
+	end
+end
+ 
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+
+glyph_ability_mana = class({})
+ 
+--------------------------------------------------------------------------------
+ 
+function glyph_ability_mana:CastFilterResultTarget( hTarget )
+	return UF_SUCCESS
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function glyph_ability_mana:GetCustomCastErrorTarget( hTarget )
+	return ""
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function glyph_ability_mana:GetCooldown( nLevel )
+	return self.BaseClass.GetCooldown( self, nLevel )
+end
+ 
+--------------------------------------------------------------------------------
+ 
+function glyph_ability_mana:OnSpellStart()
+
+	local hCaster = self:GetCaster()
+
+	if hCaster == nil then
+		return
+	end
+
+	if hCaster.BottleSystem == nil then
+		return
+	end
+
+	local bUseBottle = GameRules.holdOut._bottleSystem:HeroUseBottle(hCaster, hTarget, BOTTLE_HEALTH)
+
+	if bUseBottle then
+		print("ability used health bottle !!!")
+	end
+end
+ 
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+
 
 
 

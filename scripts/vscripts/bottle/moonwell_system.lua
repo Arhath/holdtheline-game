@@ -82,7 +82,7 @@ function CMoonwell:RefillBottles()
 
 	while manaToUse - manaUsed > 0 and #BottleUnits > 0 do
 		for n, u in pairs(BottleUnits) do
-			if IsBottleFull(u, BOTTLE_HEALTH) then --and self._bottleSystem:IsBottleFull(u, BOTTLE_MANA) then
+			if IsBottleFull(u, BOTTLE_HEALTH) and IsBottleFull(u, BOTTLE_MANA) then
 				table.remove(BottleUnits, n)
 			end
 		end
@@ -91,9 +91,22 @@ function CMoonwell:RefillBottles()
 
 		for n, u in pairs(BottleUnits) do
 			if u.BottleSystem ~= nil then
-				manaUsed = manaUsed + self._bottleSystem:BottleAddCharges(u, BOTTLE_HEALTH, refillAmount)
+					manaUsed = manaUsed + refillAmount
 
-					--manaLeft = refillUnit - self._bottleSystem:BottleAddCharges(u, BOTTLE_MANA, manaLeft)
+					local healMax = u.BottleSystem[BOTTLE_HEALTH].ChargesMax
+					local manaMax = u.BottleSystem[BOTTLE_MANA].ChargesMax
+					local sumCharges = healMax + manaMax
+
+					local healPct = healMax / sumCharges
+					local manaPct = manaMax / sumCharges
+
+					refillAmount = refillAmount - self._bottleSystem:BottleAddCharges(u, BOTTLE_HEALTH, refillAmount * healPct)
+
+					refillAmount = refillAmount - self._bottleSystem:BottleAddCharges(u, BOTTLE_MANA, refillAmount)
+
+					refillAmount = refillAmount - self._bottleSystem:BottleAddCharges(u, BOTTLE_HEALTH, refillAmount)
+
+					manaUsed = manaUsed - refillAmount
 			end
 		end
 	end
