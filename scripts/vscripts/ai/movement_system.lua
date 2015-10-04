@@ -190,8 +190,8 @@ function CMovementSystem:Init( gameMode, team)
 
 	self._vWaypoints =
 	{
-	"path_invader1_1", "path_invader1_2", "path_invader1_3", "path_invader1_4", "path_invader1_5", "path_invader1_6", "path_invader1_7", "path_invader1_8", "path_invader1_9", "path_invader1_10", "path_invader1_11", "path_invader1_12", "path_invader1_13", "path_invader1_14", "path_invader1_15", "path_invader1_16", "path_invader1_17", "path_invader1_18", "path_invader1_19", "path_invader1_20", "path_invader1_21", "path_invader1_22", "path_invader1_23", "end",
-	"path_invader2_1", "path_invader2_2", "path_invader2_3", "path_invader2_4", "path_invader2_5", "path_invader2_6", "path_invader2_7", "path_invader2_8", "path_invader2_9", "path_invader2_10", "path_invader2_11", "path_invader2_12", "path_invader2_13", "path_invader2_14", "path_invader2_15", "path_invader2_16", "path_invader2_17", "path_invader2_18", "path_invader2_19", "path_invader2_20", "path_invader2_21", "path_invader2_22", "path_invader2_23", "end"
+	"path_invader1_1", "path_invader1_2", "path_invader1_3", "path_invader1_4", "path_invader1_5", "path_invader1_6", "path_invader1_7", "path_invader1_8", "path_invader1_9", "path_invader1_10", "path_invader1_11", "path_invader1_12", "path_invader1_13", "path_invader1_14", "path_invader1_15", "path_invader1_16", "path_invader1_17", "path_invader1_18", "path_invader1_19", "path_invader1_20", "path_invader1_21", "path_invader1_22", "path_invader_end", "end",
+	"path_invader2_1", "path_invader2_2", "path_invader2_3", "path_invader2_4", "path_invader2_5", "path_invader2_6", "path_invader2_7", "path_invader2_8", "path_invader2_9", "path_invader2_10", "path_invader2_11", "path_invader2_12", "path_invader2_13", "path_invader2_14", "path_invader2_15", "path_invader2_16", "path_invader2_17", "path_invader2_18", "path_invader2_19", "path_invader2_20", "path_invader2_21", "path_invader2_22", "path_invader_end", "end"
 	}
 
 	self.NextUpdate = GameRules:GetGameTime()
@@ -277,7 +277,7 @@ function CMovementSystem:UnitThink( unit )
 			unit.MovementSystem.NextWaypoint = nil
 		end
 	else
-
+		
 		if unit.MovementSystem.StuckTime >= MAX_STUCK_TIME then
 			SetPhasing(unit, 2)
 			unit.MovementSystem.StuckTime = 0
@@ -601,7 +601,7 @@ function CMovementSystem:UnitThinkMovement( unit )
 		pos.z = GetGroundHeight(pos, nil)
 
 		if unit.MovementSystem.OrderPosition == nil then
-			unit.MovementSystem.OrderPosition = GetRandomPointInAoe(pos, RANGE_NEXT_WAYPOINT * 0.7)
+			unit.MovementSystem.OrderPosition = GetRandomPointInAoe(pos, RANGE_NEXT_WAYPOINT)
 			unit.MovementSystem.OrderPosition.z = GetGroundHeight(unit.MovementSystem.OrderPosition, nil)
 		end
 
@@ -615,7 +615,14 @@ function CMovementSystem:UnitThinkMovement( unit )
 
 		self:UnitMoveToPosition(unit, unit.MovementSystem.OrderPosition)
 
-		if dist1 <= RANGE_NEXT_WAYPOINT and dist2 <= RANGE_NEXT_WAYPOINT / 4 then
+		local travelDist = unit:GetMoveSpeedModifier(unit:GetBaseMoveSpeed()) * self:GetTickrate()
+
+		if dist2 - travelDist <= RANGE_NEXT_WAYPOINT / 4 then
+			unit.MovementSystem.ForceUpdate = true
+			--DebugDrawText(unit:GetAbsOrigin(), "forceUpdate", true, self.GetTickrate())
+		end
+
+		if dist1 <= RANGE_NEXT_WAYPOINT * 1.1 and dist2 <= RANGE_NEXT_WAYPOINT / 4 then
 			if self._vWaypoints[n + 1] ~= "end" then
 				--print(string.format("waypoint reached setting next: %d", n + 1))
 				unit.MovementSystem.NextWaypoint = n + 1
