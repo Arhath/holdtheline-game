@@ -218,7 +218,15 @@ end
 
 
 function GetRandomPointInAoe( pos, aoe )
-    return pos + Vector(RandomInt(-(aoe), aoe), RandomInt(-(aoe), aoe) , 0)
+	local u = RandomFloat(0, 1)
+	local v = RandomFloat(0, 1)
+
+	local w = aoe * math.sqrt(u)
+  	local t = 2 * math.pi * v
+ 	local x = w * math.cos(t) 
+  	local y = w * math.sin(t)
+
+    return pos + Vector(x, y, 0)
 end
 
 
