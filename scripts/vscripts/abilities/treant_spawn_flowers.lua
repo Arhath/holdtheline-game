@@ -19,10 +19,10 @@ function FlowersPlant(event)
 	local radius = ability:GetLevelSpecialValueFor("spawn_radius", ability_level) 
 	
 	--Plant	Flower and add Aura
-	for n = 0, number_flowers do	
-		local SpawnLocation = posCaster + RandomVector( RandomFloat( 300, radius) )
-		local flower = CreateUnitByName("treant_flower", SpawnLocation, false, nil, nil, caster:GetTeamNumber())
-		
+	for n = 1, number_flowers do
+
+		flower = UnitSpawnAdd( caster, "treant_flower", 300, radius, radius * 5, nil, nil )
+
 		ParticleManager:CreateParticle("particles/units/heroes/hero_venomancer/venomancer_ward_spawn_d.vpcf", PATTACH_ABSORIGIN, flower)
 
 		ability:ApplyDataDrivenModifier(caster, flower, modifier_flower, {})

@@ -18,9 +18,9 @@ function MushroomsPlant(event)
 	local radius = ability:GetLevelSpecialValueFor("spawn_radius", ability_level) 
 	
 	--Plant	and add Aura
-	for n = 0, number_mushrooms do	
-		local SpawnLocation = posCaster + RandomVector( RandomFloat( 300, radius) )
-		local mushroom = CreateUnitByName("treant_mushroom", SpawnLocation, false, nil, nil, caster:GetTeamNumber())
+	for n = 1, number_mushrooms do	
+
+		local mushroom = UnitSpawnAdd( caster, "treant_mushroom", 300, radius, radius * 5, nil, nil )
 		
 		ParticleManager:CreateParticle("particles/units/heroes/hero_venomancer/venomancer_ward_spawn_d.vpcf", PATTACH_ABSORIGIN, mushroom)
 

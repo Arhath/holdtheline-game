@@ -1,4 +1,5 @@
 require( "ai/ai_core" )
+require("misc/utility_functions")
 
 if BossTreant == nil then
 	BossTreant = class({})
@@ -30,13 +31,13 @@ function BossTreant:Init(handler, gameRound)
 	self._strSpawner = "spawnerBoss"
 	self._strRoundTitle = "Boss Treant"
 	self._nPhase = 1
-	entBossUnit = nil
 	self.bFreezeBoss = false
 	self.bLocReached = false
 	self.bPhaseSwitch = true
 	--self.abilityPhase2 = "boss_treant_phase_2"
 	self.bOrbLeftReachedGoal = false
 	self.bOrbRightReachedGoal = false
+	self._fAddSpawnInterval = 4
 	
 	self:SetArena()
 
@@ -90,11 +91,12 @@ function BossTreant:Spawn()
 	
 	vecSpawnLocation = entSpawner:GetAbsOrigin()
 	entBossUnit = CreateUnitByName( self._strBossUnit, vecSpawnLocation, true, nil, nil, DOTA_TEAM_BADGUYS )
+	ApplyModifier(entBossUnit, entBossUnit, "modifier_vision", {Duration = -1}, true)
 	entBossUnit.MovementSystemActive = false
 	entBossUnit.CanEnterGoal = false
 	self._bossOriginalHealth = entBossUnit:GetMaxHealth()
 	self:ApplyDifficultyBuff(entBossUnit)
-	behaviorSystemBoss = AICore:CreateBehaviorSystem( { BehaviorIdle , BehaviorEarthsplitter, BehaviorRootHero, BehaviorSpawnFlowers, BehaviorSpawnMushrooms, BehaviorSpawnTrees, BehaviorRaiseNature, BehaviorMoveToArena, BehaviorAttack } )
+	behaviorSystemBoss = AICore:CreateBehaviorSystem( { BehaviorIdle, BehaviorEatTree, BehaviorEarthsplitter, BehaviorRootHero, BehaviorSpawnFlowers, BehaviorSpawnMushrooms, BehaviorSpawnTrees, BehaviorRaiseNature, BehaviorMoveToArena, BehaviorAttack } )
 	
 	self._entQuest = SpawnEntityFromTableSynchronous( "quest", {
 		name = self._strRoundTitle,
@@ -227,7 +229,7 @@ function BossTreant:PhaseThink()
 		--print (string.format( "phasethink: %d", self._nPhase))
 
 	if self._nPhase == 1 then
-		if self._fBossHpPercent <= 0.66 then
+		if self._fBossHpPercent <= -0.66 then
 			self._fPhaseTime = 0
 			self._nPhase = 2
 		end
@@ -322,6 +324,36 @@ function BossTreant:PhaseThink()
 				ParticleManager:SetParticleControl(self.entOrbRight.particle, 4, Vector(shield_size,0,shield_size))
 				ParticleManager:SetParticleControl(self.entOrbRight.particle, 5, Vector(shield_size,0,0))
 				ParticleManager:SetParticleControlEnt(self.entOrbRight.particle, 0, self.entOrbRight, PATTACH_POINT_FOLLOW, "attach_hitloc", self.entOrbRight:GetAbsOrigin(), true)
+
+				-- LeftOrb Spawner Thinker
+				Timers:CreateTimer( function()
+
+					UnitSpawnAdd(self.entOrbLeft, "treant_flower_creature", 0, 300, 300, nil, nil)
+					UnitSpawnAdd(self.entOrbLeft, "treant_mushroom_creature", 0, 300, 300, nil, nil)
+					UnitSpawnAdd(self.entOrbLeft, "npc_dota_furion_treant", 0, 300, 300, nil, nil)
+
+					if self.bOrbLeftReachedGoal then
+						return nil
+					else 
+						return self._fAddSpawnInterval
+					end
+				end
+				)
+
+				-- RightOrb Spawner Thinker
+				Timers:CreateTimer( function()
+
+					UnitSpawnAdd(self.entOrbRight, "treant_flower_creature", 0, 300, 300, nil, nil)
+					UnitSpawnAdd(self.entOrbRight, "treant_mushroom_creature", 0, 300, 300, nil, nil)
+					UnitSpawnAdd(self.entOrbRight, "npc_dota_furion_treant", 0, 300, 300, nil, nil)
+
+					if self.bOrbRightReachedGoal then
+						return nil
+					else 
+						return self._fAddSpawnInterval
+					end
+				end
+				)
 			end
 		end
 		
@@ -331,8 +363,10 @@ function BossTreant:PhaseThink()
 			local orbDistArenaLeft
 			local orbDistArenaRight
 			
+			--  Left Orb
 			local orbHPPool = 0
-			
+		
+
 			if not self.bOrbLeftReachedGoal or self.entOrbLeft:IsAlive() or not self.entOrbLeft:IsNull() then
 				local orbPos
 				local orbHP
@@ -342,10 +376,6 @@ function BossTreant:PhaseThink()
 				orbPos.z = 0
 				orbHeight = GetGroundHeight(orbPos, nil)
 
-				SafeSpawnCreature("treant_flower_creature", orbPos, 300, orbHeight, nil, nil, entBossUnit:GetTeamNumber())
-				SafeSpawnCreature("treant_mushroom_creature", orbPos, 300, orbHeight, nil, nil, entBossUnit:GetTeamNumber())
-				SafeSpawnCreature("npc_dota_furion_treant", orbPos, 300, orbHeight, nil, nil, entBossUnit:GetTeamNumber())
-		
 				orbDistArenaLeft = ( vecBossArenaPos - orbPos):Length()
 				orbHP = self.entOrbLeft:GetHealth()
 				orbHPPool = orbHPPool + orbHP
@@ -354,11 +384,11 @@ function BossTreant:PhaseThink()
 					--print("setleftarenagoal")
 					self.bOrbLeftReachedGoal = true
 				end
-				
 			else
 				orbDistArenaLeft = 0
 			end
-			
+		
+
 			if not self.bOrbRightReachedGoal or self.entOrbRight:IsAlive() or not self.entOrbRight:IsNull() then
 				local orbPos
 				local orbHP
@@ -367,10 +397,6 @@ function BossTreant:PhaseThink()
 				orbPos = self.entOrbRight:GetAbsOrigin()
 				orbPos.z = 0
 				orbHeight = GetGroundHeight(orbPos, nil)
-						
-				SafeSpawnCreature("treant_flower_creature", orbPos, 300, orbHeight, nil, nil, entBossUnit:GetTeamNumber())
-				SafeSpawnCreature("treant_mushroom_creature", orbPos, 300, orbHeight, nil, nil, entBossUnit:GetTeamNumber())
-				SafeSpawnCreature("npc_dota_furion_treant", orbPos, 300, orbHeight, nil, nil, entBossUnit:GetTeamNumber())
 
 				orbDistArenaRight = ( vecBossArenaPos - orbPos ):Length()
 				
@@ -383,7 +409,9 @@ function BossTreant:PhaseThink()
 				end
 			else
 				orbDistArenaRight = 0
+
 			end
+
 			
 			--print(orbDistArenaRight)
 			--print(orbDistArenaLeft)
@@ -409,6 +437,24 @@ function BossTreant:PhaseThink()
 				FindClearSpaceForUnit(entBossUnit, point, false)
 				entBossUnit:Stop()
 				
+
+				-- Delete all remaining Nature
+				local mushrooms = FindAllByName("treant_mushroom")
+				local flowers = FindAllByName("treant_flower")
+
+				for _, shroom in pairs(mushromms) do
+					if shroom:GetTeamNumer() == entBossUnit:GetTeamNumber() then
+						shroom:ForceKill(false)
+					end
+				end
+
+				for _, flower in pairs(flowers) do
+					if flower:GetTeamNumer() == entBossUnit:GetTeamNumber() then
+						flower:ForceKill()
+					end
+				end
+
+
 				entBossUnit:RemoveAbility("treant_spawn_flowers")
 				entBossUnit:RemoveAbility("treant_spawn_mushrooms")
 				entBossUnit:RemoveAbility("treant_spawn_trees")
@@ -497,6 +543,105 @@ end
 
 
 
+--TREANT BEAHAVIOR SYSTEM
+
+--------------------------------------------------------------------------------------------------------
+BehaviorEatTree = {}
+
+function BehaviorEatTree:Evaluate()
+	self.ID = 9
+
+	self.unit = entBossUnit
+	self.ability = self.unit:FindAbilityByName("treant_eat_tree")
+	local target
+	local desire = 0
+
+	
+	if self.ability and self.ability:IsFullyCastable() and self.unit:GetHealth() / self.unit:GetMaxHealth() <= 0.9 then
+		local trees = GridNav:GetAllTreesAroundPoint(self.unit:GetOrigin(), 500, true)
+
+		trees = ListFilterWithFn ( trees, 
+										function(e) 
+											return TreeIsAlive(e) and IsSameHeigth(e, self.unit)					
+										end 
+										)
+		if #trees > 0 then
+			target = trees[1]
+
+			for _, tree in pairs(trees) do
+				local distTree =(tree:GetAbsOrigin() - self.unit:GetOrigin()):Length()
+				local distTarget = (target:GetAbsOrigin() - self.unit:GetOrigin()):Length()
+
+				if distTree < distTarget then
+					target = tree
+				end
+			end
+		end
+	end
+
+	if target then
+		desire = 100
+		DebugDrawText(target:GetAbsOrigin(), "Tree Target", true, 1)
+
+		local vecTotree = self.unit:GetAbsOrigin() - target:GetAbsOrigin()
+		local posMove = target:GetAbsOrigin() -- + (vecTotree / vecTotree:Length() * 100) -- Offset
+
+		self.order =
+		{
+			OrderType = DOTA_UNIT_ORDER_MOVE_TO_POSITION,
+			UnitIndex = self.unit:entindex(),
+			Position = posMove,
+			delay = 1.5,
+			target = target, 
+		}
+	end
+
+	print (string.format( "eatTree Desire: %d", desire))
+	return desire
+end
+
+
+function BehaviorEatTree:Begin()
+	self.endTime = GameRules:GetGameTime() + 10
+	self.unit.lastBehavior = self.ID
+	self.orderTimer = 0
+	DebugDrawText(self.unit:GetAbsOrigin(), string.format("Begin"), true, 2)
+
+	ApplyModifier(self.unit, self.order.target, modifier_tree_highlight_fx, {Duration = -1}, true )
+end
+
+BehaviorEatTree.Continue = BehaviorEatTree.Begin --if we re-enter this ability, we might have a different target; might as well do a full reset
+
+function BehaviorEatTree:Think(dt)
+	if not self.ability:IsFullyCastable() and not self.ability:IsInAbilityPhase() or not TreeIsAlive(self.order.target) then
+		print(TreeIsAlive(self.order.target))
+		self.endTime = GameRules:GetGameTime()
+	else
+		local distTarget = (self.order.Position - self.unit:GetAbsOrigin()):Length()
+
+		DebugDrawText(self.unit:GetAbsOrigin(), string.format("DistTarget: %f", distTarget), true, dt)
+
+		if distTarget <= 200 then
+			self.unit:Stop()
+			self.orderTimer = self.orderTimer + dt
+
+			--DebugDrawText(self.order.target:GetAbsOrigin(), string.format("Timer: %f", self.orderTimer), true, dt)
+
+			if self.orderTimer >= self.order.delay then
+				UnitCutDownTree(self.unit, self.order.target) 
+
+				local order =
+				{
+					OrderType = DOTA_UNIT_ORDER_CAST_NO_TARGET,
+					UnitIndex = self.unit:entindex(),
+					AbilityIndex = self.ability:entindex()
+				}
+
+				ExecuteOrderFromTable(order)
+			end
+		end
+	end
+end
 
 
 --------------------------------------------------------------------------------------------------------
@@ -612,7 +757,7 @@ function BehaviorSpawnFlowers:Evaluate()
 		self.order =
 		{
 			OrderType = DOTA_UNIT_ORDER_CAST_NO_TARGET,
-			UnitIndex = self.unit :entindex(),
+			UnitIndex = self.unit:entindex(),
 			AbilityIndex = self.ability:entindex()
 		}
 		--print (string.format( "flowers Desire: %d", desire))
@@ -729,14 +874,22 @@ function BehaviorRaiseNature:Evaluate()
 	local desire = 0
 	
 	if self.ability and self.ability:IsFullyCastable() then
-		local allTargets = FindUnitsInRadius( self.unit:GetTeamNumber(), self.unit:GetOrigin(), nil, 700.0, DOTA_UNIT_TARGET_TEAM_FRIENDLY, DOTA_UNIT_TARGET_ALL, 0, 0, false )
-		for n, u in pairs(allTargets) do
+		local allUnits = FindUnitsInRadius( self.unit:GetTeamNumber(), self.unit:GetAbsOrigin(), nil, 700.0, DOTA_UNIT_TARGET_TEAM_FRIENDLY, DOTA_UNIT_TARGET_ALL, 0, 0, false )
+		for n, u in pairs(allUnits) do
 			local uName = u:GetUnitName()
-			if not (uName == "treant_flower" or uName == "treant_mushroom" or uName == "ent_dota_tree" or uName == "dota_temp_tree") then
-				table.remove(allTargets, n)
+			if not (uName == "treant_flower" or uName == "treant_mushroom") then
+				table.remove(allUnits, n)
 			end
 		end
-		desire = 1 * #allTargets
+
+		local allTrees = GridNav:GetAllTreesAroundPoint(self.unit:GetAbsOrigin(), 700, true)
+
+		numberTargets = #allUnits + #allTrees
+		DebugDrawText(self.unit:GetAbsOrigin(), string.format("Targets: %f", numberTargets), true, 3)
+
+		if numberTargets > 10 then
+			desire =  7
+		end
 
 		self.order =
 		{

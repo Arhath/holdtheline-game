@@ -18,6 +18,50 @@
 	
 		"Modifiers"
 		{
+			"modifier_dummy"
+			{
+				"Passive"				"1"
+				"IsHidden"				"1"
+
+				"States"
+				{
+					"MODIFIER_STATE_NO_UNIT_COLLISION"		"MODIFIER_STATE_VALUE_ENABLED"
+					"MODIFIER_STATE_INVISIBLE"				"MODIFIER_STATE_VALUE_ENABLED"
+					"MODIFIER_STATE_INVULNERABLE"			"MODIFIER_STATE_VALUE_ENABLED"
+					"MODIFIER_STATE_NO_HEALTH_BAR"			"MODIFIER_STATE_VALUE_ENABLED"
+					"MODIFIER_STATE_UNSELECTABLE"			"MODIFIER_STATE_VALUE_ENABLED"
+				}
+			}
+
+			"modifier_vision"
+			{
+				"Passive"				"1"
+				"IsHidden"				"1"
+
+				"States"
+				{
+					"MODIFIER_STATE_PROVIDES_VISION"	"MODIFIER_STATE_VALUE_ENABLED"
+				}
+			}
+
+			"modifier_root_hero_fx"
+			{
+				"Passive"				"1"
+				"IsHidden"				"1"
+
+				"EffectName"			"particles\test_particle\treant_root_hero.vpcf"
+				"EffectAttachType"		"follow_absorigin"
+			}
+
+			"modifier_tree_highlight_fx"
+			{
+				"Passive"				"1"
+				"IsHidden"				"1"
+
+				"EffectName"			"particles/econ/items/effigies/status_fx_effigies/jade_effigy_ambient_b.vpcf"
+				"EffectAttachType"		"follow_overhead"
+			
+
 			"modifier_glyph_mana"
 			{
 				"Passive"				"1"

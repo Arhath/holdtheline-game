@@ -13,7 +13,7 @@ function OnSpell(event)
 	
 	-- Plant Root	
 	caster.root = CreateUnitByName("treant_root", posTarget, false, nil, nil, caster:GetTeamNumber())
-	
+	caster.target.effect = ApplyEffectOnPos( caster, posTarget, "modifier_root_hero_fx", {Duration = -1} )
 	--target.particle = ParticleManager:CreateParticle(particle, PATTACH_ABSORIGIN, target)
 	
 	--Apply Debuff
@@ -30,11 +30,13 @@ function RootDeath(event)
 	local target = event.target
 	
 	caster.target:RemoveModifierByName(modifier_target)
+
+	caster.target.effect:ForceKill(false)
 end
 
 function TargetDeath( event )
 	local caster = event.caster
-	target = caster.target
 
 	UTIL_RemoveImmediate(caster.root)
+	caster.target.effect:ForceKill(false)
 end

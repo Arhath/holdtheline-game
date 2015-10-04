@@ -14,7 +14,7 @@ function treant_spawn_trees:OnSpellStart()
 	
 	for n = 0, self:GetNumberTrees() do	
 		local SpawnLocation = posCaster + RandomVector( RandomFloat( 300, self:GetAOERadius() )) 
-		tree = CreateTempTree( SpawnLocation, 60 )
+		tree = CreateTempTree( SpawnLocation, 40 )
 		ParticleManager:CreateParticle("particles/units/heroes/hero_venomancer/venomancer_ward_spawn_d.vpcf", PATTACH_ABSORIGIN, tree)
 	end
 end

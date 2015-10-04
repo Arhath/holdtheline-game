@@ -4,78 +4,98 @@
 	"Version"	"1"	
 	
 	//=================================================================
+	
 
 	"Gate"
-	{
-		// General
-		//----------------------------------------------------------------
-		"BaseClass"					"npc_dota_courier"	// Class of entity of link to.
-		"Model"						"models/props_gameplay/donkey.mdl"	// Model.
-		"SoundSet"					""					// Name of sound set.
-		"Level"						"0"
-		"IsAncient"					"1"
-		"ModelScale"					"1"
-		"UnitLabel"					"courier"
-
+	{  
+	  // General
+		//
+		"BaseClass"					"npc_dota_holdout_tower"	// Class of entity of link to.
+		"Model"   					"models/development/invisiblebox.vmdl"
+		"SoundSet"					"Tower.Water"					// Name of sound set.
+		"MinimapIcon"				"minimap_tower90"
+		"MinimapIconSize"			"200"
+		"Level"						"1"
+		
 		// Abilities
 		//----------------------------------------------------------------
-		"AbilityLayout"				"6"		// changes when we change to flying -> "5"
+		
+		"AbilityLayout"				"4"
+		"Ability1"					"ability_placeholder"			// Ability 1.
+		"Ability2"					"ability_placeholder"								// Ability 2.
+		"Ability3"					"ability_placeholder"								// Ability 3.
+		"Ability4"					"ability_placeholder"								// Ability 4.
+		"Ability5"					"gate_ability_fortify"								// Ability 5.
+		"Ability6"					""								// Ability 6 - Extra.
+		"Ability7"					""								// Ability 7 - Extra.
+		"Ability8"					""								// Ability 8 - Extra.
 
-		"Ability1"					"gate_ability_fortify"
-		"Ability2"					"courier_go_to_secretshop"		
-		"Ability3"					"courier_return_stash_items"
-		"Ability4"					"courier_take_stash_items"
-		"Ability5"					"courier_transfer_items"	
-		"Ability6"					"courier_burst"		
-		"Ability7"					"courier_morph"
-		"Ability8"					"courier_take_stash_and_transfer_items"
+		// Armor
+		//----------------------------------------------------------------
+		"ArmorPhysical"				"20"		// Physical protection.
+		"MagicalResistance"			"0"			// Magical protection.
+
+		// Attack
+		//----------------------------------------------------------------
+		"AttackCapabilities"		"DOTA_UNIT_CAP_NO_ATTACK"
+		"AttackDamageMin"			"25"		// Damage range min.
+		"AttackDamageMax"			"50"		// Damage range max.
+		"AttackDamageType"			"DAMAGE_TYPE_ArmorPhysical"
+		"AttackRate"				"1"			// Speed of attack.
+		"AttackAnimationPoint"		"0.6"		// Normalized time in animation cycle to attack.
+		"AttackAcquisitionRange"	"700"		// Range within a target can be acquired.
+		"AttackRange"				"700"		// Range within a target can be attacked.
+		"ProjectileModel"			"particles/base_attacks/ranged_tower_good.vpcf"		// Particle system model for projectile.
+		"ProjectileSpeed"			"750"		// Speed of projectile.
+
+		// Attributes
+		//----------------------------------------------------------------
+		"AttributePrimary"			"DOTA_ATTRIBUTE_STRENGTH"
+		"AttributeBaseStrength"		"0"			// Base strength
+		"AttributeStrengthGain"		"0"			// Strength bonus per level.
+		"AttributeBaseIntelligence"	"0"			// Base intelligence
+		"AttributeIntelligenceGain"	"0"			// Intelligence bonus per level.
+		"AttributeBaseAgility"		"0"			// Base agility
+		"AttributeAgilityGain"		"0"			// Agility bonus per level.
+
+		// Bounty
+		//----------------------------------------------------------------
+		"BountyXP"					"25"	// Experience earn.
+		"BountyGoldMin"				"0"		// Gold earned min.
+		"BountyGoldMax"				"0"		// Gold earned max.
 
 		// Bounds
 		//----------------------------------------------------------------
-		"BoundsHullName"			"DOTA_HULL_SIZE_SMALL"			// Hull type used for navigation/locomotion.
-		"HealthBarOffset"			"120"
+		"BoundsHullName"			"DOTA_HULL_SIZE_TOWER"			// Hull type used for navigation/locomotion.
+		"ProjectileCollisionSize"	"50"
+		"RingRadius"				"700"
+		"HealthBarOffset"			"260"
 
 		// Movement
 		//----------------------------------------------------------------
-		"MovementCapabilities"		"DOTA_UNIT_CAP_MOVE_GROUND"			// Type of locomotion - ground, air
-		"MovementSpeed"				"350"		// Speed
-		"MovementTurnRate"			"0.5"		// Turning rate.
-	
-		// Bounty
-		//----------------------------------------------------------------
-		"BountyXP"					"0"			// Experience earn.
-		"BountyGoldMin"				"150"		// Gold earned min.
-		"BountyGoldMax"				"150"		// Gold earned max.
+		"MovementCapabilities"		"DOTA_UNIT_CAP_MOVE_FLY"			// Type of locomotion - ground, air
+		"MovementSpeed"				"0"				// Speed
+		"MovementTurnRate"			"1.0"			// Turning rate.
 
-			// Status
+		// Status
 		//----------------------------------------------------------------
-		"StatusHealth"				"75"		// Base health.
-		"StatusHealthRegen"			"0.5"			// Health regeneration rate.
+		"StatusHealth"				"1000"		// Base health.
+		"StatusHealthRegen"			"3"			// Health regeneration rate.
 		"StatusMana"				"0"			// Base mana.
+		"StatusStartingMana"		"0"			// Base mana.
 		"StatusManaRegen"			"0"			// Mana regeneration rate.
 
 		// Team
 		//----------------------------------------------------------------
 		"TeamName"					"DOTA_TEAM_GOODGUYS"			// Team name.
-		"CombatClassAttack"			"DOTA_COMBAT_CLASS_ATTACK_BASIC"
-		"CombatClassDefend"			"DOTA_COMBAT_CLASS_DEFEND_SOFT"
-		"UnitRelationshipClass"		"DOTA_NPC_UNIT_RELATIONSHIP_TYPE_COURIER"
+		"CombatClassAttack"			"DOTA_COMBAT_CLASS_ATTACK_SIEGE"
+		"CombatClassDefend"			"DOTA_COMBAT_CLASS_DEFEND_STRUCTURE"
+		"UnitRelationshipClass"		"DOTA_NPC_UNIT_RELATIONSHIP_TYPE_BUILDING"
 		
 		// Vision
 		//----------------------------------------------------------------
-		"VisionDaytimeRange"		"350"		// Range of vision during day light.
-		"VisionNighttimeRange"		"350"		// Range of vision at night time.
-
-		// Bots
-		//----------------------------------------------------------------
-		"AttackDesire"				"1.5"		// How much bots want to attack them vs other non-hero things
-
-		//Inventory
-		"HasInventory"				"1"
-		
-		"IdleExpression"			"scenes\default_idle.vcd"
-		
-		"WakesNeutrals"				"0"
+		"VisionDaytimeRange"		"1900"		// Range of vision during day light.
+		"VisionNighttimeRange"		"1600"		// Range of vision at night time. 
 	}
 
 	"pathing_blocker"
@@ -175,11 +195,46 @@
 	  "Model"   	"models/development/invisiblebox.vmdl"  
 	}
 
+	"quest_giver1"
+	{
+		"BaseClass"   "npc_dota_creature" 
+		"Model"   	 "models/heroes/antimage/antimage.vmdl"
+		"ModelScale"  "1"
+
+		// Bounds
+		//----------------------------------------------------------------
+		"BoundsHullName"			"DOTA_HULL_SIZE_HERO"			// Hull type used for navigation/locomotion.
+
+		// Movement
+		//----------------------------------------------------------------
+		"MovementCapabilities"		"DOTA_UNIT_CAP_MOVE_GROUND"			// Type of locomotion - ground, air
+		"MovementSpeed"				"0"		// Speed
+		"MovementTurnRate"			"0.5"		// Turning rate.
+	}
+
+	"quest_giver2"
+	{
+		"BaseClass"   "npc_dota_creature" 
+		"Model"   	 "models/heroes/dragon_knight/dragon_knight.vmdl"
+		"ModelScale"  "1"
+
+		// Bounds
+		//----------------------------------------------------------------
+		"BoundsHullName"			"DOTA_HULL_SIZE_HERO"			// Hull type used for navigation/locomotion.
+
+		// Movement
+		//----------------------------------------------------------------
+		"MovementCapabilities"		"DOTA_UNIT_CAP_MOVE_GROUND"			// Type of locomotion - ground, air
+		"MovementSpeed"				"0"		// Speed
+		"MovementTurnRate"			"0.5"		// Turning rate.
+	}
+
 	"shop_sheep"
 	{
 		"BaseClass"   "npc_dota_creature" 
 		"Model"   	 "models/courier/defense3_sheep/defense3_sheep.vmdl"
 		"ModelScale"  "1"
+
 
 		"Ability1"	""
 
@@ -243,7 +298,7 @@
 		// Movement
 		//----------------------------------------------------------------
 		"MovementCapabilities"		"DOTA_UNIT_CAP_MOVE_GROUND"			// Type of locomotion - ground, air
-		"MovementSpeed"				"500"		// Speed
+		"MovementSpeed"				"2000"		// Speed
 		"MovementTurnRate"			"0.5"		// Turning rate.
 
 	}
@@ -268,12 +323,11 @@
 		
 		"Ability1"		"treant_root_hero"
 		"Ability2"		"treant_eat_tree"
-		"Ability1"		"treant_spawn_mushrooms"
+		"Ability3"		"treant_spawn_mushrooms"
 		"Ability4"		"treant_spawn_flowers"
-		"Ability5"		"treant_spawn_trees"
-		"Ability6"		"treant_raise_nature"			// Ability 6 - Extra.
-		"Ability7"		"creature_earth_splitter"			// Ability 7 - Extra.
-		"Ability8"		""			// Ability 8 - Extra.
+		"Ability5"		"treant_raise_nature"		
+		"Ability6"		"creature_earth_splitter"		
+		"Ability7"		"treant_spawn_trees"			
 		
 		// Status
 		//----------------------------------------------------------------
@@ -295,7 +349,7 @@
 		"AttackDamageType"			"DAMAGE_TYPE_ArmorPhysical"
 		"AttackRate"				"1.35"		// Speed of attack.
 		"AttackAnimationPoint"		"0.5"		// Normalized time in animation cycle to attack.
-		"AttackAcquisitionRange"	"500"		// Range within a target can be acquired.
+		"AttackAcquisitionRange"	"0"			// Range within a target can be acquired.
 		"AttackRange"				"100"		// Range within a target can be attacked.
 		"ProjectileModel"			""			// Particle system model for projectile.
 		"ProjectileSpeed"			""			// Speed of projectile.
@@ -401,28 +455,22 @@
 	{
 		"particle"		"particles/test_particle/aura_debuff_gas.vpcf"
 	}
-
-
+	
 	"Ability1"		 "creature_aura_debuff"
  }
  
  "treant_root"
  {
-  "BaseClass"   "npc_dota_creature" 
-  "Model"    "models/development/invisiblebox.vmdl"
-  "ModelScale"  "1.0"  
+	"BaseClass"   "npc_dota_creature" 
+	"Model"    "models/development/invisiblebox.vmdl"
+	"ModelScale"  "1.0"  
   
 	// Status
 	//----------------------------------------------------------------
-	"StatusHealth"				"200"		// Base health.
+	"StatusHealth"				"100"		// Base health.
 	"StatusHealthRegen"			"0.0"		// Health regeneration rate.
-		
-		
-	// Bounty
-	//----------------------------------------------------------------
-	"BountyXP"					"350"		// Experience earn.
-	"BountyGoldMin"				"11"		// Gold earned min.
-	"BountyGoldMax"				"13"		// Gold earned max.
+
+
  }
  
   "mushroom_poison_trap"
@@ -589,6 +637,8 @@
 			"particle"			"particles/units/heroes/hero_venomancer/venomancer_poison_debuff_nova.vpcf"
 			"particle"			"particles/units/heroes/hero_venomancer/venomancer_poison_nova_cast.vpcf"
 			"particle"			"particles/econ/items/abaddon/abaddon_alliance/abaddon_aphotic_shield_explosion_alliance_flash_b.vpcf"
+
+			"particle"  "particles/units/heroes/hero_batrider/batrider_flamebreak.vpcf"
 				
 			"model"			"models/heroes/techies/fx_techiesfx_mine.vmdl"
 			"model"    		"models/items/furion/flowerstaff.vmdl"
@@ -596,7 +646,7 @@
 		
 		// Status
 		//----------------------------------------------------------------
-		"StatusHealth"				"2000"		// Base health.
+		"StatusHealth"				"2000000"		// Base health.
 		"StatusHealthRegen"			"5.0"		// Health regeneration rate.
 		"StatusMana"				"2000"			// Base mana.
 		"StatusManaRegen"			"0"			// Mana regeneration rate.
@@ -637,9 +687,9 @@
 		"MovementTurnRate"			"0.5"		// Turning rate.
 		
 		"Ability1"		"mushroom_poison_attack"
-		"Ability2"		"viper_corrosive_skin_datadriven"
+		"Ability2"		"mushroom_corrosive_skin"
 		"Ability3"		"poison_trap"
-		"Ability4"		"treant_root_hero"		
+		"Ability4"		"catapult_attack"		
 	}
 
 	"treant_flower_creature_big"
@@ -697,6 +747,7 @@
 				
 		"Ability1"		"creature_aoe_heal"
 		"Ability2"		"spawn_flower"
+		"Ability3"		"flower_cure_poison"
 	}
 	
 	"npc_dota_moonwell"

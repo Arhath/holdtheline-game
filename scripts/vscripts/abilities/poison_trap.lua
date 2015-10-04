@@ -42,6 +42,7 @@ function TrapTracker( event )
 
 	-- Modifiers
 	local modifier_target = event.modifier_target
+	local modifier_buff = event.modifier_buff
  
 	-- Target variables
 	local target_team = DOTA_UNIT_TARGET_TEAM_ENEMY
@@ -57,6 +58,7 @@ function TrapTracker( event )
 			if target:IsAlive() then
 				for _, unit in pairs(units) do
 					ability:ApplyDataDrivenModifier(caster, unit, modifier_target, {})
+					ability:ApplyDataDrivenModifier(caster, unit, modifier_buff, {})
 				end
 				UTIL_Remove(target)
 			end

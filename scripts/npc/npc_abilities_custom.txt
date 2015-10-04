@@ -4,27 +4,6 @@
 {
 	"Version"		"1"
 
-	"glyph_ability_mana"
-	{
-		// General
-		//-------------------------------------------------------------------------------------------------------------
-		"AbilityName"					"glyph_ability_mana"
-		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_IMMEDIATE | DOTA_ABILITY_BEHAVIOR_NO_TARGET | DOTA_ABILITY_BEHAVIOR_IGNORE_CHANNEL"
-		"BaseClass" 					"ability_lua"
-		"ScriptFile"					"abilities/bottle_abilities.lua"
-		"AbilityTextureName"            "keeper_of_the_light_chakra_magic"
-
-		// Stats		
-		//-------------------------------------------------------------------------------------------------------------
-		"AbilityCooldown"				"1.0"
-
-		"RequiredLevel"					"1000"
-
-		// Item Info
-		//-------------------------------------------------------------------------------------------------------------
-		"AbilityManaCost"				"0"
-	}
-
 	"ability_placeholder"
 	{
 		// General
@@ -69,7 +48,7 @@
 		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_IMMEDIATE | DOTA_ABILITY_BEHAVIOR_NO_TARGET | DOTA_ABILITY_BEHAVIOR_IGNORE_CHANNEL"
 		"BaseClass" 					"ability_lua"
 		"ScriptFile"					"abilities/bottle_abilities.lua"
-		"AbilityTextureName"            "bottle_shop_ability_toggle"
+		"AbilityTextureName"            "alchemist_unstable_concoction"
 
 		// Stats		
 		//-------------------------------------------------------------------------------------------------------------
@@ -362,8 +341,6 @@
 		//-------------------------------------------------------------------------------------------------------------
 		"AbilityCooldown"				"0.2"
 
-		"RequiredLevel"					"1000"
-
 		// Item Info
 		//-------------------------------------------------------------------------------------------------------------
 		"AbilityManaCost"				"0"
@@ -396,14 +373,12 @@
 		"AbilityUnitTargetType"			"DOTA_UNIT_TARGET_HERO | DOTA_UNIT_TARGET_CREEP"
 		"BaseClass" 					"ability_lua"
 		"ScriptFile"					"abilities/bottle_abilities.lua"
-		"AbilityTextureName"            "keeper_of_the_light_mana_leak"
+		"AbilityTextureName"            "alchemist_unstable_concoction"
 
 		// Stats		
 		//-------------------------------------------------------------------------------------------------------------
 		"AbilityCooldown"				"0.2"
 
-		"RequiredLevel"					"1000"
-		
 		// Item Info
 		//-------------------------------------------------------------------------------------------------------------
 		"AbilityManaCost"				"0"
@@ -2275,12 +2250,12 @@
 			"02"
 			{
 				"var_type"					"FIELD_FLOAT"
-				"health_regen_amount"		"22.0 23.0 24.0 25.0"
+				"health_regen_amount"		"10"
 			}
 			"03"
 			{
 				"var_type"					"FIELD_INTEGER"
-				"armor_buff"				"8 12 18 22"
+				"armor_buff"				"10"
 			}
 		}
 	}
@@ -9460,7 +9435,7 @@
 	 // General
 	  //-------------------------------------------------------------------------------------------------------------
 		"BaseClass"     	 		"ability_datadriven"
-		"AbilityBehavior"   		"DOTA_ABILITY_BEHAVIOR_UNIT_TARGET"
+		"AbilityBehavior"   		"DOTA_ABILITY_BEHAVIOR_NO_TARGET"
 		"AbilityUnitTargetType"		"DOTA_UNIT_TARGET_TREE"
 	  
 		"AbilityTextureName"   ""
@@ -9473,7 +9448,7 @@
 	  
 	  // Time  
 	  //-------------------------------------------------------------------------------------------------------------
-	  "AbilityCooldown"    "5"
+	  "AbilityCooldown"    "10"
 
 	  // Cost
 	  //-------------------------------------------------------------------------------------------------------------
@@ -9498,14 +9473,6 @@
 	  
 		"OnSpellStart"
 		{
-			"RunScript"
-			{
-				"ScriptFile"				"abilities/treant_eat_tree.lua"
-				"Function"					"DestroyTree"
-				"Target"					"TARGET"
-				"Caster"					"CASTER"
-			}
-			
 			"ApplyModifier"
             {
 				"ModifierName"		"modifier_health_reg"
@@ -9513,6 +9480,7 @@
                 "Duration"			"%duration"
             }	
 		}
+
 		"Modifiers"
 		{
 			"modifier_health_reg"
@@ -9595,11 +9563,11 @@
 			"modifier_root"
 			{
 				"Duration"		"%duration" 
-				"IsBuff"		"1"
+				"IsBuff"		"0"
 				"IsHidden" 		"0"
 				
-				"EffectName"       "particles\test_particle\treant_root_hero.vpcf"
-   				"EffectAttachType"  "follow_origin"
+				//"EffectName"       "particles\test_particle\treant_root_hero.vpcf"
+   				//"EffectAttachType"  "follow_origin"
 
 				"OnDeath"
 				{
@@ -9612,22 +9580,7 @@
 					}
 				}
 					
-				"OnCreated"
-				{
-					"AttachEffect"
-					{
-						"EffectName"					"particles\test_particle\treant_root_hero.vpcf"
-						"EffectAttachType"				"follow_origin"
-						"Target"						"TARGET"
-						"EffectLifeDurationScale "		"1"
-						"EffectDurationScale"			"1"
-					
-						"ControlPoints"
-						{
-							"00"		"0 0 0"
-						}
-					}	
-				}
+
 			}
 			
 			"modifier_root_target"
@@ -9680,7 +9633,7 @@
   //-------------------------------------------------------------------------------------------------------------
   "AbilityCastRange"    "%spawn_radius"
   "AbilityCastPoint"    "0.3"
-  "AbilityCooldown"    "10"
+  "AbilityCooldown"    "22"
   "AbilityManaCost"    "20"
   
 	"precache"
@@ -9695,7 +9648,7 @@
    "01"
    {
     "var_type"    "FIELD_INTEGER"
-    "number_treants"   "5"
+    "number_treants"   "10"
    }
    "02"
    {
@@ -9730,7 +9683,7 @@
   //-------------------------------------------------------------------------------------------------------------
   "AbilityCastRange"    "%spawn_radius"
   "AbilityCastPoint"    "0.3"
-  "AbilityCooldown"    "5"
+  "AbilityCooldown"    "7"
   "AbilityManaCost"    "20"
   
 	"precache"
@@ -9745,7 +9698,7 @@
 	   "01"
 	   {
 	    "var_type"    "FIELD_INTEGER"
-	    "number_trees"   "5"
+	    "number_trees"   "7"
 	   }
 	   "02"
 	   {
@@ -9804,7 +9757,7 @@
 		  //-------------------------------------------------------------------------------------------------------------
 		  "AbilityCastRange"    "%spawn_radius"
 		  "AbilityCastPoint"    "0.3"
-		  "AbilityCooldown"    "5"
+		  "AbilityCooldown"    "10"
 		  "AbilityManaCost"    "20"
 		  
 		  "precache"
@@ -9886,7 +9839,7 @@
 		  //-------------------------------------------------------------------------------------------------------------
 		  "AbilityCastRange"    "%spawn_radius"
 		  "AbilityCastPoint"    "0.3"
-		  "AbilityCooldown"    "5"
+		  "AbilityCooldown"    "10"
 		  "AbilityManaCost"    "20"
 		  
 		  "precache"
@@ -10479,11 +10432,47 @@
 		}
 	}
 	
-	"viper_corrosive_skin_datadriven"
+	"flower_cure_poison"
+	{
+		"BaseClass"						"ability_datadriven"
+		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_PASSIVE"
+
+		"AbilitySpecial"
+		{
+			"01"
+			{
+				"var_type"			"FIELD_INTEGER"
+				"cure_count"		"2"
+			}
+		}
+
+		"Modifiers"
+		{
+			"modifier_cure_poison_datadriven"
+			{
+				"Passive"	"1"
+				"IsHidden"	"1"
+
+				"OnTakeDamage"
+				{
+					"RunScript"
+					{
+						"ScriptFile"		"abilities/flower_cure_poison.lua"
+						"Function"			"OnTakeDamage"
+						"modifier_debuff"	"modifier_corrosive_skin_debuff"
+						"Target"			"ATTACKER"
+					}
+				}
+			}
+		}
+
+	}
+
+	"mushroom_corrosive_skin"
 	{
 		// General
 		//-------------------------------------------------------------------------------------------------------------
-		"BaseClass"						"ability_datadriven"
+		"BaseClass" 					"ability_datadriven"
 		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityUnitDamageType"			"DAMAGE_TYPE_MAGICAL"	
 		"SpellImmunityType"				"SPELL_IMMUNITY_ENEMIES_NO"
@@ -10508,27 +10497,37 @@
 			"01"
 			{
 				"var_type"					"FIELD_FLOAT"
-				"duration"					"4.0"
+				"duration"					"15.0"
 			}
 			"02"
 			{
 				"var_type"					"FIELD_INTEGER"
-				"bonus_movement_speed"		"-10 -15 -20 -25"
+				"bonus_movement_speed"		"-1"
 			}
 			"03"
 			{
 				"var_type"					"FIELD_INTEGER"
-				"bonus_attack_speed"		"-10 -15 -20 -25"
+				"bonus_attack_speed"		"-1"
 			}
 			"04"
 			{
 				"var_type"					"FIELD_INTEGER"
-				"bonus_magic_resistance"	"30"
+				"bonus_magic_resistence"	"20"	
 			}
 			"05"
 			{
 				"var_type"					"FIELD_INTEGER"
-				"damage"					"10 15 20 25"
+				"damage"					"2"
+			}
+			"06"
+			{
+				"var_type"					"FIELD_INTEGER"
+				"stunning_stacks"			"2"
+			}
+			"07"
+			{
+				"var_type"					"FIELD_FLOAT"
+				"stun_duration"				"0.25"
 			}
 		}
 
@@ -10541,9 +10540,12 @@
 
 				"OnTakeDamage"
 				{
-					"ApplyModifier"
+					"RunScript"
 					{
-						"ModifierName"		"modifier_corrosive_skin_debuff_datadriven"
+						"ScriptFile"		"abilities/mushroom_corrosive_skin.lua"
+						"Function"			"OnTakeDamage"
+						"modifier_debuff"	"modifier_corrosive_skin_debuff"
+						"modifier_stun"		"modifier_stun_thinker_datadriven"
 						"Target"			"ATTACKER"
 					}
 
@@ -10556,36 +10558,59 @@
 
 				"Properties"
 				{
-					"MODIFIER_PROPERTY_MAGICAL_RESISTANCE_BONUS"	"%bonus_magic_resistance"
+					"MODIFIER_PROPERTY_MAGICAL_RESISTANCE_BONUS"	"%bonus_magic_resistence"
 				}
 			}
 
-			"modifier_corrosive_skin_debuff_datadriven"
+			"modifier_corrosive_skin_debuff"
 			{
-				"Duration"	"%duration"
 				"IsDebuff"	"1"
 
 				"EffectName"	"particles/units/heroes/hero_viper/viper_poison_debuff.vpcf"
 				"EffectAttachType"	"follow_origin"
-
-				"ThinkInterval"	"1.0"
-
-				"OnIntervalThink"
-				{
-					"Damage"
-					{
-						"Target"	"TARGET"
-						"Type"		"DAMAGE_TYPE_MAGICAL"
-						"Damage"	"%damage"
-					}
-				}
 
 				"Properties"
 				{
 					"MODIFIER_PROPERTY_ATTACKSPEED_BONUS_CONSTANT"	"%bonus_attack_speed"
 					"MODIFIER_PROPERTY_MOVESPEED_BONUS_PERCENTAGE"	"%bonus_movement_speed"
 				}
+				
 			}
+
+			"modifier_stun_thinker_datadriven"
+			{
+				"IsDebuff"		"1"
+
+				"StatusEffectName"     "particles/status_fx/status_effect_maledict.vpcf"
+   				"StatusEffectPriority" "10"
+
+				"ThinkInterval"	"2"
+
+				"OnIntervalThink"
+				{
+					"ApplyModifier"
+					{
+						"ModifierName"	"modifier_stun_datadriven"
+						"Target" 		"TARGET"
+						"Duration"		"%stun_duration"
+					}
+				}
+			}
+
+			"modifier_stun_datadriven"
+			{
+				"IsHidden"	"1"
+				"IsDebuff"	"1"
+
+				"EffectName" "particles/generic_gameplay/generic_stunned.vpcf"
+       			"EffectAttachType" "follow_overhead"
+
+				"States"
+				{
+					"MODIFIER_STATE_STUNNED"		"MODIFIER_STATE_VALUE_ENABLED"
+				}
+			}
+
 		}
 	}
 
@@ -10761,6 +10786,16 @@
 					"var_type"					"FIELD_INTEGER"
 					"explosion_radius"			"500"
 				}
+				"09"
+				{
+					"var_type"					"FIELD_INTEGER"
+					"poison_attack_damage"		"20"
+				}
+				"10"
+				{
+					"var_type"					"FIELD_INTEGER"
+					"poison_attack_radius"		"200"
+				}
 			}
 			
 			"OnSpellStart"
@@ -10841,6 +10876,7 @@
 							"ScriptFile"		"abilities/poison_trap.lua"
 							"Function"			"TrapTracker"
 							"modifier_target"	"modifier_poison_nova_debuff_datadriven"
+							"modifier_buff"		"modifier_poison_attack_buff"
 						}
 					}
 				}
@@ -10881,7 +10917,48 @@
 							"Target"		"TARGET"
 						}
 					}
-				}		
+				}	
+
+				"modifier_poison_attack_buff"
+				{
+					"IsBuff"		"1"
+
+					"Duration" 		"%duration"
+
+					"OnAttackLanded"
+					{
+						"Damage"
+						{
+							"Target"		"TARGET"
+							"Type"			"DAMAGE_TYPE_MAGICAL"
+							"Damage"		"%poison_attack_damage"
+						}
+
+						"Damage"
+						{
+							"Target"
+							{
+								"Center"  	"TARGET"
+								"Radius" 	"%poison_attack_radius"
+								"Teams" 	"DOTA_UNIT_TARGET_TEAM_ENEMY"
+								"Types" 	"DOTA_UNIT_TARGET_HERO | DOTA_UNIT_TARGET_BASIC"
+							}
+							"Type"			"DAMAGE_TYPE_MAGICAL"
+							"Damage"		"%AbilityDamage/2"
+						}
+
+						"FireEffect"
+						{
+							"EffectName"        "particles/econ/items/abaddon/abaddon_alliance/abaddon_aphotic_shield_explosion_alliance_flash_b.vpcf"
+							"EffectAttachType"  "follow_hitloc"
+							"Target"
+							{
+								"Center"	"TARGET"
+								"Flags"		"DOTA_UNIT_TARGET_FLAG_DEAD"
+							}
+						}
+					}
+				}	
 			}
 	}
 
@@ -11031,6 +11108,97 @@
 						"Target"		"TARGET"
 					}
 				}
+			}
+		}
+	}
+
+	"orb_energy_attack"
+	{
+		//particles 	particles/econ/items/outworld_devourer/od_shards_exile_gold/od_shards_exile_staff_gold.vpcf
+		//				particles/units/heroes/hero_pugna/pugna_weapon_glow.vpcf
+		//				particles/units/heroes/hero_pugna/pugna_ward_sphereinner.vpcf
+
+
+		// General
+		//-------------------------------------------------------------------------------------------------------------
+		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_AOE | DOTA_ABILITY_BEHAVIOR_PASSIVE"
+		"BaseClass"						"ability_datadriven"
+		"AbilityTextureName"			""
+		
+		// Special
+		//-------------------------------------------------------------------------------------------------------------
+		"AbilitySpecial"
+		{
+			"01"
+			{
+				"var_type"					"FIELD_INTEGER"
+				"explosion_radius"			"300"
+			}
+			"02"
+			{
+				"var_type"					"FIELD_FLOAT"
+				"damage"						"100"
+			}
+			"03"
+			{
+				"var_type"					"FIELD_FLOAT"
+				"knockback"						"100"
+			}
+			"04"
+			{
+				"var_type"					"FIELD_FLOAT"
+				"radius"						"700"
+			}
+		}
+	
+		// Modifiers
+		//-------------------------------------------------------------------------------------------------------------
+		"Modifiers"
+		{	
+			"AttackThinker"
+			{	
+				"Passive"			"1"			
+			    "ThinkInterval"		"5"
+
+			    "OnIntervalThink"
+			    {
+					"RunScript"
+					{
+						"ScriptFile"	"orb_energy_attack.lua"
+						"Function"		"Thinker"
+					}
+			  	}
+			}
+		}
+	}
+
+	///////////////////////////
+	///// QUEST ABILITIES /////
+	///////////////////////////
+
+	"quest_lab_potion_red"
+	{
+		// General
+		//-------------------------------------------------------------------------------------------------------------
+		"AbilityName"					"quest_lab_potion_red"
+		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_IMMEDIATE | DOTA_ABILITY_BEHAVIOR_NO_TARGET | DOTA_ABILITY_BEHAVIOR_IGNORE_CHANNEL"
+		"BaseClass" 					"ability_datadriven"
+		"AbilityTextureName"            "alchemist_unstable_concoction"
+
+		// Stats		
+		//-------------------------------------------------------------------------------------------------------------
+		"AbilityCooldown"				"1.0"
+
+		// Item Info
+		//-------------------------------------------------------------------------------------------------------------
+		"AbilityManaCost"				"0"
+
+		"OnSpellStart"
+		{
+			"RunScript"
+			{
+				"ScriptFile"		"quest/quests.lua"
+				"Function"			"AbilityName"
 			}
 		}
 	}

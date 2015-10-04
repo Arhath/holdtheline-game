@@ -94,7 +94,18 @@ function CHoldoutGameMode:InitGameMode()
 	self._gateSystem:Init(self, DOTA_TEAM_GOODGUYS)
 	
 	Timers:CreateTimer(5, function()
-		TestSpawn("treant_mushroom_creature_big","testspawner_2", 0, DOTA_TEAM_GOODGUYS)
+		TestSpawn("treant_mushroom_creature_big","testspawner_2", 0, DOTA_TEAM_GOODGUYS, false)
+		return nil
+		end
+		)
+	Timers:CreateTimer(5, function()
+		TestSpawn("treant_mushroom_creature_big","testspawner_2", 0, DOTA_TEAM_GOODGUYS, false)
+		return nil
+		end
+		)
+
+	Timers:CreateTimer(5, function()
+		TestSpawn("treant_flower_creature_big","testspawner_1", 0, DOTA_TEAM_BADGUYS, false)
 		return nil
 		end
 		)
@@ -444,8 +455,10 @@ function CHoldoutGameMode:OnEntityHurt(keys)
 					--PopupNumbers(tree, "gold", Vector(0, 255, 0), 1.0, TREE_HEALTH - tree.damage, POPUP_SYMBOL_PRE_PLUS, nil)
 			
 					if tree.damage >= TREE_HEALTH then
-						tree:CutDown(entVictim:GetTeamNumber())
-						tree.damage = 0
+						UnitCutDownTree(entVictim, trees)
+						if not tree:IsNull() then
+							tree.damage = 0
+						end
 					end
 				end
 			end
