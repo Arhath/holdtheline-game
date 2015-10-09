@@ -74,7 +74,7 @@ end
 
 
 function CMoonwell:RefillBottles()
-	print("refilling bottles")
+	--print("refilling bottles")
 	local BottleUnits = shallowcopy(self._vBottleUnits)
 	local refillTick = self._fRefillPerSecond * self._TICKRATE
 	local manaToUse = math.min(refillTick, self:GetMana())
@@ -192,7 +192,7 @@ function CMoonwell:UpdateMoonwell(show)
 end
 
 function CMoonwell:AddBottleUnit( unit )
-	print("adding bottle unit")
+	--print("adding bottle unit")
 	if unit.BottleSystem == nil then
 		return
 	end
@@ -207,7 +207,7 @@ function CMoonwell:AddBottleUnit( unit )
 	end
 
 	if bSetUnit then
-		print("inserting bottle unit into table")
+		--print("inserting bottle unit into table")
 		table.insert(self._vBottleUnits, unit)
 	end
 end
@@ -215,7 +215,7 @@ end
 function CMoonwell:RemoveBottleUnit( unit )
 	for n, u in pairs(self._vBottleUnits) do
 		if u == unit then
-			print("removing bottle unit from table")
+			--print("removing bottle unit from table")
 			table.remove(self._vBottleUnits, n)
 			break
 		end
@@ -229,7 +229,7 @@ function CMoonwell:RefillBottle(unit, trigger)
 			--local bottle = findItemOnUnit( unit, "item_bottle", false)
 
 			if unit.BottleSystem == nil then
-				print("bottle system not found")
+				--print("bottle system not found")
 				return
 			end
 	

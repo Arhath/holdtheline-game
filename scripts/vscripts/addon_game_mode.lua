@@ -58,6 +58,7 @@ function Precache( context )
 	PrecacheItemByNameSync( "item_glyph_mana", context )
 	PrecacheItemByNameSync( "item_slippers_of_halcyon", context )
 	PrecacheItemByNameSync( "item_greater_clarity", context )
+	PrecacheItemByNameSync( "item_modifier_applier", context)
 end
 
 -- Actually make the game mode when we activate
@@ -350,11 +351,13 @@ function CHoldoutGameMode:OnUnitRightClick( event )
 	mPos.y = event.mouseY
 	--mPos.z = GetGroundHeight(mPos, nil)
 
+	--print(eventName)
+	--GameRules.holdOut._movementSystem:OnUnitRightClick( event )
+
 	if eventName == "doublepressed" then
 
 		--SafeSpawnCreature("npc_dota_creature_kobold_tunneler", mPos, 50, mPos.z, nil, nil, DOTA_TEAM_BADGUYS)
 		UnitTeleportToPosition(unit, mPos, true)
-		print(eventName)
 	end
 
 	--
@@ -375,7 +378,7 @@ function CHoldoutGameMode:OnUnitLeftClick( event )
 		--SafeSpawnCreature("npc_dota_creature_kobold_tunneler", mPos, 50, mPos.z, nil, nil, DOTA_TEAM_BADGUYS)
 		unit:SetControllableByPlayer(pID, true)
 		--UnitTeleportToPosition(unit, mPos, true)
-		print(eventName)
+		--print(eventName)
 	--end
 
 	--
@@ -757,7 +760,10 @@ function CHoldoutGameMode:OnEntityKilled( event )
 
 		if killedUnit.Holdout_CoreNum ~= nil then
 			self._vRounds[killedUnit.Holdout_CoreNum]:OnEntityKilled( event )
-			self._bottleSystem:SpawnGlyphOnPosition(killedUnit:GetAbsOrigin(), 1, 1)
+			local rand = RandomFloat(0, 1)
+			if 0.7 > rand and rand > 0.63  then
+				self._bottleSystem:SpawnGlyphOnPosition(killedUnit:GetAbsOrigin(), 1, 1)
+			end
 		end 
 	end
 	

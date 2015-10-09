@@ -182,6 +182,15 @@ function UnitTeleportToPosition( unit, pos, stop )
 end
 
 
+function UnitIsDead( unit )
+	if unit:IsNull() then
+		return true
+	else
+		return not unit:IsAlive()
+	end
+end
+
+
 
 function SafeSpawnCreature(name, pos, aoe, height, npcOwner, unitOwner, team)
     local spawn = pos
@@ -266,7 +275,7 @@ function GetPointWithPolarOffset( pos, angle, offset )
 
     result.x = pos.x + math.cos(angle) * offset
     result.y = pos.y + math.sin(angle) * offset
-    print("point with offset")
+    --print("point with offset")
 
     return result
 end

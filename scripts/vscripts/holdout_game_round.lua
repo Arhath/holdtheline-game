@@ -319,13 +319,14 @@ end
 
 
 function CHoldoutGameRound:OnEntityKilled( event )
-	print("entity killed !!!!! round trigger")
+	--print("entity killed !!!!! round trigger")
 	local killedUnit = EntIndexToHScript( event.entindex_killed )
 	if not killedUnit then
 		return
 	end
 
 	local attackerUnit = EntIndexToHScript( event.entindex_attacker or -1 )
+	local pID = attackerUnit:GetPlayerOwnerID()
 
 
 	for i, unit in pairs( self._vEnemiesRemaining ) do
@@ -365,15 +366,19 @@ function CHoldoutGameRound:OnEntityKilled( event )
 		for _, hero in pairs(self._gameMode._vHeroes) do
 			if killedUnit.RewardXP ~= nil then
 				hero:AddExperience(xpGain, DOTA_ModifyXP_CreepKill, true, false)
+				PopupNumbers(hero, "gold", Vector(127, 0, 255), 2.0, goldModifier, POPUP_SYMBOL_PRE_PLUS, nil)
+				print(xpGain)
 			end
 
-			if killedUnit.RewardGold ~= nil then
-				if attackerUnit ~= nil and hero == attackerUnit then
-					--PlayerResource:ModifyGold(nPlayerID, killedUnit.RewardGold, true, DOTA_ModifyGold_CreepKill)
-				else
-					--PlayerResource:ModifyGold(nPlayerID, killedUnit.RewardGold * 0.33, true, DOTA_ModifyGold_CreepKill)
-				end
+			local goldModifier = goldGain
+
+			if attackerUnit ~= nil and hero ~= attackerUnit then
+				goldModifier = goldGain * 0.33
 			end
+
+			PlayerResource:ModifyGold(pID, goldModifier, true, DOTA_ModifyGold_CreepKill)
+			PopupNumbers(killedUnit, "gold", Vector(255, 200, 33), 2.0, goldModifier, POPUP_SYMBOL_PRE_PLUS, nil)
+			print(goldModifier)
 		end
 	end
 

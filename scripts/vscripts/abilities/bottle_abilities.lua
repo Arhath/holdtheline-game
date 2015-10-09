@@ -120,7 +120,7 @@ function bottle_mana:OnSpellStart()
 	local bUseBottle = GameRules.holdOut._bottleSystem:HeroUseBottle(hCaster, hTarget, BOTTLE_MANA)
 
 	if bUseBottle then
-		print("ability used health bottle !!!")
+		--print("ability used health bottle !!!")
 	end
 end
  
@@ -165,7 +165,7 @@ function glyph_ability_mana:OnSpellStart()
 	local bUseBottle = GameRules.holdOut._bottleSystem:HeroUseBottle(hCaster, hTarget, BOTTLE_HEALTH)
 
 	if bUseBottle then
-		print("ability used health bottle !!!")
+		--print("ability used health bottle !!!")
 	end
 end
  

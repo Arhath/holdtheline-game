@@ -113,14 +113,14 @@ function CGlyphObj:Init(nType, lvl, system)
 		return false
 	end
 
-	print(GLYPH_ITEM_NAME_[nType])
+	--print(GLYPH_ITEM_NAME_[nType])
 	self._entGlyph = CreateItem(GLYPH_ITEM_NAME_[nType], nil, nil)
 
 	if self._entGlyph == nil then
-		print("couldnt create item")
+		--print("couldnt create item")
 		return false
 	end
-	print("created item")
+	--print("created item")
 	self._entGlyphIndex = self._entGlyph:entindex()
 	self._bottleSystem = system
 	self._nType = nType
@@ -187,7 +187,7 @@ function CGlyphObj:GlyphThink( target )
 	self._fLastTick = GameRules:GetGameTime()
 
 	if target.BottleSystem ~= nil and self._fTimer <= self._fDuration then
-		print("hasmodifier mana")
+		--print("hasmodifier mana")
 		local reg = self._nStacks * math.min(self._fDuration - self._fTimer, timePassed)
 		DebugDrawText(target:GetAbsOrigin(), string.format("reg: %f dur: %f / %f stacks: %d", reg, self._fDuration, self._fTimer, self._nStacks), true, timePassed)
 
@@ -201,7 +201,7 @@ function CGlyphObj:GlyphThink( target )
 		return self:GetTickrate()
 	end
 
-	print("no modifier mana")
+	--print("no modifier mana")
 	local stacks = target:GetModifierStackCount(self._strModifier, self._entOwner)
 
 	DebugDrawText(target:GetAbsOrigin(), string.format("stacks: %d", stacks), true, 7)
@@ -228,7 +228,7 @@ end
 
 
 function CGlyphObj:GetBottleType()
-	print(string.format("bottle type: %d", self._nBottleType))
+	--print(string.format("bottle type: %d", self._nBottleType))
 	return self._nBottleType
 end
 

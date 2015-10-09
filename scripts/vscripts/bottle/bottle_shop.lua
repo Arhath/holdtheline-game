@@ -29,17 +29,27 @@ SHOP_ABILITY_LIST_ = {
 }
 
 
-function CBottleShop:CreateBottleShop(pedestal, bottle, hero, bottleSystem)
+function CBottleShop:CreateBottleShop(pedestal, bottle, pID, bottleSystem)
 	local shopObj = CBottleShop()
-	if shopObj:Init(pedestal, bottle, hero, bottleSystem) then
+	if shopObj:Init(pedestal, bottle, pID, bottleSystem) then
 		return shopObj
 	end
 	
 	return nil
 end
 
+function CBottleShop:AddHero( hero )
+	self._vHeroes[hero:entindex()] = hero
+	hero.BottleSystem.BottleShop = self
+end
 
-function CBottleShop:Init(pedestal, bottle, hero, bottleSystem)
+function CBottleShop:RemoveHero( hero )
+	self._vHeroes[hero:entindex()] = nil
+	hero.BottleSystem.BottleShop = nil
+end
+
+
+function CBottleShop:Init(pedestal, bottle, pID, bottleSystem)
 	self._TICKRATE = 0.04
 
 	self._entPedestal = Entities:FindByName(nil, pedestal)
@@ -54,8 +64,11 @@ function CBottleShop:Init(pedestal, bottle, hero, bottleSystem)
 		return nil
 	end
 
+	self._playerID = pID
+	self._vHeroes = {}
+
 	self._entBottle:AddNewModifier( self._entBottle, nil, "modifier_invulnerable", {} )
-	self._entBottle:SetControllableByPlayer(hero:GetPlayerOwnerID(), true)
+	self._entBottle:SetControllableByPlayer(pID, true)
 	self._bottleSystem = bottleSystem
 
 	self._fMinHeigth = self._entBottle:GetOrigin().z
@@ -118,10 +131,6 @@ function CBottleShop:Init(pedestal, bottle, hero, bottleSystem)
 		{
 		},
 	}
-
-	self._hero = hero
-
-	self._hero.BottleSystem.BottleShop = self
 
 	self._entBottle.BottleShop = self
 
@@ -221,7 +230,9 @@ function CBottleShop:UpdateShop()
 		end
 	end
 
-	self._bottleSystem:HeroUpdateBottle(self._hero, counterState)
+	for _, unit in pairs(self._vHeroes) do
+		self._bottleSystem:HeroUpdateBottle(unit, counterState)
+	end
 end
 
 

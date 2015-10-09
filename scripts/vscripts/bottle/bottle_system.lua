@@ -54,13 +54,16 @@ function CBottleSystem:Init( gameMode, team )
 	--)
 end
 
-function CBottleSystem:InitBottleShop(hero)
-	local id = hero:GetPlayerOwnerID()
-	--print(string.format("player owner: %d", id))
+function CBottleSystem:InitBottleShop(pID)
+	----print(string.format("player owner: %d", id))
 
-	if Entities:FindByName(nil, "BottleShopPedestal" .. id) ~= nil then
-		local bottleShopObj = CBottleShop:CreateBottleShop("BottleShopPedestal" .. id, "BottleShopBottle" .. id, hero, self)
-		table.insert(self._vBottleShops, bottleShopObj)
+	if self._vBottleShops[pID] ~= nil then
+		return
+	end
+
+	if Entities:FindByName(nil, "BottleShopPedestal" .. pID) ~= nil then
+		local bottleShopObj = CBottleShop:CreateBottleShop("BottleShopPedestal" .. pID, "BottleShopBottle" .. pID, pID, self)
+		self._vBottleShops[pID] = bottleShopObj
 	end
 end
 
@@ -84,16 +87,16 @@ function CBottleSystem:OnItemPickedUp( event )
 	local item = EntIndexToHScript(event.ItemEntityIndex)
 	local hero = EntIndexToHScript(event.HeroEntityIndex)
 	local player = hero:GetPlayerOwner()
-	print("try pickup")
+	--print("try pickup")
 
 	if item ~= nil then
-		print("item exists")
+		--print("item exists")
 	end
 
 	local glyph = self:GetGlyph(item)
 
 	if glyph ~= nil then
-		print("picking up")
+		--print("picking up")
 		UTIL_Remove(item)
 		self:HeroPickUpGlyph(hero, glyph)
 	end
@@ -116,7 +119,7 @@ function CBottleSystem:SpawnGlyphOnPosition( pos, nType, lvl )
 		return false
 	end
 
-	print("spawning glyph")
+	--print("spawning glyph")
 
 	local glyphObj = CGlyphObj:CreateGlyph(nType, lvl, self)
 
@@ -126,7 +129,7 @@ function CBottleSystem:SpawnGlyphOnPosition( pos, nType, lvl )
 
 	table.insert(self._vGlyphs, glyphObj)
 
-	print("glyph created")
+	--print("glyph created")
 
 	glyphObj:SpawnOnPosition(pos)
 
@@ -155,6 +158,12 @@ end
 
 
 function CBottleSystem:OnHeroSpawned( hero )
+	if hero.BottleSystem.BottleShop == nil then
+		local pID = hero:GetPlayerOwnerID()
+		print(string.format("playerId: %d", pID))
+		self._vBottleShops[pID]:AddHero(hero)
+	end
+
 	for i = 1, 2 do
 		ApplyModifier(hero, hero, MODIFIER_STACKS_[i], {duration=-1})
 		self:BottleAddCharges(hero, i, hero.BottleSystem[i].ChargesMax)
@@ -204,16 +213,14 @@ function CBottleSystem:OnHeroInGame( hero )
 		BottleShop = nil
 	}
 
-	self:InitBottleShop(hero)
-	
+	local pID = hero:GetPlayerOwnerID()
+
+	self:InitBottleShop(pID)
+	print("hero ingame")
 
 	table.insert(self._vHeroes, hero)
 
-	for i = 1, 2 do
-		ApplyModifier(hero, hero, MODIFIER_STACKS_[i], {duration=-1})
 
-		self:BottleAddCharges(hero, i, 100)
-	end
 end
 
 function CBottleSystem:HeroUpdateBottle(hero, bottle)
@@ -259,7 +266,7 @@ function CBottleSystem:HeroUseBottle( hero, target, bottle )
 	local bReturn = false
 
 	if hero.BottleSystem[bottle].Glyph ~= nil then
-		print("glyph")
+		--print("glyph")
 		hero.BottleSystem[bottle].Glyph:Activate()
 		hero:RemoveAbility(GLYPH_ABILITY_[hero.BottleSystem[bottle].Glyph._nType])
 		hero.BottleSystem[bottle].Glyph = nil
@@ -267,7 +274,7 @@ function CBottleSystem:HeroUseBottle( hero, target, bottle )
 
 		bReturn = true
 	else
-		print("no glyph")
+		--print("no glyph")
 		if hero.BottleSystem[bottle].Charges >= hero.BottleSystem[bottle].ChargesCost then
 			self:BottleAddCharges(hero, bottle, -hero.BottleSystem[bottle].ChargesCost)
 			self:BottleActivate(hero, target, bottle)
@@ -419,8 +426,8 @@ function CBottleSystem:BottleAddCharges( hero, bottle, charges)
 	
 
 	hero:SetModifierStackCount(MODIFIER_STACKS_[bottle], hero, math.floor(hero.BottleSystem[bottle].Charges))
-	--print(string.format("charges: %f", hero.BottleSystem[bottle].Charges))
-	--print(string.format("refilled: %f", chargesUsed))
+	----print(string.format("charges: %f", hero.BottleSystem[bottle].Charges))
+	----print(string.format("refilled: %f", chargesUsed))
 	return chargesUsed
 end
 
