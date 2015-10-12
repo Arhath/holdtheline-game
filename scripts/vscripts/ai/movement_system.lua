@@ -23,8 +23,10 @@ WAYPOINT_ANTI_STUCK_TIME_MAX = 10.0
 
 MAX_TIME_IGNORE			= 5.0
 MAX_TIME_FOLLOW_NO_VISION = 4.0
+MAX_TIME_NO_DAMAGE = 12.0
+MAX_TIME_IGNORE_SIGHT = 7.0
 
-MAX_DISTANCE_AGGRO = 2000.0
+MAX_DISTANCE_AGGRO = 1400.0
 
 MAX_STUCK_TIME = 4.0
 
@@ -35,8 +37,7 @@ AGGRO_TYPE_DAMAGE_ENEMY_RANGE	= 6
 AGGRO_TYPE_DAMAGE_OWN			= 5
 AGGRO_TYPE_DAMAGE_AOE_MELEE		= 4
 AGGRO_TYPE_DAMAGE_AOE_RANGE		= 3
-AGGRO_TYPE_SIGHT_MELEE			= 2
-AGGRO_TYPE_SIGHT_RANGE			= 1
+AGGRO_TYPE_SIGHT				= 1
 
 AGGRO_OVERWRITE_ALL		= 10
 AGGRO_OVERWRITE_RENEW	= 2
@@ -68,6 +69,8 @@ function CMovementSystem:OnNPCSpawned( event )
 			IgnoreTime = 0,
 			TargetTime = 0,
 			NoVisionTime = 0,
+			NoDamageTime = 0,
+			IgnoreSight = false,
 			MaxTargetTime = 0,
 			MinTargetTime = 0,
 			CanChangeTarget = true,
@@ -145,12 +148,14 @@ function CMovementSystem:OnEntityHurt( keys)
 
 			DebugDrawCircle(entVictim:GetOrigin(), Vector(255, 0, 0), 0, ATTACK_AGGRO_AOE, true, 1)
 
+			self:UnitAggroTarget(entVictim, entCause, MAX_TARGET_TIME, 7, aggroTypeDmg, AGGRO_OVERWRITE_RENEW)
+			entVictim.MovementSystem.NoDamageTime = 0
+			entVictim.MovementSystem.IgnoreSight = false
+			--entVictim.MovementSystem.StuckTime = 0
+
 			for _, nt in pairs(newTargets) do
 				self:UnitAggroTarget(nt, entCause, MAX_TARGET_TIME, 4, aggroTypeAoe, AGGRO_OVERWRITE_RENEW)
 			end
-
-			self:UnitAggroTarget(entVictim, entCause, MAX_TARGET_TIME, 7, aggroTypeDmg, AGGRO_OVERWRITE_RENEW)
-			--entVictim.MovementSystem.StuckTime = 0
 		end
 
 		if entCause.MovementSystem.Type == MOVEMENT_SYSTEM_TYPE_ATTACKER and entVictim.MovementSystem.Type == MOVEMENT_SYSTEM_TYPE_DEFENDER then
@@ -168,14 +173,16 @@ function CMovementSystem:OnEntityHurt( keys)
 				false
 			)
 
+			self:UnitAggroTarget(entCause, entVictim, MAX_TARGET_TIME, 7, AGGRO_TYPE_DAMAGE_OWN, AGGRO_OVERWRITE_RENEW)
+			entCause.MovementSystem.NoDamageTime = 0
+			entCause.MovementSystem.IgnoreSight = false
+			entCause.MovementSystem.StuckTime = 0
+
 			--DebugDrawCircle(entCause:GetOrigin() + Vector(0, 0, 100), Vector(255, 255, 255), 0, ATTACK_AGGRO_AOE, false, 0.5)
 
-			for _, nt in pairs(newTargets) do
-				self:UnitAggroTarget(nt, entVictim, MAX_TARGET_TIME, 4, AGGRO_TYPE_DAMAGE_AOE, AGGRO_OVERWRITE_NORMAL)
-			end
-
-			self:UnitAggroTarget(entCause, entVictim, MAX_TARGET_TIME, 7, AGGRO_TYPE_DAMAGE_OWN, AGGRO_OVERWRITE_RENEW)
-			entCause.MovementSystem.StuckTime = 0
+			--for _, nt in pairs(newTargets) do
+			--	self:UnitAggroTarget(nt, entVictim, MAX_TARGET_TIME, 4, AGGRO_TYPE_DAMAGE_AOE, AGGRO_OVERWRITE_NORMAL)
+			--end
 		end
 	end
 end
@@ -321,15 +328,17 @@ function CMovementSystem:Think()
 					false
 				)
 
+			--[[
 			local atkRange = au:GetAttackRange()
 			local aggroTypeSight = AGGRO_TYPE_SIGHT_MELEE
 
 			if atkRange > 200 then
 				aggroTypeSight = AGGRO_TYPE_SIGHT_RANGE
 			end
+			]]
 
 			for _, nt in pairs(newTargets) do
-				self:UnitAggroTarget(nt, au, MAX_TARGET_TIME, 4, aggroTypeSight, AGGRO_OVERWRITE_NORMAL)
+				self:UnitAggroTarget(nt, au, MAX_TARGET_TIME, 4, AGGRO_TYPE_SIGHT, AGGRO_OVERWRITE_NORMAL)
 			end
 
 			DebugDrawText(au:GetOrigin(), string.format("Targets: %d", aggroNum), true, 0.25)
@@ -447,16 +456,48 @@ function CMovementSystem:UnitThink( unit )
 		end
 
 		if unit.MovementSystem.Target ~= nil then
+			if unit.MovementSystem.IgnoreSight == false then
+				if unit.MovementSystem.NoDamageTime > MAX_TIME_NO_DAMAGE then
+					unit.MovementSystem.IgnoreSight = true
+					unit.MovementSystem.NoDamageTime = 0
+
+					if unit.MovementSystem.AggroType < AGGRO_TYPE_DAMAGE_OWN then
+						self:UnitSetTarget(unit, nil, false)
+					end
+				else
+					unit.MovementSystem.NoDamageTime = unit.MovementSystem.NoDamageTime + timePassed
+				end
+			end
+		else
+			if unit.MovementSystem.IgnoreSight == true then
+				if unit.MovementSystem.NoDamageTime > MAX_TIME_IGNORE_SIGHT then
+					unit.MovementSystem.IgnoreSight = false
+					unit.MovementSystem.NoDamageTime = 0
+				else
+					unit.MovementSystem.NoDamageTime = unit.MovementSystem.NoDamageTime + timePassed
+				end
+			else
+				if unit.MovementSystem.NoDamageTime > 0 then
+					unit.MovementSystem.NoDamageTime = unit.MovementSystem.NoDamageTime - math.min(unit.MovementSystem.NoDamageTime, timePassed * 2)
+				end
+			end
+		end
+
+		
+		if unit.MovementSystem.Target ~= nil then
 			self:UnitAttackTarget(unit, unit.MovementSystem.Target)
 			unit.MovementSystem.ForceUpdate = true
 			----print("unitthinkattack")
 		else
 			----print("UnitThinkMovement")
+
 			self:UnitThinkMovement(unit)
 		end
 
+
 		if unit.MovementSystem.Target ~= nil then
-			DebugDrawText(unit:GetOrigin(), string.format("Target: %d", unit.MovementSystem.TargetTime), true, 0.25)
+			--DebugDrawText(unit:GetOrigin(), string.format("Target: %d", unit.MovementSystem.TargetTime), true, 0.25)
+			DebugDrawText(unit:GetOrigin(), string.format("it: %d", unit.MovementSystem.NoDamageTime), true, 0.25)
 		elseif unit.MovementSystem.IgnoreTarget ~= nil then
 			DebugDrawText(unit:GetOrigin(), string.format("Ignore: %d", unit.MovementSystem.IgnoreTime), true, 0.25)
 		end
@@ -496,8 +537,8 @@ function CMovementSystem:UnitSetTarget(unit, data, ignore)
 		unit.MovementSystem.MaxTargetTime = data.timeMax
 		unit.MovementSystem.MinTargetTime = data.timeMin
 		unit.MovementSystem.CanChangeTarget = false
-		unit.MovementSystem.IgnoreTarget = nil
-		unit.MovementSystem.IgnoreTime = 0
+		unit.MovementSystem.IgnoreTarget = unit.MovementSystem.IgnoreTarget
+		unit.MovementSystem.IgnoreTime = unit.MovementSystem.IgnoreTime
 		unit.MovementSystem.StuckTime = 0
 
 		unit.MovementSystem.Target.MovementSystem.TargetList[unit:entindex()] = unit
@@ -515,7 +556,7 @@ function  CMovementSystem:UnitAggroTarget( unit, target, timeMax, timeMin, aggro
 			if unit.MovementSystem.Target ~= nil then
 				if overwrite ~= AGGRO_OVERWRITE_RENEW then
 					if not unit.MovementSystem.CanChangeTarget then
-						if unit.MovementSystem.AggroType >= aggroType then
+						if aggroType <= unit.MovementSystem.AggroType then
 							----print("not setting target")
 							return
 						end
@@ -526,11 +567,11 @@ function  CMovementSystem:UnitAggroTarget( unit, target, timeMax, timeMin, aggro
 					end
 				else
 					if not unit.MovementSystem.CanChangeTarget then
-						if unit.MovementSystem.AggroType > aggroType then
-							return
-						elseif unit.MovementSystem.Target ~= target then		
+						if aggroType < unit.MovementSystem.AggroType then
 							return
 						end
+					elseif unit.MovementSystem.Target ~= target then		
+						return
 					end
 				end
 			end
@@ -539,6 +580,10 @@ function  CMovementSystem:UnitAggroTarget( unit, target, timeMax, timeMin, aggro
 				if aggroType < AGGRO_TYPE_DAMAGE_OWN then
 					return
 				end
+			end
+
+			if unit.MovementSystem.IgnoreSight and aggroType < AGGRO_TYPE_DAMAGE_OWN then
+				return
 			end
 		end
 
@@ -552,6 +597,7 @@ function  CMovementSystem:UnitAggroTarget( unit, target, timeMax, timeMin, aggro
 		}
 
 		self:UnitSetTarget(unit, data, false)
+		ApplyModifier(unit, target, "modifier_vision", {Duration = 2}, true)
 		--print("new aggro Target: " .. unit.MovementSystem.Target:GetName())
 
 		DebugDrawLine(unit:GetOrigin(), target:GetOrigin(), 255, 0, 0, true, 1)

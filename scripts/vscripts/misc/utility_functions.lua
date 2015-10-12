@@ -18,6 +18,16 @@ function ApplyModifier(source, target, modifier_name, modifierArgs, overwrite)
 end
 
 
+function Assert( handle )
+	if handle ~= nil then 
+		return handle
+	else
+		return 0
+	end
+end
+
+
+
 function BroadcastMessage( sMessage, fDuration )
     local centerMessage = {
         message = sMessage,
@@ -488,4 +498,28 @@ function SetPhasing(unit, time)
     else
         ApplyModifier(unit, unit, "modifier_phasing_passive", {duration=time})
     end
+end
+
+function TreeIsAlive( tree )
+    if not tree:IsNull() then
+        local treeClass = tree:GetClassname()
+
+        if treeClass == "ent_dota_tree" then
+            return tree:IsStanding()
+        else 
+            return not tree:IsNull()
+        end
+    else
+        return false
+    end
+end
+
+function UnitCutDownTree( unit, tree )
+	local treeClass = tree:GetClassname()
+
+	if treeClass == "ent_dota_tree" then
+		tree:CutDown(unit:GetTeamNumber())
+	else
+		UTIL_RemoveImmediate( tree )
+	end
 end
