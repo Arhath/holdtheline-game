@@ -34,6 +34,8 @@ ABILITY_ = {
 	"bottle_mana",
 }
 
+BOTTLE_HEALTH_DURATION_BASE = 4.0
+BOTTLE_MANA_DURATION_BASE = 4.0
 
 
 function CBottleSystem:Init( gameMode, team )
@@ -43,6 +45,13 @@ function CBottleSystem:Init( gameMode, team )
 	self._vMoonwells = {}
 	self._vBottleShops = {}
 	self:InitMoonwells()
+
+	for i = 0, DOTA_MAX_PLAYERS-1 do
+		local ent = Entities:FindByName(nil, "BottleShopBottle" .. i)
+		if ent ~= nil then
+			ent:AddNewModifier( ent, nil, "modifier_invulnerable", {} )
+		end
+	end
 
 	self._vGlyphs = {}
 
@@ -54,6 +63,8 @@ function CBottleSystem:Init( gameMode, team )
 	--)
 end
 
+
+
 function CBottleSystem:InitBottleShop(pID)
 	----print(string.format("player owner: %d", id))
 
@@ -61,7 +72,7 @@ function CBottleSystem:InitBottleShop(pID)
 		return
 	end
 
-	if Entities:FindByName(nil, "BottleShopPedestal" .. pID) ~= nil then
+	if Entities:FindByName(nil, "BottleShopBottle" .. pID) ~= nil then
 		local bottleShopObj = CBottleShop:CreateBottleShop("BottleShopPedestal" .. pID, "BottleShopBottle" .. pID, pID, self)
 		self._vBottleShops[pID] = bottleShopObj
 	end
@@ -190,6 +201,8 @@ function CBottleSystem:OnHeroInGame( hero )
 				HealInstant = 0,
 				Hps = 0,
 				Tickrate = 0.2,
+				Timer = nil,
+
 			},
 			Glyph = nil,
 		},
@@ -206,6 +219,7 @@ function CBottleSystem:OnHeroInGame( hero )
 				HealInstant = 0,
 				Hps = 0,
 				Tickrate = 0.2,
+				Timer = nil,
 			},
 			Glyph = nil,
 		},
@@ -305,25 +319,25 @@ function CBottleSystem:BottleCalcThink( hero, bottle )
 
 	if bottle == BOTTLE_HEALTH then
 
-		local healTime = 		4 + 1 * ( data[3] - 1 )
-		local healPct = 		( 0.3 + ( data[1] - 1 ) * 0.1 ) * healTime / 4
-		local healPctInstant = 	0.2 + ( data[2] - 1 ) * 0.5 * healPct
+		local healTime = 		BOTTLE_HEALTH_DURATION_BASE + 1 * ( data[3] - 1 )
+		local healPct = 		( 0.3 + ( data[1] - 1 ) * 0.1 ) * healTime / BOTTLE_HEALTH_DURATION_BASE
+		local healPctInstant = 	(0.2 + ( data[2] - 1 ) * 0.05 ) * healPct
 		local hps =				1 + ( data[4] - 1 ) * 0.1
 
-		hero.BottleSystem[bottle].Think.HealInstant = hero:GetMaxHealth() * healPctInstant
-		hero.BottleSystem[bottle].Think.Healing = hero:GetMaxHealth() * healPct * hps
+		hero.BottleSystem[bottle].Think.HealInstant = healPctInstant
+		hero.BottleSystem[bottle].Think.Healing = healPct * hps
 		hero.BottleSystem[bottle].Think.TimeLeft = healTime
 		hero.BottleSystem[bottle].Think.Hps = hero.BottleSystem[bottle].Think.Healing / healTime
 
 	elseif bottle == BOTTLE_MANA then
 
-		local healTime = 		4 + 1 * ( data[3] - 1 )
-		local healPct = 		( 0.3 + ( data[1] - 1 ) * 0.1 ) * healTime / 4
-		local healPctInstant = 	0.2 + ( data[2] - 1 ) * 0.5 * healPct
+		local healTime = 		BOTTLE_MANA_DURATION_BASE + 1 * ( data[3] - 1 )
+		local healPct = 		( 0.3 + ( data[1] - 1 ) * 0.1 ) * healTime / BOTTLE_MANA_DURATION_BASE
+		local healPctInstant = 	(0.2 + ( data[2] - 1 ) * 0.05) * healPct
 		local hps =				1 + ( data[4] - 1 ) * 0.1
 
-		hero.BottleSystem[bottle].Think.HealInstant = hero:GetMaxMana() * healPctInstant
-		hero.BottleSystem[bottle].Think.Healing = hero:GetMaxMana() * healPct * hps
+		hero.BottleSystem[bottle].Think.HealInstant = healPctInstant
+		hero.BottleSystem[bottle].Think.Healing = healPct * hps
 		hero.BottleSystem[bottle].Think.TimeLeft = healTime
 		hero.BottleSystem[bottle].Think.Hps = hero.BottleSystem[bottle].Think.Healing / healTime
 	end
@@ -333,7 +347,19 @@ end
 function CBottleSystem:BottleActivate(hero, target, bottle)
 
 	self:BottleCalcThink(hero, bottle)
-	self:HeroBottleHeal(target, bottle, hero.BottleSystem[bottle].Think.HealInstant)
+	local heal = hero.BottleSystem[bottle].Think.HealInstant
+
+	if target ~= hero and target.BottleSystem.BottleShop ~= nil then
+		self:BottleCalcThink(target, bottle)
+		local tHeal = target.BottleSystem[bottle].Think.HealInstant
+		if heal > tHeal then
+			local pctDiff = tHeal / heal
+			heal = tHeal + (heal - tHeal) * pctDiff
+		end
+	end
+
+	self:HeroBottleHeal(target, bottle, heal)
+	DebugDrawText(target:GetAbsOrigin() + Vector(0, 0, 450), string.format("inst: %f", heal), true, 2)
 
 	target:RemoveModifierByName(MODIFIER_[bottle])
 	target:RemoveModifierByName(MODIFIER_FX_[bottle])
@@ -341,18 +367,35 @@ function CBottleSystem:BottleActivate(hero, target, bottle)
 	ApplyModifier(hero, target, MODIFIER_[bottle], {duration=hero.BottleSystem[bottle].Think.TimeLeft})
 	ApplyModifier(hero, target, MODIFIER_FX_[bottle], {duration=hero.BottleSystem[bottle].Think.TimeLeft})
 
+	local timerID = DoUniqueString('bottle')
+	target.BottleSystem[bottle].Think.Timer = timerID
 	Timers:CreateTimer(function()
-		return CBottleSystem:BottleThink(hero, target, bottle)
+		return CBottleSystem:BottleThink(hero, target, bottle, timerID)
 	end
 	)
 end
 
-function CBottleSystem:BottleThink( hero, target, bottle )
+function CBottleSystem:BottleThink( hero, target, bottle, timer )
+	if timer ~= target.BottleSystem[bottle].Think.Timer then
+		return nil
+	end
+
 	if hero.BottleSystem[bottle].Think.TimeLeft > 0 then
 
-		local healing = hero.BottleSystem[bottle].Think.Hps * hero.BottleSystem[bottle].Think.Tickrate
+		local heal = hero.BottleSystem[bottle].Think.Hps
 
-		self:HeroBottleHeal(target, bottle, healing)
+		if target.BottleSystem.BottleShop ~= nil then
+			local tHeal = target.BottleSystem[bottle].Think.Hps
+			if heal > tHeal then
+				local pctDiff = tHeal / heal
+				heal = tHeal + (heal - tHeal) * pctDiff
+			end
+		end
+
+		heal = heal * hero.BottleSystem[bottle].Think.Tickrate
+
+		self:HeroBottleHeal(target, bottle, heal)
+		DebugDrawText(target:GetAbsOrigin()+ Vector(0, 0, 400), string.format("h: %f", heal), true, 0.2)
 
 		hero.BottleSystem[bottle].Think.TimeLeft = hero.BottleSystem[bottle].Think.TimeLeft - hero.BottleSystem[bottle].Think.Tickrate
 
@@ -370,16 +413,18 @@ function IsBottleFull( hero, bottle )
 		return false
 	end
 end
-
+	
 
 function CBottleSystem:HeroBottleHeal( hero, bottle, amount )
 	if bottle == BOTTLE_HEALTH then
+		amount = hero:GetMaxHealth() * amount
 		if hero:GetHealth() + amount < hero:GetMaxHealth() then
 			hero:SetHealth(hero:GetHealth() + amount)
 		else
 			hero:SetHealth(hero:GetMaxHealth())
 		end
 	elseif bottle == BOTTLE_MANA then
+		amount = hero:GetMaxMana() * amount
 		if hero:GetMana() + amount < hero:GetMaxMana() then
 			hero:SetMana(hero:GetMana() + amount)
 		else

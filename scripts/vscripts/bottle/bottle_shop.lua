@@ -68,7 +68,6 @@ function CBottleShop:Init(pedestal, bottle, pID, bottleSystem)
 	self._vHeroes = {}
 
 	self._entBottle:AddNewModifier( self._entBottle, nil, "modifier_invulnerable", {} )
-	self._entBottle:SetControllableByPlayer(pID, true)
 	self._bottleSystem = bottleSystem
 
 	self._fMinHeigth = self._entBottle:GetOrigin().z
@@ -123,7 +122,7 @@ function CBottleShop:Init(pedestal, bottle, pID, bottleSystem)
 			10,
 		},
 	}
-
+	
 	self._vAbilities = {
 		{
 		},
@@ -135,9 +134,10 @@ function CBottleShop:Init(pedestal, bottle, pID, bottleSystem)
 	self._entBottle.BottleShop = self
 
 	self:UpdateShop()
-	
+
+	self._entBottle:SetControllableByPlayer(pID, true)
+
 	Timers:CreateTimer(function()
-		
 		return self:Think()
 	end
 	)

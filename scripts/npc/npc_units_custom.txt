@@ -902,7 +902,7 @@
 
 		// Bounds
 		//----------------------------------------------------------------
-		"BoundsHullName"			"DOTA_HULL_SIZE_TOWER"			// Hull type used for navigation/locomotion.
+		"BoundsHullName"			"DOTA_HULL_SIZE_HERO"			// Hull type used for navigation/locomotion.
 		"ProjectileCollisionSize"	"50"
 		"RingRadius"				"130"
 		"HealthBarOffset"			"260"

@@ -79,6 +79,7 @@ function CMovementSystem:OnNPCSpawned( event )
 			State = MOVEMENT_SYSTEM_STATE_ACTIVE,
 			ForceUpdate = true,
 			LastFrame = GameRules:GetGameTime(),
+			Spawned = true,
 		}
 	end
 
@@ -675,6 +676,10 @@ function CMovementSystem:UnitThinkMovement( unit )
 		end
 
 		if nBest ~= nil then
+			if bestDist > RANGE_NEXT_WAYPOINT then
+				unit.MovementSystem.Spawned = false
+			end
+			
 			if  self._vWaypoints[nBest + 1] ~= "end" then
 				local waypoint1 = Entities:FindByName(nil, self._vWaypoints[nBest])
 				local waypoint2 = Entities:FindByName(nil, self._vWaypoints[nBest + 1])
@@ -683,21 +688,23 @@ function CMovementSystem:UnitThinkMovement( unit )
 				local pos2 = waypoint2:GetOrigin()
 				pos2.z = GetGroundHeight(pos2, nil)
 
-				if posUnit == pos1 then
-					nBest = nBest + 1
-				else
-					local angletest = GetAngleBetweenVectors(pos1 - pos2, pos1 - posUnit)
-						--print(string.format("angletest: %d", angletest))
-
-					DebugDrawText(pos1, string.format("angle diff: %d", angletest), true, 2)
-					DebugDrawText(pos2, "waypoint 2", true, 20)
-					--DebugDrawText(posUnit, "Unit", false, 20)
-
-					DebugDrawLine(pos1, pos2, 0, 255, 255, true, 2)
-					DebugDrawLine(posUnit, pos1, 0, 255, 0, true, 2)
-
-					if angletest < 75 	then
+				if not unit.MovementSystem.Spawned then
+					if posUnit == pos1 then
 						nBest = nBest + 1
+					else
+						local angletest = GetAngleBetweenVectors(pos1 - pos2, pos1 - posUnit)
+							--print(string.format("angletest: %d", angletest))
+
+						DebugDrawText(pos1, string.format("angle diff: %d", angletest), true, 2)
+						DebugDrawText(pos2, "waypoint 2", true, 20)
+						--DebugDrawText(posUnit, "Unit", false, 20)
+
+						DebugDrawLine(pos1, pos2, 0, 255, 255, true, 2)
+						DebugDrawLine(posUnit, pos1, 0, 255, 0, true, 2)
+
+						if angletest < 75 	then
+							nBest = nBest + 1
+						end
 					end
 				end
 			end
@@ -725,9 +732,6 @@ function CMovementSystem:UnitThinkMovement( unit )
 
 		--DebugDrawCircle(pos + Vector(0, 0, 100), Vector(255, 255, 255), 0, RANGE_NEXT_WAYPOINT, false, 0.25)
 		--DebugDrawText(posUnit, string.format("z: %d / %d", posUnit.z, unit.MovementSystem.OrderPosition.z), true, 0.25)
-		DebugDrawLine(posUnit, unit.MovementSystem.OrderPosition, 0, 255, 0, true, 0.25)
-
-		self:UnitMoveToPosition(unit, unit.MovementSystem.OrderPosition)
 
 		local travelDist = unit:GetMoveSpeedModifier(unit:GetBaseMoveSpeed()) * self:GetTickrate()
 
@@ -736,7 +740,7 @@ function CMovementSystem:UnitThinkMovement( unit )
 			DebugDrawText(unit:GetAbsOrigin(), "forceUpdate", true, self.GetTickrate())
 		end
 
-		if dist1 <= RANGE_NEXT_WAYPOINT * 1.1 and dist2 <= RANGE_NEXT_WAYPOINT / 4 then
+		if (dist1 <= RANGE_NEXT_WAYPOINT * 1.1 and dist2 <= RANGE_NEXT_WAYPOINT / 4) or unit.MovementSystem.Spawned == true then
 			if self._vWaypoints[n + 1] ~= "end" then
 				--print(string.format("waypoint reached setting next: %d", n + 1))
 				unit.MovementSystem.NextWaypoint = n + 1
@@ -746,8 +750,13 @@ function CMovementSystem:UnitThinkMovement( unit )
 
 				unit.MovementSystem.OrderPosition = posUnit + posWp2 - posWp1
 				unit.MovementSystem.OrderPosition.z = GetGroundHeight(unit.MovementSystem.OrderPosition, nil)
+				unit.MovementSystem.Spawned = false
 			end
 		end
+
+		DebugDrawLine(posUnit, unit.MovementSystem.OrderPosition, 0, 255, 0, true, 0.25)
+
+		self:UnitMoveToPosition(unit, unit.MovementSystem.OrderPosition)
 	end
 end
 

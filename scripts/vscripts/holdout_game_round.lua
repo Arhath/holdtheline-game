@@ -351,34 +351,36 @@ function CHoldoutGameRound:OnEntityKilled( event )
 		if bGoal then
 			local xpBuffer = self._nFixedXP * XP_BUFFER_PCT - self._nXPBuffer
 			print(string.format("xpbuffer = %d", xpBuffer))
-			local xpGain = math.min( xpBuffer, xpGain)
+			xpGain = math.min( xpBuffer, xpGain)
 			
 
 			self._nXPBuffer = self._nXPBuffer + xpGain
 
 			local goldBuffer = self._nMaxGold * GOLD_BUFFER_PCT - self._nGoldBuffer
-			local goldGain = math.min( goldBuffer, goldGain)
+			goldGain = math.min( goldBuffer, goldGain)
 
 			self._nGoldBuffer = self._nGoldBuffer + goldGain
-			goldGain = goldGain * 1.7
 		end
 
 		for _, hero in pairs(self._gameMode._vHeroes) do
-			if killedUnit.RewardXP ~= nil then
+			if xpGain > 0 then
 				hero:AddExperience(xpGain, DOTA_ModifyXP_CreepKill, true, false)
-				PopupNumbers(hero, "gold", Vector(127, 0, 255), 2.0, goldModifier, POPUP_SYMBOL_PRE_PLUS, nil)
+				PopupNumbers(hero, "gold", Vector(127, 0, 255), 2.0, math.floor(xpGain), POPUP_SYMBOL_PRE_PLUS, nil)
 				print(xpGain)
 			end
 
-			local goldModifier = goldGain
+			if goldGain > 0 then
 
-			if attackerUnit ~= nil and hero ~= attackerUnit then
-				goldModifier = goldGain * 0.33
+				local goldModifier = goldGain
+
+				if attackerUnit ~= nil and hero ~= attackerUnit then
+					goldModifier = goldGain * 0.33
+				end
+
+				PlayerResource:ModifyGold(pID, goldModifier, true, DOTA_ModifyGold_CreepKill)
+				PopupNumbers(killedUnit, "gold", Vector(255, 200, 33), 2.0, math.floor(goldModifier), POPUP_SYMBOL_PRE_PLUS, nil)
+				print(goldModifier)
 			end
-
-			PlayerResource:ModifyGold(pID, goldModifier, true, DOTA_ModifyGold_CreepKill)
-			PopupNumbers(killedUnit, "gold", Vector(255, 200, 33), 2.0, goldModifier, POPUP_SYMBOL_PRE_PLUS, nil)
-			print(goldModifier)
 		end
 	end
 

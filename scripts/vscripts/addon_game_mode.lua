@@ -459,7 +459,7 @@ function CHoldoutGameMode:OnEntityHurt(keys)
 					--PopupNumbers(tree, "gold", Vector(0, 255, 0), 1.0, TREE_HEALTH - tree.damage, POPUP_SYMBOL_PRE_PLUS, nil)
 			
 					if tree.damage >= TREE_HEALTH then
-						UnitCutDownTree(entVictim, trees)
+						UnitCutDownTree(entVictim, tree)
 						if not tree:IsNull() then
 							tree.damage = 0
 						end

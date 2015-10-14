@@ -41,6 +41,16 @@ bottle_health = class({})
 --------------------------------------------------------------------------------
  
 function bottle_health:CastFilterResultTarget( hTarget )
+	local hCaster = self:GetCaster()
+
+	if hCaster:GetTeamNumber() ~= hTarget:GetTeamNumber() then
+		return UF_FAIL_ENEMY
+	end
+
+	if hTarget:GetClassname() == "npc_dota_building" then
+		return UF_FAIL_BUILDING
+	end
+
 	return UF_SUCCESS
 end
  
@@ -87,6 +97,17 @@ bottle_mana = class({})
 --------------------------------------------------------------------------------
  
 function bottle_mana:CastFilterResultTarget( hTarget )
+
+	local hCaster = self:GetCaster()
+	
+	if hCaster:GetTeamNumber() ~= hTarget:GetTeamNumber() then
+		return UF_FAIL_ENEMY
+	end
+
+	if hTarget:GetClassname() == "npc_dota_building" then
+		return UF_FAIL_BUILDING
+	end
+
 	return UF_SUCCESS
 end
  
