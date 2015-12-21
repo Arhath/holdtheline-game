@@ -80,6 +80,15 @@ function TeleportStart(event)
 				unit:EmitSound("Portal.Hero_Disappear")
 				Timers:CreateTimer(0.1, function()
 					UnitTeleportToPosition(unit, point, true)
+					if unit.UseTeleporter == nil then
+						unit.MoveOrder = nil
+					end
+					
+					if unit.TeleportOrder ~= nil then
+						ExecuteOrderFromTable(unit.TeleportOrder)
+					end
+
+					unit.UseTeleporter = nil
 				end
 				)
 
@@ -116,6 +125,8 @@ function BottleWaterEnter(event)
 		if trigger.Moonwell ~= nil then
 			--print("moonwell enter")
 			trigger.Moonwell:AddBottleUnit(unit)
+			DebugDrawLine(trigger:GetAbsOrigin(), unit:GetAbsOrigin(), 0, 255, 0, true, 4)
+			DebugDrawText(unit:GetAbsOrigin(), string.format("dist: %f", (trigger:GetAbsOrigin() - unit:GetAbsOrigin()):Length()), true, 4)
 		end
 	end
 end
@@ -128,6 +139,8 @@ function BottleWaterLeave(event)
 		if trigger.Moonwell ~= nil then
 			--print("moonwell leave")
 			trigger.Moonwell:RemoveBottleUnit(unit)
+			DebugDrawLine(trigger:GetAbsOrigin(), unit:GetAbsOrigin(), 0, 255, 0, true, 4)
+			DebugDrawText(unit:GetAbsOrigin(), string.format("dist: %f", (trigger:GetAbsOrigin() - unit:GetAbsOrigin()):Length()), true, 4)
 		end
 	end
 end

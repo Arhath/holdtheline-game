@@ -37,7 +37,7 @@ function BossTreant:Init(handler, gameRound)
 	--self.abilityPhase2 = "boss_treant_phase_2"
 	self.bOrbLeftReachedGoal = false
 	self.bOrbRightReachedGoal = false
-	self._fAddSpawnInterval = 4
+	self._fAddSpawnInterval = 7
 	
 	self:SetArena()
 
@@ -58,13 +58,13 @@ end
 
 
 function BossTreant:Begin()
-	--print("begin")
+	print("begin")
 	self:Spawn()
 end
 
 
 function BossTreant:Prepare()
-	--print("prepare")
+	print("prepare")
 	PrecacheUnitByNameAsync( self._strBossUnit, function( sg ) self._sg = sg end )
 end
 
@@ -81,18 +81,20 @@ end
 
 
 function BossTreant:Spawn()
-	--print("spawn")
+	print("spawn")
 	local entSpawner = Entities:FindByName( nil, self._strSpawner)
 	local vecSpawnLocation = nil
 	
 	if not entSpawner then
-			--print( string.format( "Failed to find spawner named %s" , self._strSpawner) )
+		print( string.format( "Failed to find spawner named %s" , self._strSpawner) )
 	end
+
+	PrecacheUnitByNameAsync( self._strBossUnit, function( sg ) self._sg = sg end )
 	
 	vecSpawnLocation = entSpawner:GetAbsOrigin()
 	entBossUnit = CreateUnitByName( self._strBossUnit, vecSpawnLocation, true, nil, nil, DOTA_TEAM_BADGUYS )
 	ApplyModifier(entBossUnit, entBossUnit, "modifier_vision", {Duration = -1}, true)
-	entBossUnit.MovementSystemActive = false
+	entBossUnit.MovementSystem.State = MOVEMENT_SYSTEM_STATE_NONE
 	entBossUnit.CanEnterGoal = false
 	self._bossOriginalHealth = entBossUnit:GetMaxHealth()
 	self:ApplyDifficultyBuff(entBossUnit)
@@ -143,22 +145,21 @@ end
 
 function UnitCalcArenaDesire( unit, pos, range, desire, incr )
 	local posUnit = unit:GetAbsOrigin()
-		posUnit.z = 0
-		pos.z = 0
-		
-		local distArena = ( pos - posUnit ):Length()
-		--print (string.format( "dist arena: %d", distArena))
-		local distDiff = distArena - range
-		--print (string.format( "dist diff: %d", distDiff))
-		--print(distDiff)
-		
-		if distDiff > 0 then
-			return desire + incr * distDiff
-			--print("distdiff > 0")
-		else
-			return 0.0
-		end
-
+	posUnit.z = 0
+	pos.z = 0
+	
+	local distArena = ( pos - posUnit ):Length()
+	--print (string.format( "dist arena: %d", distArena))
+	local distDiff = distArena - range
+	--print (string.format( "dist diff: %d", distDiff))
+	--print(distDiff)
+	
+	if distDiff > 0 then
+		return desire + incr * distDiff
+		--print("distdiff > 0")
+	else
+		return 0.0
+	end
 end
 
 
@@ -229,7 +230,7 @@ function BossTreant:PhaseThink()
 		--print (string.format( "phasethink: %d", self._nPhase))
 
 	if self._nPhase == 1 then
-		if self._fBossHpPercent <= -0.66 then
+		if self._fBossHpPercent <= 0.66 then
 			self._fPhaseTime = 0
 			self._nPhase = 2
 		end
@@ -290,12 +291,14 @@ function BossTreant:PhaseThink()
 				SetPhasing(self.entOrbLeft, -1)
 				self.entOrbLeft:SetMaxHealth(orbHP)
 				self.entOrbLeft:SetHealth(orbHP)
+				--self.entOrbLeft.MovementSystem.State = MOVEMENT_SYSTEM_STATE_MOVE
 
 				self.entOrbRight = CreateUnitByName( "treant_phase_2_orb", entBossUnit:GetOrigin() + Vector(100, 200, 0), true, nil, nil, entBossUnit:GetTeamNumber() )
 				self.entOrbRight.CanEnterGoal = false
 				SetPhasing(self.entOrbRight, -1)
 				self.entOrbRight:SetMaxHealth(orbHP)
 				self.entOrbRight:SetHealth(orbHP)
+				--self.entOrbRight.MovementSystem.State = MOVEMENT_SYSTEM_STATE_MOVE
 				
 				entBossUnit:RemoveModifierByName("modifier_invulnerable")
 				entBossUnit:SetHealth(entBossUnit:GetHealth() - orbHP * 2)
@@ -439,10 +442,10 @@ function BossTreant:PhaseThink()
 				
 
 				-- Delete all remaining Nature
-				local mushrooms = FindAllByName("treant_mushroom")
+				--[[local mushrooms = FindAllByName("treant_mushroom")
 				local flowers = FindAllByName("treant_flower")
 
-				for _, shroom in pairs(mushromms) do
+				for _, shroom in pairs(mushrooms) do
 					if shroom:GetTeamNumer() == entBossUnit:GetTeamNumber() then
 						shroom:ForceKill(false)
 					end
@@ -453,7 +456,7 @@ function BossTreant:PhaseThink()
 						flower:ForceKill()
 					end
 				end
-
+				]]
 
 				entBossUnit:RemoveAbility("treant_spawn_flowers")
 				entBossUnit:RemoveAbility("treant_spawn_mushrooms")
@@ -468,12 +471,12 @@ function BossTreant:PhaseThink()
 				--Spawn Boss Ads
 				entBossFlower = CreateUnitByName("treant_flower_creature_big", vecBossArenaPos + Vector(-300, -100, 0), false, nil, nil, entBossUnit:GetTeamNumber())
 				entBossFlower.CanEnterGoal = false
-				entBossFlower.MovementSystemActive = false
+				entBossFlower.MovementSystem.State = MOVEMENT_SYSTEM_STATE_NONE
 				behaviorSystemFlower = AICore:CreateBehaviorSystem( { BehaviorFlowerAttack, BehaviorFlowerRun, BehaviorFlowerIdle, BehaviorFlowerWard, BehaviorFlowerMoveToArena, BehaviorFlowerHeal } )
 
 				entBossMushroom = CreateUnitByName("treant_mushroom_creature_big", vecBossArenaPos + Vector(300, -100, 0), false, nil, nil, entBossUnit:GetTeamNumber())
 				entBossMushroom.CanEnterGoal = false
-				entBossMushroom.MovementSystemActive = false
+				entBossMushroom.MovementSystem.State = MOVEMENT_SYSTEM_STATE_NONE
 				behaviorSystemMushroom = AICore:CreateBehaviorSystem( { BehaviorMushroomIdle, BehaviorMushroomAttack, BehaviorMushroomMoveToArena, BehaviorMushroomTrap} ) --  
 			end
 

@@ -7,7 +7,7 @@ if CMoonwell == nil then
 end
 
 
-function CMoonwell:CreateMoonwell(moonwell, water, trigger, bottleSystem)
+function CMoonwell:CreateMoonwell(moonwell, water, bottleSystem)
 	local moonwellObj = CMoonwell()
 	if moonwellObj:Init(moonwell, water, trigger, bottleSystem) then
 		return moonwellObj
@@ -30,16 +30,8 @@ function CMoonwell:Init(moonwell, water, trigger, bottleSystem)
 		return nil
 	end
 
-	self._entTrigger = Entities:FindByName(nil, trigger)
-	if self._entWater == nil then
-		print("trigger not found")
-		return nil
-	end
-
-	self._entTrigger.Moonwell = self
-
 	self._bottleSystem = bottleSystem
-	self._TICKRATE = 0.1
+	self._TICKRATE = 0.25
 	self._fManaReg = 7.0
 	self._fRefillPerSecond = 20
 	self._fTimeNextUpdate = GameRules:GetGameTime()
@@ -47,6 +39,9 @@ function CMoonwell:Init(moonwell, water, trigger, bottleSystem)
 	self._bIsFull = false
 	self._bShownFull = false
 	self._fManaLastUpdate = self._entMoonwell:GetMana()
+
+	self._fMaxDistRefill = 700.0
+	self._bRefillOnHighground = false
 	
 	self._fMaxHeight = self._entWater:GetOrigin().z
 	self._fHeightDiff = 47
@@ -61,8 +56,21 @@ function CMoonwell:Init(moonwell, water, trigger, bottleSystem)
 	return true
 end
 
-
 function CMoonwell:Think()
+	--DebugDrawCircle(self._entMoonwell:GetAbsOrigin(), Vector(0,0,255), 0, self._fMaxDistRefill, true, self._TICKRATE)
+
+	self._vBottleUnits = ListFilterWithFn(self._bottleSystem._gameMode._vHeroes,
+	function(e)
+		if not UnitAlive(e) then
+			return false
+		end
+
+		local dist = (e:GetAbsOrigin() - self._entMoonwell:GetAbsOrigin()):Length2D()
+		--local height = GetGroundHeight(Vector Vector_1, handle handle_2)
+		return dist <= self._fMaxDistRefill
+	end
+	)
+
 	self:AddMana(self._fManaReg * self._TICKRATE)
 	if #self._vBottleUnits > 0 then
 		self:RefillBottles()
@@ -75,43 +83,58 @@ end
 
 function CMoonwell:RefillBottles()
 	--print("refilling bottles")
-	local BottleUnits = shallowcopy(self._vBottleUnits)
+
 	local refillTick = self._fRefillPerSecond * self._TICKRATE
 	local manaToUse = math.min(refillTick, self:GetMana())
-	local manaUsed = 0
+	local manaLeft = manaToUse
 
-	while manaToUse - manaUsed > 0 and #BottleUnits > 0 do
-		for n, u in pairs(BottleUnits) do
-			if IsBottleFull(u, BOTTLE_HEALTH) and IsBottleFull(u, BOTTLE_MANA) then
-				table.remove(BottleUnits, n)
-			end
+	while manaLeft > 0.01 do
+		local BottleUnits = ListFilterWithFn(self._vBottleUnits,
+										function(e)
+											if IsBottleFull(e, BOTTLE_HEALTH) and IsBottleFull(e, BOTTLE_MANA) then
+												--DebugDrawText(e:GetAbsOrigin() + Vector(0,0,200), "true", true, self._TICKRATE)
+												return false
+											else
+												--DebugDrawText(e:GetAbsOrigin() + Vector(0,0,200), "false", true, self._TICKRATE)
+												return true
+											end
+										end
+										)
+		--print(#BottleUnits)
+
+		if #BottleUnits <= 0 then
+			break
 		end
 
-		local refillAmount = manaToUse - manaUsed / #BottleUnits
+
+		local refillPerUnit = manaLeft / #BottleUnits
 
 		for n, u in pairs(BottleUnits) do
 			if u.BottleSystem ~= nil then
-					manaUsed = manaUsed + refillAmount
 
-					local healMax = u.BottleSystem[BOTTLE_HEALTH].ChargesMax
-					local manaMax = u.BottleSystem[BOTTLE_MANA].ChargesMax
-					local sumCharges = healMax + manaMax
+				local refillAmount = refillPerUnit
 
-					local healPct = healMax / sumCharges
-					local manaPct = manaMax / sumCharges
+				local healMax = u.BottleSystem[BOTTLE_HEALTH].ChargesMax
+				local manaMax = u.BottleSystem[BOTTLE_MANA].ChargesMax
+				local sumCharges = healMax + manaMax
 
-					refillAmount = refillAmount - self._bottleSystem:BottleAddCharges(u, BOTTLE_HEALTH, refillAmount * healPct)
+				local healPct = healMax / sumCharges
+				local manaPct = manaMax / sumCharges
 
-					refillAmount = refillAmount - self._bottleSystem:BottleAddCharges(u, BOTTLE_MANA, refillAmount)
+				refillAmount = refillAmount - self._bottleSystem:BottleAddCharges(u, BOTTLE_HEALTH, refillAmount * healPct)
 
-					refillAmount = refillAmount - self._bottleSystem:BottleAddCharges(u, BOTTLE_HEALTH, refillAmount)
+				refillAmount = refillAmount - self._bottleSystem:BottleAddCharges(u, BOTTLE_MANA, refillAmount)
 
-					manaUsed = manaUsed - refillAmount
+				refillAmount = refillAmount - self._bottleSystem:BottleAddCharges(u, BOTTLE_HEALTH, refillAmount)
+
+				--DebugDrawText(u:GetAbsOrigin() + Vector(0,0,100) , string.format(refillPerUnit - refillAmount), true, self._TICKRATE)
+
+				manaLeft = manaLeft - (refillPerUnit - refillAmount)
 			end
 		end
 	end
 
-	self:AddMana(-manaUsed, true)
+	self:AddMana(-(manaToUse - manaLeft), true)
 end
 
 
@@ -171,9 +194,9 @@ function CMoonwell:UpdateMoonwell(show)
 	
 	if show then
 		if manaDiff > 0 then
-			PopupNumbers(self._entMoonwell, "gold", Vector(0, 0, 255), 1.0, math.ceil(math.abs(manaDiff)), POPUP_SYMBOL_PRE_PLUS, nil)
+			PopupNumbers(self._entMoonwell, PATTACH_ABSORIGIN_FOLLOW, "gold", Vector(0, 0, 255), 1.0, math.ceil(math.abs(manaDiff)), POPUP_SYMBOL_PRE_PLUS, nil, -1)
 		elseif manaDiff < 0 then
-			PopupNumbers(self._entMoonwell, "gold", Vector(255, 0, 0), 1.0, math.ceil(math.abs(manaDiff)), POPUP_SYMBOL_PRE_MINUS, nil)
+			PopupNumbers(self._entMoonwell, PATTACH_ABSORIGIN_FOLLOW, "gold", Vector(255, 0, 0), 1.0, math.ceil(math.abs(manaDiff)), POPUP_SYMBOL_PRE_MINUS, nil, -1)
 		end
 		
 			if GameRules:GetGameTime() >= self._fTimeNextUpdate then
@@ -183,7 +206,7 @@ function CMoonwell:UpdateMoonwell(show)
 				if self._bIsFull then
 					self._bShowedFull = true
 				end
-				PopupNumbers(self._entMoonwell, "gold", Vector(0, 255, 0), 1.0, math.floor(mana), POPUP_SYMBOL_POST_EXCLAMATION, nil)
+				PopupNumbers(self._entMoonwell, PATTACH_ABSORIGIN_FOLLOW, "gold", Vector(0, 255, 0), 1.0, math.floor(mana), POPUP_SYMBOL_POST_EXCLAMATION, nil, -1)
 			end
 		end
 	end
@@ -241,7 +264,7 @@ function CMoonwell:RefillBottle(unit, trigger)
 					--bottle:SetCurrentCharges(bottle:GetCurrentCharges() + 1)
 					self._bottleSystem:BottleAddCharges(unit, BOTTLE_HEALTH, 20)
 					moonwell:AddMana(-20, true)
-					PopupNumbers(unit, "gold", Vector(255, 0, 255), 1.0, 1, POPUP_SYMBOL_POST_EXCLAMATION, nil)
+					PopupNumbers(unit, PATTACH_ABSORIGIN_FOLLOW, "gold", Vector(255, 0, 255), 1.0, 1, POPUP_SYMBOL_POST_EXCLAMATION, nil, -1)
 				end
 			else
 				----print("no bottle found")

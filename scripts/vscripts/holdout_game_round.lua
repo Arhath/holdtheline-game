@@ -2,14 +2,29 @@
 	CHoldoutGameRound - A single round of Holdout
 ]]
 
+require( "boss/boss_handler")
+
 if CHoldoutGameRound == nil then
 	CHoldoutGameRound = class({})
 end
 
+INTERVALL_SHOW_EXPERIENCE_MIN = 2.0
+INTERVALL_SHOW_EXPERIENCE_MAX = 7.0
+
 XP_BUFFER_PCT = 0.1
 GOLD_BUFFER_PCT = 0.1
 
-XP_VALUES_TEAMSIZE_ = {
+CORE_VALUE_CREEP = 1
+CORE_VALUE_CHAMPION = 3
+CORE_VALUE_MINIBOSS = 7
+
+SPAWNERS_ =
+{
+	"path_invader1_1",
+	"path_invader2_1",
+}
+
+GOLD_VALUES_TEAMSIZE_ = {
 	{
 		10,
 		0,
@@ -51,73 +66,157 @@ function CHoldoutGameRound:ReadConfiguration( kv, gameMode, roundNumber )
 	self._nXPBuffer = 0
 	self._nGoldBuffer = 0
 	self._nWoodBuffer = 0
-	self._bIsBoss = tonumber( kv.IsBoss or 0 )
-	self._nBoss = tonumber( kv.BossNumber or 1 )
+	self._nBoss = tonumber( kv.Boss or 0 )
 	self._flPrepTime = tonumber( kv.PrepTime or gameMode._flPrepTimeBetweenRounds or 0 )
-	self._nBoss = tonumber( kv.BossNumber or 0 )
+
+	self._bossHandler = nil
 	
-	if self._bIsBoss == 1 then
-		self._bossHandler = CHoldoutGameBossHandler()
+	if self:IsBoss() then
+		self._bossHandler = CBossHandler()
 		self._bossHandler:Init(self, self._nBoss)
-	end
-	
-	if self._bIsBoss == 0 then
+		print("is boss init")
+	else
+
+		--init Packs
+
+		self._vPacks = {}
+
+		for str, pack in pairs( kv["Packs"] ) do
+			self._vPacks[str] = pack
+			print(str)
+			for s, p in pairs(pack) do
+				print(s)
+				print("npc: " .. p["NPCName"])
+				print( "value: " .. p["CoreValue"])
+				print("count: " .. p["UnitsPerSpawn"])
+			end
+
+			print(self:PackGetUnitCount(str))
+			print(self:PackGetValue(str))
+		end
+
+		print("asd")
+		print(self:PackGetUnitCount("1"))
+
+		--init spawners
+
 		self._vSpawners = {}
+		local spawners = self._gameMode:GetSpawnerList()
+
 		for k, v in pairs( kv ) do
-			if type( v ) == "table" and v.NPCName then
+			if type( v ) == "table" and v.PackName then
 				if v.SpawnerName == "all" then
-					local spawners = self._gameMode:GetSpawnerList()
-					for _, sp in pairs(spawners) do
-						--print ( string.format( "spawner : %d name: %s",#self._vSpawners, sp.szSpawnerName ) )
-						local spawner = CHoldoutGameSpawner()
-						v.SpawnerName = sp.szSpawnerName
-						v.Waypoint = sp.szFirstWaypoint
-						v.WaitForUnit = v.WaitForUnit .. "_" .. v.SpawnerName
-						v.GroupWithUnit = v.GroupWithUnit .. "_" .. v.SpawnerName
-						--spawner:ReadConfiguration( #self._vSpawners, v, self )
-						--table.insert(self._vSpawners, spawner)
-						spawner:ReadConfiguration( k, v, self )
-						self._vSpawners[ k ] = spawner
+					for i = 1, #spawners do
+						local k2 = i .. k
+						local v2 = shallowcopy(v)
+
+						--print(v.GroupWithUnit)
+						if v.GroupWithUnit then
+							v2.GroupWithUnit = i .. v.GroupWithUnit
+						end
+
+						if v.WaitForUnit then
+							v2.WaitForUnit = i .. v.WaitForUnit
+						end
+
+						print(spawners[i].SpawnerName)
+						v2.SpawnerName = SPAWNERS_[i]
+
+						local spawn = CHoldoutGameSpawner()
+						spawn:ReadConfiguration( k2, v2, self )
+						self._vSpawners[ k2 ] = spawn
 					end
 				else
-					local spawner = CHoldoutGameSpawner()
-					--local name = v.name
-					--print( "spawnername:" .. name)
+					if v.SpawnerName == "left" then
+						v.SpawnerName = SPAWNERS_[1]
+					elseif v.SpawnerName == "right" then
+						v.SpawnerName = SPAWNERS_[2]
+					elseif v.SpawnerName == "random" then
 
-					spawner:ReadConfiguration( k, v, self )
+						v.SpawnerName = SPAWNERS_[RandomInt(1, #SPAWNERS_)]
+					--local name = v.name
+					----print( "spawnername:" .. name)
+					end
+
+					local spawn = CHoldoutGameSpawner()
+					spawn:ReadConfiguration( k, v, self )
 					--table.insert(self._vSpawners, spawner)
-					self._vSpawners[ k ] = spawner
+					self._vSpawners[ k ] = spawn
 				end
 			end
 		end
 
 		for _, spawner in pairs( self._vSpawners ) do
+			print(string.format("name: " .. spawner._szName))
+			print(string.format("spawn: " .. spawner._szSpawnerName))
+			print(string.format("wait: " .. spawner._szWaitForPack))
+			print(string.format("group: " .. spawner._szGroupWithPack))
+
+
 			spawner:PostLoad( self._vSpawners )
 		end
 	end
 end
 
-function CHoldoutGameRound:Prepare()
-	if self._bIsBoss == 1 then
-		self._bossHandler:Prepare()
+function CHoldoutGameRound:PackGetUnitCount(str)
+	if self._vPacks[str] then
+		local count = 0
+
+		for _, n in pairs(self._vPacks[str]) do
+			count = count + n["UnitsPerSpawn"]
+		end
+
+		return count
 	end
+
+	return 0
+end
+
+
+function CHoldoutGameRound:PackGetValue(str)
+	if self._vPacks[str] then
+		local count = 0
+
+		for _, n in pairs(self._vPacks[str]) do
+			count = count + (n["UnitsPerSpawn"] * n["CoreValue"])
+		end
+
+		return count
+	end
+
+	return 0
+end
+
+
+function CHoldoutGameRound:Prepare()
+	if self:IsBoss() then
+		self._bossHandler:Prepare()
+		
+		print("prepare boss")
+	end
+	print("prepare round")
 	self._gameMode._flPrepTimeBetweenRounds = self._flPrepTime
 end
 
 
 function CHoldoutGameRound:IsBoss()
-	return self._bIsBoss 
+	if IsValidBoss(self._nBoss) then
+		return true
+	end
+
+	return false
 end
 
 function CHoldoutGameRound:UpdateBossDifficulty()
-	if self._bIsBoss == 1 then
+	if self:IsBoss() then
 		self._bossHandler:UpdateBossDifficulty()
+		print("update boss difficulty")
 	end
 end
 
 
 function CHoldoutGameRound:Precache()
-	if self._bIsBoss == 0 then
+	if not self:IsBoss() then
 		for _, spawner in pairs( self._vSpawners ) do
 			spawner:Precache()
 		end
@@ -147,7 +246,7 @@ function CHoldoutGameRound:Begin()
 	self._nCoreUnitsSpawnedValue = 0	
 	self._nCoreUnitsKilled = 0
 	
-	if self._bIsBoss == 0 then
+	if not self:IsBoss()then
 		for _, spawner in pairs( self._vSpawners ) do
 			spawner:Begin()
 			self._nCoreUnitsTotal = self._nCoreUnitsTotal + spawner:GetTotalUnitsToSpawn()
@@ -167,6 +266,8 @@ function CHoldoutGameRound:Begin()
 		} )
 		self._entQuest:AddSubquest( self._entKillCountSubquest )
 		self._entKillCountSubquest:SetTextReplaceValue( SUBQUEST_TEXT_REPLACE_VALUE_TARGET_VALUE, self._nCoreValueTotal )
+	else
+		self._bossHandler:Begin()
 	end
 end
 
@@ -244,8 +345,8 @@ end
 
 
 function CHoldoutGameRound:Think()
-	----print (self._bIsBoss) 
-	if self._bIsBoss == 0 then
+	------print (self:IsBoss()) 
+	if not self:IsBoss() then
 		for _, spawner in pairs( self._vSpawners ) do
 			spawner:Think()
 		end
@@ -261,7 +362,7 @@ end
 
 
 function CHoldoutGameRound:IsFinished()
-	if self._bIsBoss == 0 then
+	if not self:IsBoss()then
 		for _, spawner in pairs( self._vSpawners ) do
 			if not spawner:IsFinishedSpawning() then
 				return false
@@ -273,7 +374,7 @@ function CHoldoutGameRound:IsFinished()
 	
 	if not self._lastEnemiesRemaining == nEnemiesRemaining then
 		self._lastEnemiesRemaining = nEnemiesRemaining
-		--print ( string.format( "%d enemies remaining in the round...", #self._vEnemiesRemaining ) )
+		----print ( string.format( "%d enemies remaining in the round...", #self._vEnemiesRemaining ) )
 	end
 	return true
 end
@@ -286,7 +387,7 @@ function CHoldoutGameRound:GetXPPerCoreUnit()
 	if self._nCoreUnitsTotal == 0 then
 		return 0
 	else
-		return math.floor( self._nFixedXP / self._nCoreValueTotal )
+		return self._nFixedXP / self._nCoreValueTotal
 	end
 end
 
@@ -294,7 +395,7 @@ function CHoldoutGameRound:GetGoldPerCoreUnit()
 	if self._nCoreUnitsTotal == 0 then
 		return 0
 	else
-		return math.floor( self._nMaxGold / self._nCoreValueTotal)
+		return self._nMaxGold / self._nCoreValueTotal
 	end
 end
 
@@ -306,7 +407,7 @@ function CHoldoutGameRound:OnNPCSpawned( event )
 		return
 	end
 
-	if self._bIsBoss == 1 then
+	if self:IsBoss() then
 		self._bossHandler:OnNPCSpawned(event)
 	end
 
@@ -319,7 +420,7 @@ end
 
 
 function CHoldoutGameRound:OnEntityKilled( event )
-	--print("entity killed !!!!! round trigger")
+	----print("entity killed !!!!! round trigger")
 	local killedUnit = EntIndexToHScript( event.entindex_killed )
 	if not killedUnit then
 		return
@@ -341,16 +442,16 @@ function CHoldoutGameRound:OnEntityKilled( event )
 		self:_CheckForGoldBagDrop( killedUnit )
 		self._gameMode:CheckForLootItemDrop( killedUnit )
 
-		local xpGain = killedUnit.RewardXP
-		print(string.format("xpGain = %d", xpGain))
-		local goldGain = killedUnit.RewardGold
-		print(string.format("goldGain = %d", goldGain))
+		local xpGain = Assert(killedUnit.RewardXP)
+		--print(string.format("xpGain = %d", xpGain))
+		local goldGain = Assert(killedUnit.RewardGold)
+		--print(string.format("goldGain = %d", goldGain))
 		local bGoal = killedUnit.EnteredGoal
 
-		--print(string.format("enteredGoal = %d", bGoal))
+		----print(string.format("enteredGoal = %d", bGoal))
 		if bGoal then
 			local xpBuffer = self._nFixedXP * XP_BUFFER_PCT - self._nXPBuffer
-			print(string.format("xpbuffer = %d", xpBuffer))
+			--print(string.format("xpbuffer = %d", xpBuffer))
 			xpGain = math.min( xpBuffer, xpGain)
 			
 
@@ -362,24 +463,53 @@ function CHoldoutGameRound:OnEntityKilled( event )
 			self._nGoldBuffer = self._nGoldBuffer + goldGain
 		end
 
+		local goldModifier = goldGain
+
+		if goldGain > 0 then
+			--ParticleManager:SetParticleControl(pidx, 1, Vector(tonumber(presymbol), tonumber(number), tonumber(postsymbol)))
+  			--ParticleManager:SetParticleControl(pidx, 2, Vector(lifetime, digits, 0))
+  			--ParticleManager:SetParticleControl(pidx, 3, color)
+			
+		end
+
 		for _, hero in pairs(self._gameMode._vHeroes) do
 			if xpGain > 0 then
+				--print(xpGain)
+				
+				if GameRules:GetGameTime() >= hero.ShowExperienceNextUpdate or GameRules:GetGameTime() >= hero.ShowExperienceNextUpdateDelay then
+					hero.ShowExperienceNextUpdateDelay = GameRules:GetGameTime() + INTERVALL_SHOW_EXPERIENCE_MAX
+					GameRules.holdOut:ExperiencePopup(hero)
+				end
+
+				hero.ShowExperienceNextUpdate = GameRules:GetGameTime() + INTERVALL_SHOW_EXPERIENCE_MIN
+
 				hero:AddExperience(xpGain, DOTA_ModifyXP_CreepKill, true, false)
-				PopupNumbers(hero, "gold", Vector(127, 0, 255), 2.0, math.floor(xpGain), POPUP_SYMBOL_PRE_PLUS, nil)
-				print(xpGain)
+				--DebugDrawText(hero:GetAbsOrigin(), string.format(xpGain), true, 0.5)
+				--AddExperience(float amount, int nReason, bool bApplyBotDifficultyScaling, bool bIncrementTotal)
+				hero.ShowExperiencePool = hero.ShowExperiencePool + xpGain
+				--print(xpGain)
 			end
 
 			if goldGain > 0 then
 
-				local goldModifier = goldGain
+				goldModifier = goldGain
 
-				if attackerUnit ~= nil and hero ~= attackerUnit then
+				if attackerUnit == nil or hero ~= attackerUnit then
 					goldModifier = goldGain * 0.33
 				end
+				
+				PlayerResource:ModifyGold(hero:GetPlayerOwnerID(), goldModifier, true, DOTA_ModifyGold_CreepKill)
 
-				PlayerResource:ModifyGold(pID, goldModifier, true, DOTA_ModifyGold_CreepKill)
-				PopupNumbers(killedUnit, "gold", Vector(255, 200, 33), 2.0, math.floor(goldModifier), POPUP_SYMBOL_PRE_PLUS, nil)
-				print(goldModifier)
+				local goldFx = ParticleManager:CreateParticle("particles/econ/items/alchemist/alchemist_midas_knuckles/alch_knuckles_lasthit_coins.vpcf", PATTACH_ABSORIGIN_FOLLOW, hero)
+				ParticleManager:ReleaseParticleIndex( goldFx )
+
+				if attackerUnit ~= nil and attackerUnit ~= killedUnit then
+					PopupNumbers(killedUnit, PATTACH_ABSORIGIN_FOLLOW, "gold", Vector(255, 200, 33), 2.0, math.floor(goldModifier), POPUP_SYMBOL_PRE_PLUS, nil, hero:GetPlayerOwnerID())
+				else
+					PopupNumbers(self._gameMode._entAncient, PATTACH_ABSORIGIN_FOLLOW, "gold", Vector(255, 200, 33), 2.0, math.floor(goldModifier), POPUP_SYMBOL_PRE_PLUS, nil, hero:GetPlayerOwnerID())
+				end
+
+				--print(goldModifier)
 			end
 		end
 	end
@@ -449,15 +579,15 @@ end
 
 
 function CHoldoutGameRound:StatusReport( )
-	--print( string.format( "Enemies remaining: %d", #self._vEnemiesRemaining ) )
+	----print( string.format( "Enemies remaining: %d", #self._vEnemiesRemaining ) )
 	for _,e in pairs( self._vEnemiesRemaining ) do
 		if e:IsNull() then
-			--print( string.format( "<Unit %s Deleted from C++>", e.unitName ) )
+			----print( string.format( "<Unit %s Deleted from C++>", e.unitName ) )
 		else
-			--print( e:GetUnitName() )
+			----print( e:GetUnitName() )
 		end
 	end
-	--print( string.format( "Spawners: %d", #self._vSpawners ) )
+	----print( string.format( "Spawners: %d", #self._vSpawners ) )
 	for _,s in pairs( self._vSpawners ) do
 		s:StatusReport()
 	end

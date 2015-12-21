@@ -1,0 +1,216 @@
+"dota_holdout"
+{
+	"PrepTimeBetweenRounds"			"2"
+	"ItemExpireTime"				"10"
+	"RestoreHPAfterRound"			"0"
+	"RestoreMPAfterRound"			"0"
+	"RewardForTowersStanding"		"1"
+	"TowerRewardAmount"				"18"
+	"TowerScalingRewardPerRound"	"2"
+	
+	"ItemDrops"
+	{
+		"HealingSalve"
+		{
+			"Item"					"item_flask2"
+			"Chance"				"2"
+		}
+		"Clarity"
+		{
+			"Item"					"item_greater_clarity"
+			"Chance"				"2"
+		}
+	}
+	
+	"RandomSpawns"
+	{
+		"1"
+		{
+			"SpawnerName"			"spawner1"
+			"Waypoint"				"path_invader1_1"
+		}
+		"2"
+		{
+			"SpawnerName"			"spawner2"
+			"Waypoint"				"path_invader2_1"
+		}
+	}
+
+	"LinkedXPEnemies"
+	{
+		// Key enemy spawns sub-value count of subkey enemies
+		// e.g. splitter_a spawns 3 splitter_b
+		"npc_dota_splitter_a"
+		{
+			"npc_dota_splitter_b"	"3"
+		}
+
+		"npc_dota_splitter_b"
+		{
+			"npc_dota_splitter_c"	"4"
+		}
+
+		"npc_dota_creature_boss_skeleton_king_1"
+		{
+			"npc_dota_creature_boss_skeleton_king_2"	"1"
+		}
+
+		"npc_dota_creature_boss_skeleton_king_2"
+		{
+			"npc_dota_creature_boss_skeleton_king_3"	"1"
+		}
+	}
+	
+	"Round1" // Kobolds
+	{
+		"round_quest_title"			"#DOTA_Holdout_Round_Kobolds_Quest_Title"
+		"round_title"				"#DOTA_Holdout_Round_Kobolds_Title"
+		"MaxGold"					"5600"
+		"BagCount"					"50"
+		"BagVariance"				"30"
+		"FixedXP"					"5500"
+		
+		// Stage 1 ================================================
+		"UnitFodder_1a" // Duration 80s - Continues with UnitFodderGrouped_2a & 3a to 120s total
+		{
+			"NPCName"				"npc_dota_creature_lesser_nightcrawler" //"npc_dota_creature_kobold_tunneler"  ////"npc_dota_creature_ogre_tank"//"npc_dota_creature_lesser_nightcrawler"//////"npc_dota_creature_slithereen"//"npc_dota_creature_lesser_nightcrawler"////"treant_flower_creature"//"npc_dota_creature_kobold_tunneler"//"npc_dota_creature_lesser_nightcrawler"//"npc_dota_creature_corpselord"////"npc_dota_creature_tormented_soul"//"npc_dota_creature_missile_launcher"////"npc_dota_creature_mini_roshan"//"treant_flower_creature"////"npc_dota_creature_kobold_tunneler"
+			"TotalUnitsToSpawn"		"100"
+			"UnitsPerSpawn"			"100"
+			"SpawnInterval"			"1"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+
+	}
+
+	"Round2" // Kobolde
+	{
+		"round_quest_title"			"#DOTA_Holdout_Round_Kobolds_Quest_Title"
+		"round_title"				"#DOTA_Holdout_Round_Kobolds_Title"
+		"MaxGold"					"5600"
+		"BagCount"					"50"
+		"BagVariance"				"30"
+		"FixedXP"					"5500"
+		
+		// Stage 1 - Duration 28s ================================================
+
+		"UnitFodder_1a" // Duration 14s 
+		{
+			"NPCName"				"npc_dota_creature_kobold_tunneler"
+			"TotalUnitsToSpawn"		"12"
+			"UnitsPerSpawn"			"3"
+			"SpawnInterval"			"4"
+			"SpawnerName"			"path_invader1_1"
+		}
+
+		"UnitFodder_1b" // Duration 14s 
+		{
+			"WaitForUnit"			"UnitFodder_1a"
+			"WaitForTime"			"4"
+
+			"NPCName"				"npc_dota_creature_kobold_tunneler"
+			"TotalUnitsToSpawn"		"12"
+			"UnitsPerSpawn"			"3"
+			"SpawnInterval"			"4"
+			"SpawnerName"			"path_invader1_1"
+		}
+
+		"UnitHealer_1"
+		{
+			"GroupWithUnit"			"UnitFodder_1b"
+			"WaitForTime"			"2"
+
+			"NPCName"				"npc_dota_creature_troll_healer"
+			"TotalUnitsToSpawn"		"1"
+			"UnitsPerSpawn"			"1"
+			"SpawnerName"			"path_invader1_1"
+		}
+
+		// Stage 2 - Duration 80 s ================================================
+
+		"UnitFodder_2a"  
+		{
+			"WaitForUnit"			"UnitFodder_1b"
+			"WaitForTime"			"4"
+
+			"NPCName"				"npc_dota_creature_kobold_tunneler"
+			"TotalUnitsToSpawn"		"20"
+			"UnitsPerSpawn"			"2"
+			"SpawnInterval"			"8"
+			"SpawnerName"			"path_invader1_1"
+		}
+
+		"UnitRanged_2a"
+		{
+			"WaitForUnit"			"UnitFodder_1b"
+			"WaitForTime"			"4"
+
+			"NPCName"				"npc_dota_creature_gnoll_assassin"
+			"TotalUnitsToSpawn"		"10"
+			"UnitsPerSpawn"			"1"
+			"SpawnInterval"			"8"
+			"SpawnerName"			"path_invader1_1"
+		}
+
+		"UnitFodder_2b"   
+		{
+			"WaitForUnit"			"UnitFodder_1b"
+			"WaitForTime"			"8"
+
+			"NPCName"				"npc_dota_creature_kobold_tunneler"
+			"TotalUnitsToSpawn"		"10"
+			"UnitsPerSpawn"			"1"
+			"SpawnInterval"			"8"
+			"SpawnerName"			"path_invader1_1"
+		}
+
+		"UnitRanged_2b" 
+		{
+			"WaitForUnit"			"UnitFodder_1b"
+			"WaitForTime"			"8"
+
+			"NPCName"				"npc_dota_creature_gnoll_assassin"
+			"TotalUnitsToSpawn"		"20"
+			"UnitsPerSpawn"			"2"
+			"SpawnInterval"			"8"
+			"SpawnerName"			"path_invader1_1"
+		}
+
+		"UnitHealer_2"
+		{
+			"GroupWithUnit"			"UnitFodder_2b"
+			"WaitForTime"			"8"
+			
+			"NPCName"				"npc_dota_creature_troll_healer"
+			"TotalUnitsToSpawn"		"5"
+			"UnitsPerSpawn"			"1"
+			"SpawnInterval"			"16"
+			"SpawnerName"			"path_invader1_1"
+		}
+	}
+
+	"Round3"
+	{
+		"round_quest_title"			"#DOTA_Holdout_Round_Kobolds_Quest_Title"
+		"round_title"				"#DOTA_Holdout_Round_Kobolds_Title"
+		"MaxGold"					"5600"
+		"BagCount"					"50"
+		"BagVariance"				"30"
+		"FixedXP"					"5500"
+		"PrepTime"					"100"
+
+		"IsBoss"					"1"
+		"BossNumber"				"1"
+		
+		// Stage 1 ================================================
+		"UnitFodder_1a" // Duration 80s - Continues with UnitFodderGrouped_2a & 3a to 120s total
+		{
+			"NPCName"				"npc_dota_creature_kobold_tunneler"  //"npc_dota_creature_lesser_nightcrawler" //"npc_dota_creature_ogre_tank"//"npc_dota_creature_lesser_nightcrawler"//////"npc_dota_creature_slithereen"//"npc_dota_creature_lesser_nightcrawler"////"treant_flower_creature"//"npc_dota_creature_kobold_tunneler"//"npc_dota_creature_lesser_nightcrawler"//"npc_dota_creature_corpselord"////"npc_dota_creature_tormented_soul"//"npc_dota_creature_missile_launcher"////"npc_dota_creature_mini_roshan"//"treant_flower_creature"////"npc_dota_creature_kobold_tunneler"
+			"TotalUnitsToSpawn"		"1"
+			"UnitsPerSpawn"			"1"
+			"SpawnInterval"			"1"
+
+			"SpawnerName"			"path_invader1_1"
+		}
+	}
+}

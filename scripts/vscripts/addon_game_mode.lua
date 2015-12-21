@@ -19,6 +19,7 @@ require( "boss/holdout_game_bosshandler" )
 require( "ai/movement_system" )
 require( "bottle/bottle_system" )
 require( "misc/gate_system")
+require('libraries/projectiles')
 
 if CHoldoutGameMode == nil then
 	CHoldoutGameMode = class({})
@@ -28,19 +29,53 @@ end
 MAX_LEVEL = 125
 
 XP_PER_LEVEL_TABLE = {}
-XP_PER_LEVEL_TABLE[1] = 200
+XP_PER_LEVEL_TABLE[1] = 0
 for i=1, MAX_LEVEL - 1 do
 	XP_PER_LEVEL_TABLE[i+1] = XP_PER_LEVEL_TABLE[i] + i * 200
 	--print(XP_PER_LEVEL_TABLE[i])
 end
 
+_TICKRATE = 0.2
 
+_BoundingBox = {
+	{
+		Vector(-7729, 25, 129),
+		Vector(-1290, -7550, 129),
+	},
+
+	{
+		Vector(-7833, 7601, 0),
+		Vector(-1209, -1814, 0),
+	},
+}
+
+_vecTeleporter = 
+{
+	{
+		Vector(-6308, -3175, 0),
+		Vector(-2649, -3200, 0),	
+	},
+
+	{
+		Vector(-7471, 2111, 0),
+		Vector(-1479, 2094, 0),
+	},
+}
+
+_VecArena2 = Vector(-4485, -6108, 0)
+--_VecArena2.z = GetGroundHeight(_VecArena2, nil)
+
+_vecTeleporter[1][1][3] = GetGroundHeight(_vecTeleporter[1][1], nil)
+_vecTeleporter[1][2][3] = GetGroundHeight(_vecTeleporter[1][2], nil)
+_vecTeleporter[2][1][3] = GetGroundHeight(_vecTeleporter[2][1], nil)
+_vecTeleporter[2][2][3] = GetGroundHeight(_vecTeleporter[2][2	], nil)
 
 -- Precache resources
 function Precache( context )
 	--PrecacheResource( "particle", "particles/generic_gameplay/winter_effects_hero.vpcf", context )
 	PrecacheUnitByNameSync("treant_mushroom_creature_big", context)
 	PrecacheUnitByNameSync("treant_flower_creature_big", context)
+	PrecacheUnitByNameSync("bottleabilities", context)
 	PrecacheResource( "particle", "particles/items2_fx/veil_of_discord.vpcf", context )	
 	PrecacheResource( "particle_folder", "particles/frostivus_gameplay", context )
 	PrecacheResource( "particle_folder", "particles/units/heroes/hero_elder_titan", context )
@@ -53,6 +88,10 @@ function Precache( context )
 	PrecacheResource( "particle", "particles/econ/items/drow/drow_head_mania/mask_of_madness_active_mania.vpcf", context )
 	PrecacheResource( "particle", "particles/econ/items/tinker/boots_of_travel/teleport_start_bots_counter.vpcf", context )
 	PrecacheResource( "particle", "particles/econ/items/tinker/boots_of_travel/teleport_end_bots.vpcf", context )
+	PrecacheResource( "particle", "particles/units/heroes/hero_mirana/mirana_spell_arrow.vpcf", context )
+	PrecacheResource( "particle", "particles/econ/items/alchemist/alchemist_midas_knuckles/alch_knuckles_lasthit_coins.vpcf", context )
+	
+
 	PrecacheItemByNameSync( "item_tombstone", context )
 	PrecacheItemByNameSync( "item_bag_of_gold", context )
 	PrecacheItemByNameSync( "item_glyph_mana", context )
@@ -95,7 +134,7 @@ function CHoldoutGameMode:InitGameMode()
 	self._gateSystem = CGateSystem()
 	self._gateSystem:Init(self, DOTA_TEAM_GOODGUYS)
 	
-	Timers:CreateTimer(5, function()
+	--[[Timers:CreateTimer(5, function()
 		TestSpawn("treant_mushroom_creature_big","testspawner_2", 0, DOTA_TEAM_GOODGUYS, false)
 		return nil
 		end
@@ -111,7 +150,7 @@ function CHoldoutGameMode:InitGameMode()
 		return nil
 		end
 		)
-	
+	]]
 	if not self._entAncient then
 		--print( "Ancient entity not found!" )
 	end
@@ -203,7 +242,7 @@ function CHoldoutGameMode:InitGameMode()
 
 
 	CustomGameEventManager:RegisterListener( "unit_right_click", Dynamic_Wrap(CHoldoutGameMode, "OnUnitRightClick"))
-	CustomGameEventManager:RegisterListener( "unit_left_click", Dynamic_Wrap(CHoldoutGameMode, "OnUnitLeftClick"))
+	--CustomGameEventManager:RegisterListener( "unit_left_click", Dynamic_Wrap(CHoldoutGameMode, "OnUnitLeftClick"))
 	
 
 
@@ -211,7 +250,7 @@ function CHoldoutGameMode:InitGameMode()
 	--GameRules:GetGameModeEntity():SetThink( "OnThink", self, 0.25 )
 	Timers:CreateTimer(function()
 		self:OnThink()
-		return 0.25
+		return _TICKRATE
 	end
 	)
 end
@@ -332,6 +371,12 @@ function CHoldoutGameMode:OnGameRulesStateChange()
 	end
 end
 
+
+function PosInTeamsMap(p, t)
+	return PosInBoundingBox(p, _BoundingBox[1]) or PosInBoundingBox(p, _BoundingBox[2])
+end
+
+
 function CHoldoutGameMode:SpawnRunes()
 	--print("runes Spawned")
 	--Timers:CreateTimer(1, function()
@@ -340,16 +385,71 @@ function CHoldoutGameMode:SpawnRunes()
 	--)
 end
 
+MINIMAP_EVENT_ = {
+	DOTA_MINIMAP_EVENT_BASE_GLYPHED,
+	DOTA_MINIMAP_EVENT_CANCEL_TELEPORTING,
+	DOTA_MINIMAP_EVENT_HINT_LOCATION,
+	DOTA_MINIMAP_EVENT_TEAMMATE_DIED,
+	DOTA_MINIMAP_EVENT_TEAMMATE_TELEPORTING,
+	DOTA_MINIMAP_EVENT_ANCIENT_UNDER_ATTACK,
+	DOTA_MINIMAP_EVENT_BASE_UNDER_ATTACK,
+	DOTA_MINIMAP_EVENT_TEAMMATE_UNDER_ATTACK,
+	DOTA_MINIMAP_EVENT_TUTORIAL_TASK_ACTIVE,
+	DOTA_MINIMAP_EVENT_TUTORIAL_TASK_FINISHED,
+}
+
+SPEECH_TYPE_ = {
+	DOTA_SPEECH_SPECTATOR,
+	DOTA_SPEECH_BAD_TEAM,
+	DOTA_SPEECH_GOOD_TEAM,
+	DOTA_SPEECH_USER_ALL,
+	DOTA_SPEECH_USER_INVALID,
+	DOTA_SPEECH_USER_NEARBY,
+	DOTA_SPEECH_USER_ALL,
+	DOTA_SPEECH_USER_SINGLE,
+	DOTA_SPEECH_USER_TEAM,
+}
+
+counter = 1
+
 
 function CHoldoutGameMode:OnUnitRightClick( event )
+	print("rightclick")
 	local pID = event.pID
 	local unit = EntIndexToHScript(event.mainSelected)
 	local mPos = Vector(0, 0, 0)
 	local eventName = event.name
+	local target = event.targetIndex
+	print(event.target)
 
 	mPos.x = event.mouseX
 	mPos.y = event.mouseY
-	--mPos.z = GetGroundHeight(mPos, nil)
+	mPos.z = GetGroundHeight(mPos, nil)
+	mPos = Vector(mPos.x, mPos.y, mPos.z)
+	--print("loc")
+	--print(mPos)
+
+
+	if unit:IsRealHero() then
+		--unit:AddExperience(100, DOTA_ModifyXP_CreepKill, true, false)
+		unit.MoveOrder = mPos
+		unit.TargetOrder = target
+		if target then
+			unit.TargetOrder = EntIndexToHScript(target)
+		end
+		unit.MoveOrderTime = GameRules:GetGameTime()
+		unit.MoveOrderPickedUpGlyph = false
+		--print(unit.MoveOrder)
+
+		UnitProcessMovement(unit)
+	end
+
+	local dist = (mPos - unit:GetAbsOrigin()):Length()
+
+	local distpath = GridNav:FindPathLength(mPos, unit:GetAbsOrigin())
+
+	--DebugDrawText(unit:GetAbsOrigin() + Vector(0,0,300), string.format("d: %f p: %f", dist, distpath) , true, 2)
+	--self._bottleSystem:SpawnGlyphOnPosition(unit:GetAbsOrigin(), 1, 1)
 
 	--print(eventName)
 	--GameRules.holdOut._movementSystem:OnUnitRightClick( event )
@@ -361,7 +461,187 @@ function CHoldoutGameMode:OnUnitRightClick( event )
 	end
 
 	--
+	local org = unit:GetAbsOrigin()
+	--local event = MinimapEvent(DOTA_TEAM_GOODGUYS, unit, org.x, org.y, DOTA_MINIMAP_EVENT_TUTORIAL_TASK_ACTIVE, 5)
+
+	--unit:AddSpeechBubble(DOTA_SPEECH_USER_TEAM, "asdsadasd", 5, 0, 0)
+	--unit:DestroyAllSpeechBubbles()
+	print(event)
+	counter = counter + 1
+
+	if counter >= 9 then
+		counter = 1
+	end
 end
+
+
+function UnitProcessMovement( unit )
+	print("processmovement")
+
+	local orig = unit:GetAbsOrigin()
+	local bSetMoveOrder = true
+	local target = nil
+
+	if unit.MoveOrder ~= nil then
+
+		unit.UseTeleporter = nil
+		print("processmovement2")
+
+		--print(PosInBoundingBox(org, _BoundingBox[1]))
+		--print(PosInBoundingBox(unit.MoveOrder, _BoundingBox[2]))
+
+		local atkRange = 0
+
+		print(unit.TargetOrder)
+
+		if unit.TargetOrder then
+			target = unit.TargetOrder
+			atkRange = unit:GetAttackRange()
+
+			local dist = (target:GetAbsOrigin() - orig):Length2D()
+
+			if atkRange >= dist then
+				bSetMoveOrder = false
+			end
+		end
+
+		if bSetMoveOrder then
+			print("setmoveorder")
+			if (PosInBoundingBox(orig, _BoundingBox[1]) or PosInRangeOfPos(orig, _VecArena2, 1500)) and PosInBoundingBox(unit.MoveOrder, _BoundingBox[2]) and not PosInBoundingBox(unit.MoveOrder, _BoundingBox[1]) and not PosInRangeOfPos(unit.MoveOrder, _VecArena2, 1500) then
+				DebugDrawText(unit:GetAbsOrigin() + Vector(0,0,400), string.format("1 to 2") , true, 4)
+				local distSelf1 = (_vecTeleporter[1][1] - orig):Length()
+				local distSelf2 = (_vecTeleporter[1][2] - orig):Length()
+
+				local diff1 = math.abs(distSelf1 - distSelf2)
+
+				local distOrder1 = (_vecTeleporter[2][1] - unit.MoveOrder):Length()
+				local distOrder2 = (_vecTeleporter[2][2] - unit.MoveOrder):Length()
+
+				local diff2 = math.abs(distOrder1 - distOrder2)
+
+				if diff1 >= diff2 then
+					if distSelf1 <= distSelf2 then
+						unit.UseTeleporter = _vecTeleporter[1][1]
+					else
+						unit.UseTeleporter = _vecTeleporter[1][2]
+					end
+				else
+					if distOrder1 <= distOrder2 then
+						unit.UseTeleporter = _vecTeleporter[1][1]
+					else
+						unit.UseTeleporter = _vecTeleporter[1][2]
+					end
+				end
+			else
+				if PosInBoundingBox(orig, _BoundingBox[2]) and not PosInBoundingBox(orig, _BoundingBox[1]) and not PosInRangeOfPos(orig, _VecArena2, 1500) and (PosInBoundingBox(unit.MoveOrder, _BoundingBox[1]) or PosInRangeOfPos(unit.MoveOrder, _VecArena2, 1500)) then
+					DebugDrawText(unit:GetAbsOrigin() + Vector(0,0,400), string.format("2 to 1") , true, 4)
+					local distSelf1 = (_vecTeleporter[2][1] - orig):Length()
+					local distSelf2 = (_vecTeleporter[2][2] - orig):Length()
+
+					local diff1 = math.abs(distSelf1 - distSelf2)
+
+					local distOrder1 = (_vecTeleporter[1][1] - unit.MoveOrder):Length()
+					local distOrder2 = (_vecTeleporter[1][2] - unit.MoveOrder):Length()
+
+					local diff2 = math.abs(distOrder1 - distOrder2)
+
+					if diff1 >= diff2 then
+						if distSelf1 <= distSelf2 then
+							unit.UseTeleporter = _vecTeleporter[2][1]
+						else
+							unit.UseTeleporter = _vecTeleporter[2][2]
+						end
+					else
+						if distOrder1 <= distOrder2 then
+							unit.UseTeleporter = _vecTeleporter[2][1]
+						else
+							unit.UseTeleporter = _vecTeleporter[2][2]
+						end
+					end
+				end
+			end
+		end
+	end
+
+	local sysOrder = nil
+	local tpOrder = nil
+
+	if unit.UseTeleporter then
+		print("useteleporter")
+		DebugDrawLine(unit:GetAbsOrigin(), unit.UseTeleporter, 255, 0, 0, true, 4)
+
+		sysOrder =
+		{
+			UnitIndex = unit:entindex(),
+			OrderType = DOTA_UNIT_ORDER_MOVE_TO_POSITION,
+			Position = unit.UseTeleporter,
+		}
+
+		if target then
+			print("useteleporter with target")
+			tpOrder =
+			{
+				UnitIndex = unit:entindex(),
+				OrderType = DOTA_UNIT_ORDER_ATTACK_TARGET,
+				TargetIndex = target:entindex(),
+			}
+		else
+			print("useteleporter with move")
+			tpOrder =
+			{
+				UnitIndex = unit:entindex(),
+				OrderType = DOTA_UNIT_ORDER_MOVE_TO_POSITION,
+				Position = unit.MoveOrder,
+			}
+		end
+
+		unit.TeleportOrder = tpOrder
+
+		print("movingunit")
+
+		
+	elseif target then
+		print("in atk range")
+		sysOrder =
+		{
+			UnitIndex = unit:entindex(),
+			OrderType = DOTA_UNIT_ORDER_ATTACK_TARGET,
+			TargetIndex = target:entindex(),
+		}
+	end
+
+	Timers:CreateTimer(0.01, function()
+		ExecuteOrderFromTable(sysOrder)
+	end
+	)
+end
+
+function CHoldoutGameMode:_PredictMovement()
+	--[[for _, hero in pairs(self._vHeroes) do
+		local org = hero:GetAbsOrigin()
+		local diff = org - hero.LastPosition
+		local order = hero.MoveOrder
+		local vecOrder = order - org
+		vecOrder = (vecOrder / vecOrder:Length()) * hero:GetMoveSpeedModifier(hero:GetBaseMoveSpeed()) * _TICKRATE
+
+		DebugDrawLine(hero.LastPosition, hero:GetAbsOrigin(), 255, 0, 255, true, 1.2)
+
+		DebugDrawLine(org, org + vecOrder, 255, 255, 0, true, _TICKRATE)
+
+		local a = GetAngleBetweenVectors(diff, hero.PredictMovement)
+
+		hero.PredictMovement = hero.PredictMovement * 2/3 --(hero.PredictMovement * 4/5) --* 2/3
+		hero.PredictMovement = hero.PredictMovement + vecOrder
+
+		--hero.PredictMovement = RotateVectorByAngle(hero.PredictMovement, a)
+
+		DebugDrawLine(hero:GetAbsOrigin(), hero:GetAbsOrigin() + hero.PredictMovement, 255, 0, 0, true, 1.2)
+
+		hero.LastPosition = org
+		hero.LastPredictAngle = ang
+	end]]
+end
+
 
 function CHoldoutGameMode:OnUnitLeftClick( event )
 	local pID = event.pID
@@ -371,7 +651,7 @@ function CHoldoutGameMode:OnUnitLeftClick( event )
 
 	mPos.x = event.mouseX
 	mPos.y = event.mouseY
-	--mPos.z = GetGroundHeight(mPos, nil)
+	mPos.z = GetGroundHeight(mPos, nil)
 
 	--if eventName == "doublepressed" then
 
@@ -382,6 +662,84 @@ function CHoldoutGameMode:OnUnitLeftClick( event )
 	--end
 
 	--
+
+	local player = PlayerResource:GetPlayer(pID)
+	local hero = player:GetAssignedHero()
+
+	local projectile = {
+	--EffectName = "particles/test_particle/ranged_tower_good.vpcf",
+	--EffectName = "particles/units/heroes/hero_lina/lina_spell_dragon_slave.vpcf",
+	EffectName = "particles/units/heroes/hero_mirana/mirana_spell_arrow.vpcf",
+	--EeffectName = "",
+	--vSpawnOrigin = hero:GetAbsOrigin(),
+	vSpawnOrigin = hero:GetAbsOrigin() + Vector(0,0,80),--{unit=hero, attach="attach_attack1", offset=Vector(0,0,0)},
+	fDistance = 3000,
+	fStartRadius = 100,
+	fEndRadius = 100,
+	Source = hero,
+	fExpireTime = 100.0,
+	vVelocity = (mPos - hero:GetAbsOrigin()) / (mPos - hero:GetAbsOrigin()):Length() * 700,
+	UnitBehavior = PROJECTILES_DESTROY,
+	bMultipleHits = false,
+	bIgnoreSource = true,
+	TreeBehavior = PROJECTILES_NOTHING,
+	bCutTrees = true,
+	bTreeFullCollision = false,
+	WallBehavior = PROJECTILES_NOTHING,
+	GroundBehavior = PROJECTILES_NOTHING,
+	fGroundOffset = 80,
+	nChangeMax = 0,
+	bRecreateOnChange = true,
+	bZCheck = true,
+	bGroundLock = false,
+	bProvidesVision = true,
+	iVisionRadius = 350,
+	iVisionTeamNumber = hero:GetTeam(),
+	bFlyingVision = false,
+	fVisionTickTime = .1,
+	fVisionLingerDuration = 1,
+	draw = true,--             draw = {alpha=1, color=Vector(200,0,0)},
+	--iPositionCP = 0,
+	--iVelocityCP = 1,
+	--ControlPoints = {[5]=Vector(100,0,0), [10]=Vector(0,0,1)},
+	--ControlPointForwards = {[4]=hero:GetForwardVector() * -1},
+	--ControlPointOrientations = {[1]={hero:GetForwardVector() * -1, hero:GetForwardVector() * -1, hero:GetForwardVector() * -1}},
+	--[[ControlPointEntityAttaches = {[0]={
+	unit = hero,
+	pattach = PATTACH_ABSORIGIN_FOLLOW,
+	attachPoint = "attach_attack1", -- nil
+	origin = Vector(0,0,0)
+	}},]]
+	--fRehitDelay = .3,
+	--fChangeDelay = 1,
+	--fRadiusStep = 10,
+	--bUseFindUnitsInRadius = false,
+
+	UnitTest = function(self, unit) return unit:GetUnitName() ~= "npc_dummy_unit" and unit:GetTeamNumber() ~= hero:GetTeamNumber() end,
+	OnUnitHit = function(self, unit) 
+	print ('HIT UNIT: ' .. unit:GetUnitName())
+	end,
+	--OnTreeHit = function(self, tree) ... end,
+	--OnWallHit = function(self, gnvPos) ... end,
+	--OnGroundHit = function(self, groundPos) ... end,
+	--OnFinish = function(self, pos) ... end,
+	}
+
+	local prjktl = Projectiles:CreateProjectile(projectile)
+	Timers:CreateTimer(function()
+
+		--prjktl.fGroundOffset = prjktl.fGroundOffset + 10
+
+		if prjktl:GetVelocity() == 0 then
+			print("projectile doesnt exist")
+			return nil
+		else
+			print("projectile exists")
+			prjktl:SetVelocity(prjktl:GetVelocity() * 2)
+			return 0.25
+		end
+	end
+	)
 end
 
 
@@ -390,6 +748,12 @@ function CHoldoutGameMode:OnThink()
 	if GameRules:State_Get() == DOTA_GAMERULES_STATE_GAME_IN_PROGRESS then
 		self:_CheckForDefeat()
 		self:_ThinkLootExpiry()
+		self:_PredictMovement()
+
+			for _, hero in pairs(self._vHeroes) do
+				--print(string.format("expPool: %f", hero.ShowExperiencePool))
+				self:ExperiencePopup(hero)
+			end
 		
 		self:ShopSheepIdle()
 		--self:_CheckForUnitInGoal()
@@ -405,7 +769,7 @@ function CHoldoutGameMode:OnThink()
 				else
 					local roundMana = 2
 					self._entAncient:SetMana(self._entAncient:GetMana() - roundMana )
-					PopupNumbers(self._entAncient, "gold", Vector(0, 255, 0), 1.0, roundMana, POPUP_SYMBOL_PRE_PLUS, nil)
+					PopupNumbersTeam(self._entAncient, PATTACH_ABSORIGIN_FOLLOW, "gold", Vector(0, 255, 0), 1.0, roundMana, POPUP_SYMBOL_PRE_PLUS, nil, self._nTeam)
 				end
 				self._currentRound:End()
 				self._currentRound = nil
@@ -487,12 +851,20 @@ end
 
 
 function CHoldoutGameMode:OnUnitEntersGoal(u, team)
-	if u.Holdout_CoreNum ~= nil and u:GetTeamNumber() ~= team and u.CanEnterGoal ~= false then
-		local CoreValue = u.CoreValue
+	if u:GetTeamNumber() == team then
+		return
+	end
+	--ApplyModifier(u, u, "modifier_muted", {Duration = -1}, true)
+
+	if u.CanEnterGoal ~= nil and u.CanEnterGoal == false then
+		return
+	end
+
+	if u.Holdout_CoreNum ~= nil then
+		local CoreValue = Assert(u.CoreValue)
 		u.EnteredGoal = true
 
-		PopupNumbers(self._entAncient, "gold", Vector(255, 0, 0), 1.0, CoreValue, POPUP_SYMBOL_PRE_PLUS, nil)
-		u:ForceKill(false)
+		PopupNumbersTeam(self._entAncient, PATTACH_ABSORIGIN_FOLLOW, "gold", Vector(255, 0, 0), 1.0, CoreValue, POPUP_SYMBOL_PRE_PLUS, nil, self._nTeam)
 		
 		self._vCoreUnitsReachedGoal[team] = self._vCoreUnitsReachedGoal[team] + 1
 		----print (string.format( "Units Reached Goal: %d", self._vCoreUnitsReachedGoal[team]  ) )
@@ -503,6 +875,14 @@ function CHoldoutGameMode:OnUnitEntersGoal(u, team)
 			end
 		end
 	end
+
+	local event = {
+		entindex_killed = u:GetEntityIndex(),
+		entindex_attacker = u:GetEntityIndex(),
+		bNeedsRemove = true,
+	}
+
+	self:OnEntityKilled(event)
 end
 
 
@@ -587,6 +967,18 @@ function CHoldoutGameMode:_ThinkPrepTime()
 		self._vRounds[ self._nRoundNumber ]:Precache()
 	end
 	self._entPrepTimeQuest:SetTextReplaceValue( QUEST_TEXT_REPLACE_VALUE_CURRENT_VALUE, self._flPrepTimeEnd - GameRules:GetGameTime() )
+end
+
+
+function CHoldoutGameMode:ExperiencePopup(hero)
+	if hero.ShowExperiencePool > 0 then
+		--print(string.format("gametime: %f", GameRules:GetGameTime()))
+		if GameRules:GetGameTime() >= hero.ShowExperienceNextUpdate or GameRules:GetGameTime() >= hero.ShowExperienceNextUpdateDelay then
+			PopupNumbers(hero, PATTACH_OVERHEAD_FOLLOW, "crit", Vector(127, 0, 255), 3.0, math.floor(hero.ShowExperiencePool), POPUP_SYMBOL_PRE_PLUS, nil, hero:GetPlayerOwnerID())
+			--hero:AddExperience(hero.ShowExperiencePool, DOTA_ModifyXP_CreepKill, true, false)
+			hero.ShowExperiencePool = 0
+		end
+	end
 end
 
 
@@ -696,16 +1088,17 @@ function CHoldoutGameMode:OnNPCSpawned( event )
 
 	if spawnedUnit:IsRealHero() and spawnedUnit:GetTeamNumber()	== self._nTeam then
 		self._bottleSystem:OnHeroSpawned(spawnedUnit)
-		self:_SpawnHeroClientEffects( spawnedUnit )
 	end
 
 	--for nPlayerID = 0, DOTA_MAX_PLAYERS-1 do
-		--if ( PlayerResource:IsValidPlayer( nPlayerID ) ) then
-		--		
-		--self:_SpawnHeroClientEffects( spawnedUnit, nPlayerID )
-		--end
+		--if ( PlayerResource:	Timers:CreateTimer(function()
+		
+	--	return self:Think()
 	--end
+	--)( nPlayerID ) ) then
+		--
 end
+
 
 function CHoldoutGameMode:OnHeroInGame( hero )
 	local player = hero:GetPlayerOwner()
@@ -713,9 +1106,26 @@ function CHoldoutGameMode:OnHeroInGame( hero )
 
 	ModifyLumber(player, START_LUMBER)
 	self._bottleSystem:OnHeroInGame(hero)
+	hero.ShowExperiencePool = 0
+	hero.ShowExperienceNextUpdate = GameRules:GetGameTime()
+	hero.ShowExperienceNextUpdateDelay = GameRules:GetGameTime()
+	hero.MoveOrder = hero:GetAbsOrigin()
+	hero.MoveOrderTime = GameRules:GetGameTime()
+	hero.MoveOrderPickedUpGlyph = false
+	hero.TargetOrder = nil
+	hero.TeleportOrder = nil
+	hero.PredictMovement = hero:GetAbsOrigin()
+	hero.LastPosition = hero:GetAbsOrigin()
+	hero.LastPredictAngle = 0
+	print(hero.MoveOrder)
+	--DebugDrawText(hero.MoveOrder, "worked", true, 7.0)
+
+	local nPlayerID = hero:GetPlayerOwnerID()
+	self:_SpawnHeroClientEffects( hero, nPlayerID )
 
 	table.insert(self._vHeroes, hero)
 end
+
 
 function ModifyLumber( player, lumber_value )
 	if lumber_value == 0 then return end
@@ -746,7 +1156,9 @@ function CHoldoutGameMode:OnEntityKilled( event )
 	self._movementSystem:OnEntityKilled(event)
 
 	local killedUnit = EntIndexToHScript( event.entindex_killed )
-	if killedUnit and killedUnit:GetTeamNumber() == self._nTeamEnemy then
+
+	if killedUnit then
+
 		if killedUnit:IsRealHero() then
 			local newItem = CreateItem( "item_tombstone", killedUnit, killedUnit )
 			newItem:SetPurchaseTime( 0 )
@@ -756,19 +1168,23 @@ function CHoldoutGameMode:OnEntityKilled( event )
 			tombstone:SetContainedItem( newItem )
 			tombstone:SetAngles( 0, RandomFloat( 0, 360 ), 0 )
 			FindClearSpaceForUnit( tombstone, killedUnit:GetAbsOrigin(), true )
-		end
-
-		if killedUnit.Holdout_CoreNum ~= nil then
-			self._vRounds[killedUnit.Holdout_CoreNum]:OnEntityKilled( event )
-			local rand = RandomFloat(0, 1)
-			if 0.7 > rand and rand > 0.63  then
-				self._bottleSystem:SpawnGlyphOnPosition(killedUnit:GetAbsOrigin(), 1, 1)
+		elseif  killedUnit:GetTeamNumber() == self._nTeamEnemy then
+			if killedUnit.Holdout_CoreNum ~= nil then
+				self._vRounds[killedUnit.Holdout_CoreNum]:OnEntityKilled( event )
+				local rand = RandomFloat(0, 1)
+				if 0.7 > rand and rand > 0.63  then
+					self._bottleSystem:SpawnGlyphOnPosition(killedUnit:GetAbsOrigin(), 1, 1)
+				end
+				--self._bottleSystem:SpawnGlyphOnPosition(killedUnit:GetAbsOrigin(), 1, 1)
 			end
-		end 
-	end
-	
-	
+
+			if event.bNeedsRemove then
+				UTIL_Remove(killedUnit)
+			end
+		end
+	end	
 end
+
 
 function CHoldoutGameMode:OnItemPickedUp( event )
 
@@ -781,10 +1197,11 @@ function CHoldoutGameMode:OnItemPickedUp( event )
 		local player = hero:GetPlayerOwner()
 		local lumber = item:GetPurchaseTime()
 
-		PopupNumbers(hero, "gold", Vector(0, 255, 0), 2.0, math.floor(lumber), POPUP_SYMBOL_POST_EXCLAMATION, nil)
+		PopupNumbers(hero, PATTACH_ABSORIGIN_FOLLOW, "gold", Vector(0, 255, 0), 2.0, math.floor(lumber), POPUP_SYMBOL_POST_EXCLAMATION, nil, hero:GetPlayerOwnerID())
 		ModifyLumber(player, lumber)
 	end
 end
+
 
 function CHoldoutGameMode:OnHoldoutReviveComplete( event )
 	self._currentRound:OnHoldoutReviveComplete( event )

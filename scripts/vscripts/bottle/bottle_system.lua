@@ -36,6 +36,7 @@ ABILITY_ = {
 
 BOTTLE_HEALTH_DURATION_BASE = 4.0
 BOTTLE_MANA_DURATION_BASE = 4.0
+GLYPH_EXPIRE_TIME = 90.0
 
 
 function CBottleSystem:Init( gameMode, team )
@@ -61,9 +62,105 @@ function CBottleSystem:Init( gameMode, team )
 		----return self:GetTickrate()
 	--end
 	--)
+
+	Timers:CreateTimer(function()
+		
+		return self:GlyphThink()
+	end
+	)
 end
 
+--[[for _, glyph in pairs(self._vGlyphs) do
+		local heroes = {}
 
+		if not glyph._PickedUp then
+			local glyphOrig = glyph._entItem3D:GetAbsOrigin()
+			heroes = FindUnitsInRadius( self._nTeam, glyphOrig, nil, 200, DOTA_UNIT_TARGET_TEAM_FRIENDLY, DOTA_UNIT_TARGET_HERO, 0, 0, false )
+			DebugDrawCircle(glyphOrig, Vector(0, 255, 0), 0, 200, true, 0.25)
+
+			heroes = ListFilterWithFn(heroes,
+											function(e)
+												return not (e:IsStunned() or not e:IsAlive())
+											end
+											)
+
+			--if #heroes > 0 then
+			--	self:HeroPickUpGlyph(heroes[1], glyph)
+			--end
+
+			for _, hero in pairs(heroes) do
+				--DebugDrawText(hero.MoveOrder, "worked", true, 7.0)
+				if glyph._fSpawnTime <= hero.MoveOrderTime and not hero.MoveOrderPickedUpGlyph then
+					dist = (glyphOrig - hero.MoveOrder):Length()
+					print(dist)
+					if dist <= 70 then
+						self:HeroPickUpGlyph(hero, glyph)
+					end
+				end
+			end
+		end
+	end
+
+	return self:GetTickrate()]]
+
+function CBottleSystem:GlyphThink()
+	if #self._vGlyphs > 0 then
+		for _, hero in pairs(self._gameMode._vHeroes) do
+			if not hero:IsStunned() and hero:IsAlive() then
+				DebugDrawCircle(hero:GetAbsOrigin(), Vector(0, 255, 0), 0, 200, true, 0.25)
+				for _, glyph in pairs(self._vGlyphs) do
+					if not glyph._PickedUp then
+						if glyph._fSpawnTime <= hero.MoveOrderTime and not hero.MoveOrderPickedUpGlyph then
+							local glyphOrig = glyph._entItem3D:GetAbsOrigin()
+							distHero = (glyphOrig - hero:GetAbsOrigin()):Length()
+							distOrder = (glyphOrig - hero.MoveOrder):Length()
+							--print(dist)
+							if distOrder <= 70 and distHero <= 200 then
+								self:HeroPickUpGlyph(hero, glyph)
+							end
+						end
+					end
+				end
+			end
+		end
+
+		--Expire time check
+
+		self._vGlyphs = ListFilterWithFn(self._vGlyphs,
+		function(e)
+			local expiryTime = GameRules:GetGameTime() - GLYPH_EXPIRE_TIME
+			local item = e._entItem3D
+
+			--print(item:GetCreationTime())
+			--print(expiryTime)
+
+			if not e._PickedUp and item:GetCreationTime() < expiryTime then
+
+				local nFXIndex = ParticleManager:CreateParticle( "particles/items2_fx/veil_of_discord.vpcf", PATTACH_CUSTOMORIGIN, item )
+				ParticleManager:SetParticleControl( nFXIndex, 0, item:GetOrigin() )
+				ParticleManager:SetParticleControl( nFXIndex, 1, Vector( 35, 35, 25 ) )
+				ParticleManager:ReleaseParticleIndex( nFXIndex )
+
+				local inventoryItem = item:GetContainedItem()
+				if inventoryItem then
+					UTIL_Remove( inventoryItem )
+				end
+
+				if item then
+					UTIL_Remove( item )
+				end
+
+				return false
+			end
+
+			return true
+		end
+		)
+		--print (#self._vGlyphs)
+	end
+
+	return self:GetTickrate()
+end
 
 function CBottleSystem:InitBottleShop(pID)
 	----print(string.format("player owner: %d", id))
@@ -81,7 +178,7 @@ end
 function CBottleSystem:InitMoonwells()
 	local i = 1
 	while Entities:FindByName(nil, "moonwellradiant" .. i) ~= nil do
-		local moonwellObj = CMoonwell:CreateMoonwell("moonwellradiant" .. i, "moonwellradiantwater" .. i, "triggermoonwellradiant" .. i, self)
+		local moonwellObj = CMoonwell:CreateMoonwell("moonwellradiant" .. i, "moonwellradiantwater" .. i, self)
 		moonwellObj:SetMana(0, false)
 		table.insert(self._vMoonwells, moonwellObj)
 		i = i + 1
@@ -90,7 +187,7 @@ end
 
 
 function CBottleSystem:GetTickrate()
-	return 0.25
+	return 0.20
 end
 
 
@@ -164,14 +261,22 @@ function CBottleSystem:HeroPickUpGlyph( hero, glyph )
 	hero.BottleSystem[glyphBottle].Ability:SetLevel(glyph._nLevel)
 	glyph:PickUp(hero)
 
+	if glyph._entItem3D ~= nil and not glyph._entItem3D:IsNull() then
+		UTIL_Remove(glyph._entItem3D)
+	end
+
+	glyph._PickedUp = true
+	hero.MoveOrderPickedUpGlyph = true
+
 	self:HeroUpdateBottle(hero, glyphBottle)
+
 end
 
 
 function CBottleSystem:OnHeroSpawned( hero )
 	if hero.BottleSystem.BottleShop == nil then
 		local pID = hero:GetPlayerOwnerID()
-		print(string.format("playerId: %d", pID))
+		--print(string.format("playerId: %d", pID))
 		self._vBottleShops[pID]:AddHero(hero)
 	end
 
@@ -194,13 +299,13 @@ function CBottleSystem:OnHeroInGame( hero )
 			ChargesMax = 100,
 			ChargesCost = 25,
 			Lvl = 1,
-			Ability = hero:AddAbility(ABILITY_[1]),
+			Ability = hero:AddAbility(ABILITY_[1]), -- hero:FindAbilityByName(ABILITY_[1]),
 			Think = {
 				TimeLeft = 0,
 				Healing = 0,
 				HealInstant = 0,
 				Hps = 0,
-				Tickrate = 0.2,
+				Tickrate = self:GetTickrate(),
 				Timer = nil,
 
 			},
@@ -212,25 +317,27 @@ function CBottleSystem:OnHeroInGame( hero )
 			ChargesMax = 100,
 			ChargesCost = 25,
 			Lvl = 1,
-			Ability = hero:AddAbility(ABILITY_[2]),
+			Ability = hero:AddAbility(ABILITY_[2]), --hero:FindAbilityByName(ABILITY_[2]), 
 			Think = {
 				TimeLeft = 0,
 				Healing = 0,
 				HealInstant = 0,
 				Hps = 0,
-				Tickrate = 0.2,
+				Tickrate = self:GetTickrate(),
 				Timer = nil,
 			},
 			Glyph = nil,
 		},
-
+		
 		BottleShop = nil
 	}
 
 	local pID = hero:GetPlayerOwnerID()
 
 	self:InitBottleShop(pID)
-	print("hero ingame")
+	--hero.BottleSystem[1].Ability:SetLevel(4)
+	--hero.BottleSystem[2].Ability:SetLevel(4)
+	--print("hero ingame")
 
 	table.insert(self._vHeroes, hero)
 
@@ -441,6 +548,7 @@ function CBottleSystem:BottleAddCharges( hero, bottle, charges)
 	end
 
 	local chargesUsed = 0
+	local oldCharges = hero.BottleSystem[bottle].Charges
 
 	if charges == 0 then
 		return 0
@@ -469,8 +577,9 @@ function CBottleSystem:BottleAddCharges( hero, bottle, charges)
 
 	self:HeroUpdateBottle(hero, bottle)
 	
-
-	hero:SetModifierStackCount(MODIFIER_STACKS_[bottle], hero, math.floor(hero.BottleSystem[bottle].Charges))
+	if math.floor(hero.BottleSystem[bottle].Charges) ~= math.floor(oldCharges) then
+		hero:SetModifierStackCount(MODIFIER_STACKS_[bottle], hero, math.floor(hero.BottleSystem[bottle].Charges))
+	end
 	----print(string.format("charges: %f", hero.BottleSystem[bottle].Charges))
 	----print(string.format("refilled: %f", chargesUsed))
 	return chargesUsed

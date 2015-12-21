@@ -122,7 +122,7 @@ function CBottleShop:Init(pedestal, bottle, pID, bottleSystem)
 			10,
 		},
 	}
-	
+
 	self._vAbilities = {
 		{
 		},

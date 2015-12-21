@@ -10,43 +10,35 @@ function CHoldoutGameSpawner:ReadConfiguration( name, kv, gameRound )
 	self._gameRound = gameRound
 	self._dependentSpawners = {}
 
-	self._szChampionNPCClassName = kv.ChampionNPCName or ""
-	self._szGroupWithUnit = kv.GroupWithUnit or ""
+	self._szGroupWithPack = kv.GroupWithPack or ""
 	self._szName = name
-	self._szNPCClassName = kv.NPCName or ""
+	self._szPackName = kv.PackName or ""
 	self._szSpawnerName = kv.SpawnerName or ""
-	self._szWaitForUnit = kv.WaitForUnit or ""
-	self._szWaypointName = kv.Waypoint or ""
-	self._waypointEntity = nil
+	self._szWaitForPack = kv.WaitForPack or ""
 
-	self._nCoreValue = tonumber( kv.CoreValue or 1)
-	self._nChampionLevel = tonumber( kv.ChampionLevel or 1 )
-	self._nChampionMax = tonumber( kv.ChampionMax or 1 )
 	self._nCreatureLevel = tonumber( kv.CreatureLevel or 1 )
-	self._nTotalUnitsToSpawn = tonumber( kv.TotalUnitsToSpawn or 0 )
-	self._nUnitsPerSpawn = tonumber( kv.UnitsPerSpawn or 0 )
-	self._nUnitsPerSpawn = tonumber( kv.UnitsPerSpawn or 1 )
+	self._nTotalPacksToSpawn = tonumber( kv.TotalPacksToSpawn or 0 )
 
-	self._flChampionChance = tonumber( kv.ChampionChance or 0 )
-	self._flInitialWait = tonumber( kv.WaitForTime or 0 )
 	self._flSpawnInterval = tonumber( kv.SpawnInterval or 0 )
+	self._flInitialWait = tonumber( kv.WaitForTime or 0 )
 
-	self._bDontGiveGoal = ( tonumber( kv.DontGiveGoal or 0 ) ~= 0 )
 	self._bDontOffsetSpawn = ( tonumber( kv.DontOffsetSpawn or 0 ) ~= 0 )
+
+	self._vg = {}
 end
 
 
 function CHoldoutGameSpawner:PostLoad( spawnerList )
-	self._waitForUnit = spawnerList[ self._szWaitForUnit ]
-	if self._szWaitForUnit ~= "" and not self._waitForUnit then
-		print( self._szName .. " has a wait for unit " .. self._szWaitForUnit .. " that is missing from the round data." )
+	self._waitForUnit = spawnerList[ self._szWaitForPack ]
+	if self._szWaitForPack ~= "" and not self._waitForUnit then
+		print( self._szName .. " has a wait for unit " .. self._szWaitForPack .. " that is missing from the round data." )
 	elseif self._waitForUnit then
 		table.insert( self._waitForUnit._dependentSpawners, self )
 	end
 
-	self._groupWithUnit = spawnerList[ self._szGroupWithUnit ]
-	if self._szGroupWithUnit ~= "" and not self._groupWithUnit then
-		print ( self._szName .. " has a group with unit " .. self._szGroupWithUnit .. " that is missing from the round data." )
+	self._groupWithUnit = spawnerList[ self._szGroupWithPack ]
+	if self._szGroupWithPack ~= "" and not self._groupWithUnit then
+		print ( self._szName .. " has a group with unit " .. self._szGroupWithPack .. " that is missing from the round data." )
 	elseif self._groupWithUnit then
 		table.insert( self._groupWithUnit._dependentSpawners, self )
 	end
@@ -54,17 +46,21 @@ end
 
 
 function CHoldoutGameSpawner:Precache()
-	PrecacheUnitByNameAsync( self._szNPCClassName, function( sg ) self._sg = sg end )
-	if self._szChampionNPCClassName ~= "" then
-		PrecacheUnitByNameAsync( self._szChampionNPCClassName, function( sg ) self._sgChampion = sg end )
+	print(self._szPackName)
+	print(self._gameRound._vPacks[self._szPackName])
+	print(self._nTotalPacksToSpawn)
+	print(self:GetTotalUnitsToSpawn())
+	print(self:GetTotalCoreValue())
+
+	for _, n in pairs(self._gameRound._vPacks[self._szPackName]) do
+		local name = n["NPCName"]
+		PrecacheUnitByNameAsync( name, function( sg ) table.insert(self._vg, sg) end )
 	end
 end
 
 
 function CHoldoutGameSpawner:Begin()
-	self._nUnitsSpawnedThisRound = 0
-	self._nChampionsSpawnedThisRound = 0
-	self._nUnitsCurrentlyAlive = 0
+	self._nPacksSpawnedThisRound = 0
 	
 	self._vecSpawnLocation = nil
 	if self._szSpawnerName ~= "" then
@@ -73,13 +69,6 @@ function CHoldoutGameSpawner:Begin()
 			print( string.format( "Failed to find spawner named %s for %s\n", self._szSpawnerName, self._szName ) )
 		end
 		self._vecSpawnLocation = entSpawner:GetAbsOrigin()
-	end
-	self._entWaypoint = nil
-	if self._szWaypointName ~= "" and not self._bDontGiveGoal then
-		self._entWaypoint = Entities:FindByName( nil, self._szWaypointName )
-		if not self._entWaypoint then
-			print( string.format( "Failed to find waypoint named %s for %s", self._szWaypointName, self._szName ) )
-		end
 	end
 
 	if self._waitForUnit ~= nil or self._groupWithUnit ~= nil then
@@ -91,13 +80,12 @@ end
 
 
 function CHoldoutGameSpawner:End()
-	if self._sg ~= nil then
-		UnloadSpawnGroupByHandle( self._sg )
-		self._sg = nil
-	end
-	if self._sgChampion ~= nil then
-		UnloadSpawnGroupByHandle( self._sgChampion )
-		self._sgChampion = nil
+	if self._vg ~= nil then
+		for _, g in pairs(self._vg) do
+			UnloadSpawnGroupByHandle( g )
+		end
+
+		self._vg = nil
 	end
 end
 
@@ -135,16 +123,16 @@ end
 
 
 function CHoldoutGameSpawner:GetTotalUnitsToSpawn()
-	return self._nTotalUnitsToSpawn
+	return self._nTotalPacksToSpawn * self._gameRound:PackGetUnitCount(self._szPackName)
 end
 
 function CHoldoutGameSpawner:GetTotalCoreValue()
-	return self._nTotalUnitsToSpawn * self._nCoreValue
+	return self._nTotalPacksToSpawn * self._gameRound:PackGetValue(self._szPackName)
 end
 
 
 function CHoldoutGameSpawner:IsFinishedSpawning()
-	return ( self._nTotalUnitsToSpawn <= self._nUnitsSpawnedThisRound ) or ( self._groupWithUnit ~= nil )
+	return ( self._nTotalPacksToSpawn <= self._nPacksSpawnedThisRound ) or ( self._groupWithUnit ~= nil )
 end
 
 
@@ -157,19 +145,9 @@ function CHoldoutGameSpawner:_GetSpawnLocation()
 end
 
 
-function CHoldoutGameSpawner:_GetSpawnWaypoint()
-	if self._groupWithUnit then
-		return self._groupWithUnit:_GetSpawnWaypoint()
-	else
-		return self._entWaypoint
-	end
-end
-
-
 function CHoldoutGameSpawner:_UpdateRandomSpawn()
 	--print( "Choosing Random Spawn.")
 	self._vecSpawnLocation = Vector( 0, 0, 0 )
-	self._entWaypoint = nil
 
 	local spawnInfo = self._gameRound:ChooseRandomSpawnInfo()
 	if spawnInfo == nil then
@@ -183,23 +161,14 @@ function CHoldoutGameSpawner:_UpdateRandomSpawn()
 		return
 	end
 	self._vecSpawnLocation = entSpawner:GetAbsOrigin()
-
-	if not self._bDontGiveGoal then
-		self._entWaypoint = Entities:FindByName( nil, spawnInfo.szFirstWaypoint )
-		if not self._entWaypoint then
-			--print( string.format( "Failed to find a waypoint named %s for %s.", spawnInfo.szFirstWaypoint, self._szName ) )
-			return
-		end
-	end
 end
 
 
 function CHoldoutGameSpawner:_DoSpawn()
-	local nUnitsToSpawn = math.min( self._nUnitsPerSpawn, self._nTotalUnitsToSpawn - self._nUnitsSpawnedThisRound )
 
-	if nUnitsToSpawn <= 0 then
+	if self._nTotalPacksToSpawn - self._nPacksSpawnedThisRound <= 0 then
 		return
-	elseif self._nUnitsSpawnedThisRound == 0 then
+	elseif self._nPacksSpawnedThisRound == 0 then
 		--print( string.format( "Started spawning %s at %.2f", self._szName, GameRules:GetGameTime() ) )
 	end
 
@@ -209,75 +178,55 @@ function CHoldoutGameSpawner:_DoSpawn()
 
 	local vBaseSpawnLocation = self:_GetSpawnLocation()
 	if not vBaseSpawnLocation then return end
-	for iUnit = 1,nUnitsToSpawn do
-		local bIsChampion = RollPercentage( self._flChampionChance )
-		if self._nChampionsSpawnedThisRound >= self._nChampionMax then
-			bIsChampion = false
-		end
 
-		local szNPCClassToSpawn = self._szNPCClassName
-		if bIsChampion and self._szChampionNPCClassName ~= "" then
-			szNPCClassToSpawn = self._szChampionNPCClassName
-		end
+	----for each unit in pack spawn units and set core values accordingly
 
-		local vSpawnLocation = vBaseSpawnLocation
-		if not self._bDontOffsetSpawn then
-			vSpawnLocation = vSpawnLocation + RandomVector( RandomFloat( 0, 200 ) )
-		end
+	for _, unit in pairs(self._gameRound._vPacks[self._szPackName]) do
 
-		local entUnit = CreateUnitByName( szNPCClassToSpawn, vSpawnLocation, true, nil, nil, DOTA_TEAM_BADGUYS )
-		if entUnit then
-			if entUnit:IsCreature() then
-				if bIsChampion then
-					self._nChampionsSpawnedThisRound = self._nChampionsSpawnedThisRound + 1
-					entUnit:CreatureLevelUp( ( self._nChampionLevel - 1 ) )
-					entUnit:SetChampion( true )
-					local nParticle = ParticleManager:CreateParticle( "heavens_halberd", PATTACH_ABSORIGIN_FOLLOW, entUnit )
-					ParticleManager:ReleaseParticleIndex( nParticle )
-					entUnit:SetModelScale( 1.1, 0 )
-				else
+		local AddCoreValue = 0
+		local szNPCClassToSpawn = unit["NPCName"]
+		local cValue = unit["CoreValue"]
+		local nSpawn = unit["UnitsPerSpawn"]
+
+		for n = 1, nSpawn do
+
+			local vSpawnLocation = vBaseSpawnLocation
+			if not self._bDontOffsetSpawn then
+				vSpawnLocation = vSpawnLocation + RandomVector( RandomFloat( 0, 200 ) )
+			end
+
+			local entUnit = CreateUnitByName( szNPCClassToSpawn, vSpawnLocation, true, nil, nil, DOTA_TEAM_BADGUYS )
+			if entUnit then
+				if entUnit:IsCreature() then
 					entUnit:CreatureLevelUp( self._nCreatureLevel - 1 )
 				end
-			end
 
-			local entWp = self:_GetSpawnWaypoint()
-			if entWp ~= nil then
-				--entUnit:SetInitialGoalEntity( entWp )
-			end
-			self._nUnitsSpawnedThisRound = self._nUnitsSpawnedThisRound + 1
-			self._nUnitsCurrentlyAlive = self._nUnitsCurrentlyAlive + 1
+				ApplyModifier(entUnit, entUnit, "modifier_nether_buff_passive", {duration=-1}, false)
+				ApplyModifier(entUnit, entUnit, "modifier_nether_buff_fx", {duration=-1}, false)
+				
+				entUnit.Holdout_CoreNum = self._gameRound._nRoundNumber
+				entUnit.CoreValue = cValue 
+				entUnit:SetDeathXP(0)
+				entUnit:SetMaximumGoldBounty(0)
+				entUnit:SetBountyGain(0)
+				entUnit:SetMinimumGoldBounty(0)
+				entUnit.RewardXP = math.floor(self._gameRound:GetXPPerCoreUnit() * cValue)
+				entUnit.RewardGold = math.floor(self._gameRound:GetGoldPerCoreUnit() * cValue)
 
-			ApplyModifier(entUnit, entUnit, "modifier_nether_buff_passive", {duration=-1}, false)
-			ApplyModifier(entUnit, entUnit, "modifier_nether_buff_fx", {duration=-1}, false)
-			
-			entUnit.Holdout_CoreNum = self._gameRound._nRoundNumber
-			entUnit.CoreValue = self._nCoreValue
-			entUnit:SetDeathXP(0)
-			entUnit:SetMaximumGoldBounty(0)
-			entUnit.RewardXP = self._gameRound:GetXPPerCoreUnit()
-			entUnit.RewardGold = self._gameRound:GetGoldPerCoreUnit()
-			self._gameRound._nCoreUnitsSpawnedValue = self._gameRound._nCoreUnitsSpawnedValue + self._nCoreValue
-
-			if self._gameRound._entKillCountSubquest then
-				self._gameRound._entKillCountSubquest:SetTextReplaceValue( QUEST_TEXT_REPLACE_VALUE_CURRENT_VALUE, self._gameRound._nCoreUnitsSpawnedValue)
+				self._gameRound._nCoreUnitsSpawnedValue = self._gameRound._nCoreUnitsSpawnedValue + cValue
 			end
 		end
+	end
+
+	self._nPacksSpawnedThisRound = self._nPacksSpawnedThisRound + 1
+
+	if self._gameRound._entKillCountSubquest then
+		self._gameRound._entKillCountSubquest:SetTextReplaceValue( QUEST_TEXT_REPLACE_VALUE_CURRENT_VALUE, self._gameRound._nCoreUnitsSpawnedValue)
 	end
 end
 
 
 function CHoldoutGameSpawner:StatusReport()
 	--print( string.format( "** Spawner %s", self._szNPCClassName ) )
-	--print( string.format( "%d of %d spawned", self._nUnitsSpawnedThisRound, self._nTotalUnitsToSpawn ) )
-end
-
-function TestSpawn(name, spawner, player, team)
-	local entSpawn = Entities:FindByName(spawner)		
-		if entSpawn ~= nil then
-			local point = entSpawn:GetOrigin()
-			local unit = CreateUnitByName(name, point, true, nil, nil, team)
-			unit:SetControllableByPlayer(nil, player)
-		else 
-			--print("Error: No Spawner found!")
-		end
+	--print( string.format( "%d of %d spawned", self._nPacksSpawnedThisRound, self._nTotalPacksToSpawn ) )
 end

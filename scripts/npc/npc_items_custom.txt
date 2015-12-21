@@ -44,6 +44,19 @@
 				}
 			}
 
+			"modifier_muted"
+			{
+				"Passive"				"1"
+				"IsHidden"				"1"
+
+				"States"
+				{
+					"MODIFIER_STATE_MUTED"	"MODIFIER_STATE_VALUE_ENABLED"
+					"MODIFIER_STATE_PASSIVES_DISABLED"	"MODIFIER_STATE_VALUE_ENABLED"
+
+				}
+			}
+
 			"modifier_root_hero_fx"
 			{
 				"Passive"				"1"
@@ -228,7 +241,7 @@
 		"AbilityBehavior"				"DOTA_ABILITY_BEHAVIOR_UNIT_TARGET | DOTA_ABILITY_BEHAVIOR_IMMEDIATE | DOTA_ABILITY_BEHAVIOR_DONT_RESUME_ATTACK"
 		"AbilityUnitTargetTeam"			"DOTA_UNIT_TARGET_TEAM_FRIENDLY"
 		"AbilityUnitTargetType"			"DOTA_UNIT_TARGET_HERO"
-		"Model"							"models/props_gameplay/rune_doubledamage01.vmdl"
+		"Model"							"models/props_gameplay/rune_arcane.vmdl"
 		"ModelScale"  					"2.5"
 		"BaseClass"						"item_datadriven"
 		"ItemKillable"					"0"

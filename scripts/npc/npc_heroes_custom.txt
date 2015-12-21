@@ -48,6 +48,8 @@
 		"Ability2"				"axe_battle_rage"
 		"Ability3"				"holdout_axe_counter_helix"
 		"Ability4"				"holdout_culling_blade"
+		//"Ability5"				"bottle_health"
+		//"Ability6"				"bottle_mana"
 		"VisionNighttimeRange"		"1800"									// Range of vision at night time.
 	}
 

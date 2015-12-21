@@ -4,17 +4,21 @@
 -- Handle messages
 ---------------------------------------------------------------------------
 
+ItemModifierApllier = CreateItem("item_modifier_applier", nil, nil)
 
 function ApplyModifier(source, target, modifier_name, modifierArgs, overwrite)
     if not overwrite and target:HasModifier(modifier_name) then
         return nil
     end
 
-    if source.ModifierApplier == nil then
+    --[[if source.ModifierApplier == nil then
         source.ModifierApplier = CreateItem("item_modifier_applier", source, source)
-    end
+        DebugDrawText(source:GetAbsOrigin(), "Creating Modifier Applier", true, 10)
+     --   DebugDrawLine(source:GetAbsOrigin(), target:GetAbsOrigin(), 255, 255, 255, true, 10)
+    end]]
     
-    source.ModifierApplier:ApplyDataDrivenModifier(source, target, modifier_name, modifierArgs)
+    ItemModifierApllier:ApplyDataDrivenModifier(source, target, modifier_name, modifierArgs)
+   -- DebugDrawLine(source:GetAbsOrigin(), target:GetAbsOrigin(), 255, 255, 255, true, 10)
 end
 
 
@@ -152,8 +156,14 @@ function GetAngleBetweenVectors(v1, v2)
     
     dot = v1.x * v2.x + v1.y * v2.y
 
-    return math.acos(dot / (v1:Length() * v2:Length())) * (180 / math.pi)
+    return math.acos(dot / (v1:Length() * v2:Length())) -- * (180 / math.pi)
 end
+
+
+function RotateVectorByAngle( v, a )
+    return Vector(v.x * math.cos(a) + v.x * math.sin(a), v.y * -math.sin(a) + v.y * math.cos(a))
+end
+
 
 function GetMidpointBetweenPoints( v1, v2 )
     local v3 = Vector((v1.x + v2.x) / 2, (v1.y + v2.y) / 2, 0)
@@ -200,39 +210,58 @@ function UnitIsDead( unit )
 	end
 end
 
+function UnitAlive( unit )
+    if unit == nil or unit:IsNull() then
+        return false
+    else
+        return unit:IsAlive()
+    end
+end
 
 
-function SafeSpawnCreature(name, pos, aoe, height, npcOwner, unitOwner, team)
+
+
+function SafeSpawnCreature(name, pos, aoeMin, aoeMax, height, distMax, npcOwner, unitOwner, team)
     local spawn = pos
 
     repeat
         local bSpawn = true
 
-        if aoe > 0 then
-            spawn = GetRandomPointInAoe(pos, aoe)
+        if aoeMin > 0 or aoeMax > 0 then
+            spawn = GetRandomPointInAoeMinMax(pos, aoeMin, aoeMax)
         end
 
         if height >= 0 then
-            local posHeight = GetGroundHeight(pos, nil)
-
+            local posHeight = GetGroundHeight(spawn, nil)
+           -- DebugDrawText(spawn, string.format("Höhe: %f / %f", posHeight, height), true, 2)
+            
             if posHeight ~= height then
-                bSpawn = false
+                local dist = GridNav:FindPathLength(pos, spawn)
+                if dist == -1 or dist > distMax then
+                    bSpawn = false
+                end
             end
         end
 
-        if bSpawn then
-             local hullsize = 35
-             local vUnits = FindUnitsInRadius( DOTA_TEAM_GOODGUYS, spawn, nil, hullsize, DOTA_UNIT_TARGET_TEAM_BOTH, DOTA_UNIT_TARGET_ALL, 0, 0, false )
-
-             if #vUnits ~= 0 then
-                 bSpawn = false
-             end
-        end
     until bSpawn
 
     local unit = CreateUnitByName( name, spawn, true, npcOwner, unitOwner, team )
+    FindClearSpaceForUnit(unit, spawn, true)
+    unit.RewardXP = 0
+    unit.RewardGold = 0
+    unit.CoreValue = 0
 
     return unit
+end
+
+function UnitSpawnAdd( unit, name, aoeMin, aoeMax, distMax, npcOwner, unitOwner )
+    if unit then
+        local unitPos = unit:GetAbsOrigin()
+
+        return SafeSpawnCreature(name, unitPos, aoeMin, aoeMax, unitPos.z, distMax, npsOwner, unitOwner, unit:GetTeamNumber())
+    end
+
+    return nil
 end
 
 
@@ -246,6 +275,38 @@ function GetRandomPointInAoe( pos, aoe )
   	local y = w * math.sin(t)
 
     return pos + Vector(x, y, 0)
+end
+
+
+function GetRandomPointInAoeMinMax( pos, aoeMin, aoeMax )
+    local u = RandomFloat(0, 1)
+    local v = RandomFloat(0, 1)
+
+    local w = aoeMin + (aoeMax - aoeMin) * math.sqrt(u)
+    local t = 2 * math.pi * v
+    local x = w * math.cos(t) 
+    local y = w * math.sin(t)
+
+    return pos + Vector(x, y, 0)
+end
+
+
+function PosInBoundingBox(p, bb)
+    print ((bb[1][3] + bb[2][3] / 2) <= p[3])
+    return bb[1][1] <= p[1] and bb[2][1] >= p[1] and bb[1][2] >= p[2] and bb[2][2] <= p[2] and (bb[1][3] + bb[2][3] / 2) <= p[3]
+end
+
+function PosInRangeOfPos( p1, p2, range )
+    return (p2 - p1):Length() <= range
+end
+
+
+function Assert( handle )
+    if handle ~= nil then 
+        return handle
+    else
+        return 0
+    end
 end
 
 
@@ -448,9 +509,18 @@ end
 
 
 -- Customizable version.
-function PopupNumbers(target, pfx, color, lifetime, number, presymbol, postsymbol)
+function PopupNumbers(target, attach, pfx, color, lifetime, number, presymbol, postsymbol, pID)
     local pfxPath = string.format("particles/msg_fx/msg_%s.vpcf", pfx)
-    local pidx = ParticleManager:CreateParticle(pfxPath, PATTACH_ABSORIGIN_FOLLOW, target) -- target:GetOwner()
+    local pidx = nil
+
+    if pID == nil or pID == -1 then
+        pidx = ParticleManager:CreateParticle(pfxPath, attach, target) -- target:GetOwner()
+    else
+        if PlayerResource:IsValidPlayer(pID) then
+            local player = PlayerResource:GetPlayer(pID)
+            pidx = ParticleManager:CreateParticleForPlayer(pfxPath, attach, target, player) -- target:GetOwner()
+        end
+    end
 
     local digits = 0
     if number ~= nil then
@@ -466,13 +536,42 @@ function PopupNumbers(target, pfx, color, lifetime, number, presymbol, postsymbo
     ParticleManager:SetParticleControl(pidx, 1, Vector(tonumber(presymbol), tonumber(number), tonumber(postsymbol)))
     ParticleManager:SetParticleControl(pidx, 2, Vector(lifetime, digits, 0))
     ParticleManager:SetParticleControl(pidx, 3, color)
+    ParticleManager:ReleaseParticleIndex(pidx)
+end
+
+function PopupNumbersTeam(target, attach, pfx, color, lifetime, number, presymbol, postsymbol, team)
+    local pfxPath = string.format("particles/msg_fx/msg_%s.vpcf", pfx)
+    local pidx
+    if team == -1 then
+        pidx = ParticleManager:CreateParticle(pfxPath, attach, target) -- target:GetOwner()
+    else
+        pidx = ParticleManager:CreateParticleForTeam(pfxPath, attach, target, team) -- target:GetOwner()
+    end
+
+    local digits = 0
+    if number ~= nil then
+        digits = #tostring(number)
+    end
+    if presymbol ~= nil then
+        digits = digits + 1
+    end
+    if postsymbol ~= nil then
+        digits = digits + 1
+    end
+
+    ParticleManager:SetParticleControl(pidx, 1, Vector(tonumber(presymbol), tonumber(number), tonumber(postsymbol)))
+    ParticleManager:SetParticleControl(pidx, 2, Vector(lifetime, digits, 0))
+    ParticleManager:SetParticleControl(pidx, 3, color)
+    ParticleManager:ReleaseParticleIndex(pidx)
 end
 
 
-function CHoldoutGameSpawner:StatusReport()
-	print( string.format( "** Spawner %s", self._szNPCClassName ) )
-	print( string.format( "%d of %d spawned", self._nUnitsSpawnedThisRound, self._nTotalUnitsToSpawn ) )
-end
+
+
+--function CHoldoutGameSpawner:StatusReport()
+--	print( string.format( "** Spawner %s", self._szNPCClassName ) )
+--	print( string.format( "%d of %d spawned", self._nUnitsSpawnedThisRound, self._nTotalUnitsToSpawn ) )
+--end
 
 
 function TestSpawn(name, spawner, player, team)
@@ -500,6 +599,7 @@ function SetPhasing(unit, time)
     end
 end
 
+
 function TreeIsAlive( tree )
     if not tree:IsNull() then
         local treeClass = tree:GetClassname()
@@ -514,6 +614,7 @@ function TreeIsAlive( tree )
     end
 end
 
+
 function UnitCutDownTree( unit, tree )
 	local treeClass = tree:GetClassname()
 
@@ -522,4 +623,28 @@ function UnitCutDownTree( unit, tree )
 	else
 		UTIL_RemoveImmediate( tree )
 	end
+end
+
+
+function IsSameHeigth( e1, e2 )
+	local p1 = e1:GetAbsOrigin()
+	local p2 = e2:GetAbsOrigin()
+
+	if GetGroundHeight(p1, nil) == GetGroundHeight(p2, nil) then
+		return true
+	end
+
+	return false
+end
+
+
+function TestSpawn(name, spawner, player, team)
+	local entSpawn = Entities:FindByName(nil, spawner)		
+		if entSpawn ~= nil then
+			local point = entSpawn:GetOrigin()
+			local unit = CreateUnitByName(name, point, true, nil, nil, team)
+			unit:SetControllableByPlayer(player, false)
+		else 
+			--print("Error: No Spawner found!")
+		end
 end

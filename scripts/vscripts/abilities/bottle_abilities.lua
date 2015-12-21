@@ -84,7 +84,7 @@ function bottle_health:OnSpellStart()
 	local bUseBottle = GameRules.holdOut._bottleSystem:HeroUseBottle(hCaster, hTarget, BOTTLE_HEALTH)
 
 	if bUseBottle then
-		print("ability used health bottle !!!")
+		--print("ability used health bottle !!!")
 	end
 end
  
