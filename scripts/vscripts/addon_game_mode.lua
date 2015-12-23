@@ -26,6 +26,11 @@ if CHoldoutGameMode == nil then
 	--print (string.format( "Create Class") )
 end
 
+_TICKRATE = 0.2
+
+INTERVALL_SHOW_EXPERIENCE_MIN = 2.0
+INTERVALL_SHOW_EXPERIENCE_MAX = 7.0
+
 MAX_LEVEL = 125
 
 XP_PER_LEVEL_TABLE = {}
@@ -35,7 +40,6 @@ for i=1, MAX_LEVEL - 1 do
 	--print(XP_PER_LEVEL_TABLE[i])
 end
 
-_TICKRATE = 0.2
 
 _BoundingBox = {
 	{
@@ -124,6 +128,7 @@ function CHoldoutGameMode:InitGameMode()
 	self._nTeam = DOTA_TEAM_GOODGUYS
 	self._nTeamEnemy = DOTA_TEAM_BADGUYS
 	self._vHeroes = {}
+	self._vPlayerStats = {}
 
 	self._movementSystem = CMovementSystem()
 	self._movementSystem:Init(self, DOTA_TEAM_BADGUYS)
@@ -133,6 +138,10 @@ function CHoldoutGameMode:InitGameMode()
 
 	self._gateSystem = CGateSystem()
 	self._gateSystem:Init(self, DOTA_TEAM_GOODGUYS)
+
+	self._bFirstRoundStarted = false
+
+	self._fGoldPerSecond = 0.5
 	
 	--[[Timers:CreateTimer(5, function()
 		TestSpawn("treant_mushroom_creature_big","testspawner_2", 0, DOTA_TEAM_GOODGUYS, false)
@@ -187,7 +196,7 @@ function CHoldoutGameMode:InitGameMode()
 	GameRules:SetCreepMinimapIconScale( 0.7 )
 	GameRules:SetRuneMinimapIconScale( 0.7 )
 	GameRules:SetGoldTickTime( 0.5 )
-	GameRules:SetGoldPerTick( 2 )
+	GameRules:SetGoldPerTick( 0 )
 	GameRules:SetUseBaseGoldBountyOnHeroes(false)
 	GameRules:SetRuneSpawnTime(180.0)
 
@@ -430,7 +439,7 @@ function CHoldoutGameMode:OnUnitRightClick( event )
 	--print(mPos)
 
 	if unit:IsRealHero() then
-		--unit:AddExperience(100, DOTA_ModifyXP_CreepKill, true, false)
+		GameRules.holdOut:HeroAddExperience(unit, 0.5, DOTA_ModifyXP_CreepKill, true, false)
 		unit.MoveOrder = mPos
 		unit.TargetOrder = target
 		if target then
@@ -748,6 +757,7 @@ function CHoldoutGameMode:OnThink()
 		self:_CheckForDefeat()
 		self:_ThinkLootExpiry()
 		self:_PredictMovement()
+		self:_GoldTick()
 
 			for _, hero in pairs(self._vHeroes) do
 				--print(string.format("expPool: %f", hero.ShowExperiencePool))
@@ -955,6 +965,11 @@ function CHoldoutGameMode:_ThinkPrepTime()
 		end
 		self._currentRound = self._vRounds[ self._nRoundNumber ]
 		self._currentRound:Begin()
+
+		if not self._bFirstRoundStarted then
+			self._bFirstRoundStarted = true
+		end
+
 		return
 	end
 
@@ -967,6 +982,78 @@ function CHoldoutGameMode:_ThinkPrepTime()
 	end
 	self._entPrepTimeQuest:SetTextReplaceValue( QUEST_TEXT_REPLACE_VALUE_CURRENT_VALUE, self._flPrepTimeEnd - GameRules:GetGameTime() )
 end
+
+
+function CHoldoutGameMode:_GoldTick()
+	if not self._bFirstRoundStarted then
+		return
+	end
+
+	--print("goldtick")
+
+	local goldPerTick = self._fGoldPerSecond * _TICKRATE
+
+	for _, hero in pairs(self._vHeroes) do
+		local pID = hero:GetPlayerOwnerID()
+		self:PlayerModifyGold(pID, goldPerTick, true, DOTA_ModifyGold_GameTick)
+	end
+
+end
+
+
+function CHoldoutGameMode:PlayerModifyGold(pID, gold, reliable, reason)
+	local goldRound = math.floor(gold)
+	local goldFloat = gold - goldRound
+	local pendingGold = 0
+
+	self._vPlayerStats[pID].GoldFloat = self._vPlayerStats[pID].GoldFloat + goldFloat
+
+	if self._vPlayerStats[pID].GoldFloat >= 1 then
+		pendingGold = math.floor(self._vPlayerStats[pID].GoldFloat)
+		self._vPlayerStats[pID].GoldFloat = self._vPlayerStats[pID].GoldFloat - pendingGold
+		goldRound = goldRound + pendingGold
+	end
+
+	if goldRound > 0 then
+		PlayerResource:ModifyGold(pID, goldRound, reliable, reason)
+		local hero = PlayerResource:GetPlayer(pID):GetAssignedHero()
+		--PopupNumbers(hero, PATTACH_ABSORIGIN_FOLLOW, "gold", Vector(255, 200, 33), 2.0, goldRound, POPUP_SYMBOL_PRE_PLUS, nil, pID)
+	end
+end
+
+
+function CHoldoutGameMode:HeroAddExperience(hero, amount, nReason, bApplyBotDifficultyScaling, bIncrementTotal)
+	if not hero:IsRealHero() then
+		return
+	end
+
+	local xpRound = math.floor(amount)
+	local xpFloat = amount - xpRound
+	local pendingXp = 0
+
+	hero.XpPending = hero.XpPending + xpFloat
+
+	if hero.XpPending >= 1 then
+		pendingXp = math.floor(hero.XpPending)
+		hero.XpPending = hero.XpPending - pendingXp
+		xpRound = xpRound + pendingXp
+	end
+
+	if xpRound > 0 then
+		hero:AddExperience(xpRound, nReason, bApplyBotDifficultyScaling, bIncrementTotal)
+		--PopupNumbers(hero, PATTACH_ABSORIGIN_FOLLOW, "crit", Vector(127, 0, 255), 3.0, xpRound, POPUP_SYMBOL_PRE_PLUS, nil, pID)
+
+		if GameRules:GetGameTime() >= hero.ShowExperienceNextUpdate or GameRules:GetGameTime() >= hero.ShowExperienceNextUpdateDelay then
+			hero.ShowExperienceNextUpdateDelay = GameRules:GetGameTime() + INTERVALL_SHOW_EXPERIENCE_MAX
+			self:ExperiencePopup(hero)
+		end
+
+		hero.ShowExperienceNextUpdate = GameRules:GetGameTime() + INTERVALL_SHOW_EXPERIENCE_MIN
+		hero.ShowExperiencePool = hero.ShowExperiencePool + xpRound
+	end
+end
+
+
 
 
 function CHoldoutGameMode:ExperiencePopup(hero)
@@ -1116,11 +1203,19 @@ function CHoldoutGameMode:OnHeroInGame( hero )
 	hero.PredictMovement = hero:GetAbsOrigin()
 	hero.LastPosition = hero:GetAbsOrigin()
 	hero.LastPredictAngle = 0
+	hero.XpPending = 0
 	print(hero.MoveOrder)
 	--DebugDrawText(hero.MoveOrder, "worked", true, 7.0)
 
 	local nPlayerID = hero:GetPlayerOwnerID()
 	self:_SpawnHeroClientEffects( hero, nPlayerID )
+
+	if self._vPlayerStats[nPlayerID] == nil then
+		self._vPlayerStats[nPlayerID] =
+		{
+			GoldFloat = 0,
+		}
+	end
 
 	table.insert(self._vHeroes, hero)
 end

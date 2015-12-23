@@ -8,9 +8,6 @@ if CHoldoutGameRound == nil then
 	CHoldoutGameRound = class({})
 end
 
-INTERVALL_SHOW_EXPERIENCE_MIN = 2.0
-INTERVALL_SHOW_EXPERIENCE_MAX = 7.0
-
 XP_BUFFER_PCT = 0.1
 GOLD_BUFFER_PCT = 0.1
 
@@ -442,11 +439,11 @@ function CHoldoutGameRound:OnEntityKilled( event )
 		self:_CheckForGoldBagDrop( killedUnit )
 		self._gameMode:CheckForLootItemDrop( killedUnit )
 
-		local xpGain = Assert(killedUnit.RewardXP)
+		local xpGain = killedUnit.RewardXP or 0
 		--print(string.format("xpGain = %d", xpGain))
-		local goldGain = Assert(killedUnit.RewardGold)
+		local goldGain = killedUnit.RewardGold or 0
 		--print(string.format("goldGain = %d", goldGain))
-		local bGoal = killedUnit.EnteredGoal
+		local bGoal = killedUnit.EnteredGoal or false
 
 		----print(string.format("enteredGoal = %d", bGoal))
 		if bGoal then
@@ -473,7 +470,7 @@ function CHoldoutGameRound:OnEntityKilled( event )
 		end
 
 		for _, hero in pairs(self._gameMode._vHeroes) do
-			if xpGain > 0 then
+			--[[if xpGain > 0 then
 				--print(xpGain)
 				
 				if GameRules:GetGameTime() >= hero.ShowExperienceNextUpdate or GameRules:GetGameTime() >= hero.ShowExperienceNextUpdateDelay then
@@ -483,12 +480,16 @@ function CHoldoutGameRound:OnEntityKilled( event )
 
 				hero.ShowExperienceNextUpdate = GameRules:GetGameTime() + INTERVALL_SHOW_EXPERIENCE_MIN
 
-				hero:AddExperience(xpGain, DOTA_ModifyXP_CreepKill, true, false)
+				self._gameMode:HeroAddExperience(hero, xpGain, DOTA_ModifyXP_CreepKill, true, false)
 				--DebugDrawText(hero:GetAbsOrigin(), string.format(xpGain), true, 0.5)
 				--AddExperience(float amount, int nReason, bool bApplyBotDifficultyScaling, bool bIncrementTotal)
 				hero.ShowExperiencePool = hero.ShowExperiencePool + xpGain
 				--print(xpGain)
-			end
+			end]]
+
+			--print(string.format("goldgain: %f", goldGain))
+
+			self._gameMode:HeroAddExperience(hero, xpGain, DOTA_ModifyXP_CreepKill, true, false)
 
 			if goldGain > 0 then
 
@@ -497,8 +498,10 @@ function CHoldoutGameRound:OnEntityKilled( event )
 				if attackerUnit == nil or hero ~= attackerUnit then
 					goldModifier = goldGain * 0.33
 				end
+
+				self._gameMode:PlayerModifyGold(hero:GetPlayerOwnerID(), goldModifier, true, DOTA_ModifyGold_CreepKill)
 				
-				PlayerResource:ModifyGold(hero:GetPlayerOwnerID(), goldModifier, true, DOTA_ModifyGold_CreepKill)
+				--goldAdd = goldRound + pendingGoldPlayerResource:ModifyGold(hero:GetPlayerOwnerID(), goldModifier, true, DOTA_ModifyGold_CreepKill)
 
 				local goldFx = ParticleManager:CreateParticle("particles/econ/items/alchemist/alchemist_midas_knuckles/alch_knuckles_lasthit_coins.vpcf", PATTACH_ABSORIGIN_FOLLOW, hero)
 				ParticleManager:ReleaseParticleIndex( goldFx )

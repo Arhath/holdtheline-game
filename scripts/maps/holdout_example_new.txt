@@ -126,7 +126,7 @@
 		"UnitMelee_1" // Duration 12s 
 		{
 			"PackName"				"pack1"
-			"TotalPacksToSpawn"		"100"
+			"TotalPacksToSpawn"		"20"
 			"SpawnInterval"			"5"
 			"SpawnerName"			"left"
 		}
