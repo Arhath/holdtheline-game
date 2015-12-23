@@ -80,20 +80,20 @@ function CHoldoutGameRound:ReadConfiguration( kv, gameMode, roundNumber )
 
 		for str, pack in pairs( kv["Packs"] ) do
 			self._vPacks[str] = pack
-			print(str)
+			--print(str)
 			for s, p in pairs(pack) do
-				print(s)
-				print("npc: " .. p["NPCName"])
-				print( "value: " .. p["CoreValue"])
-				print("count: " .. p["UnitsPerSpawn"])
+			--	print(s)
+				--print("npc: " .. p["NPCName"])
+				--print( "value: " .. p["CoreValue"])
+				--print("count: " .. p["UnitsPerSpawn"])
 			end
 
-			print(self:PackGetUnitCount(str))
-			print(self:PackGetValue(str))
+			--print(self:PackGetUnitCount(str))
+			--print(self:PackGetValue(str))
 		end
 
-		print("asd")
-		print(self:PackGetUnitCount("1"))
+		--print("asd")
+		--print(self:PackGetUnitCount("1"))
 
 		--init spawners
 

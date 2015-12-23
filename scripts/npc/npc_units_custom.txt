@@ -1957,7 +1957,7 @@
 	"npc_dota_creature_basic_zombie_exploding"
 	{
 		// General
-		//
+
 		"BaseClass"					"npc_dota_creature"	// Class of entity of link to.
 		"Model"						"models/heroes/undying/undying_minion.vmdl"	// Model.
 		"SoundSet"					"Undying_Zombie"					// Name of sound set.
@@ -2070,7 +2070,7 @@
 	{
 		"vscripts"					"ai/ability_system.lua"
 		// General
-		//
+
 		"BaseClass"					"npc_dota_creature"	// Class of entity of link to.
 		"Model"						"models/heroes/undying/undying.vmdl"	// Model.
 		"SoundSet"					"Undying_Zombie"					// Name of sound set.
@@ -5331,6 +5331,8 @@
 	{
 		// General
 		//
+		"vscripts"	"ai/ability_system.lua"
+
 		"BaseClass"					"npc_dota_creature"	// Class of entity of link to.
 		"Model"						"models/creeps/neutral_creeps/n_creep_satyr_c/n_creep_satyr_c.vmdl"	// Model.
 		"SoundSet"					"Creep_Bad_Melee"					// Name of sound set.
@@ -6031,6 +6033,8 @@
 	{										
 		// General
 		//----------------------------------------------------------------
+		"vscripts"	"ai/ability_system.lua"
+
 		"Model"						"models/creeps/neutral_creeps/n_creep_kobold/kobold_a/n_creep_kobold_a.vmdl"	// Model.
 		"BaseClass"					"npc_dota_creature"
 		"SoundSet"					"n_creep_Melee"
@@ -6104,6 +6108,8 @@
 	{										
 		// General
 		//----------------------------------------------------------------
+		"vscripts"	"ai/ability_system.lua"
+
 		"Model"						"models/creeps/neutral_creeps/n_creep_centaur_med/n_creep_centaur_med.vmdl"	// Model.
 		"BaseClass"					"npc_dota_creature"
 		"SoundSet"					"n_creep_Melee"
@@ -6177,6 +6183,8 @@
 	{										
 		// General
 		//----------------------------------------------------------------
+		"vscripts"	"ai/ability_system.lua"
+
 		"Model"						"models/creeps/neutral_creeps/n_creep_centaur_lrg/n_creep_centaur_lrg.vmdl"	// Model.
 		"BaseClass"					"npc_dota_creature"
 		"SoundSet"					"n_creep_Melee"
@@ -6250,6 +6258,8 @@
 	{										
 		// General
 		//----------------------------------------------------------------
+		"vscripts"	"ai/ability_system.lua"
+
 		"Model"						"models/creeps/neutral_creeps/n_creep_ghost_b/n_creep_ghost_b.vmdl"	// Model.
 		"BaseClass"					"npc_dota_creature"
 		"SoundSet"					"n_creep_Melee"
@@ -6323,6 +6333,8 @@
 	{										
 		// General
 		//----------------------------------------------------------------
+		"vscripts"	"ai/ability_system.lua"
+
 		"Model"						"models/creeps/neutral_creeps/n_creep_beast/n_creep_beast.vmdl"	// Model.
 		"BaseClass"					"npc_dota_creature"
 		"SoundSet"					"n_creep_Melee"
@@ -6396,6 +6408,8 @@
 	{										
 		// General
 		//----------------------------------------------------------------
+		"vscripts"	"ai/ability_system.lua"
+
 		"Model"						"models/creeps/neutral_creeps/n_creep_furbolg/n_creep_furbolg_disrupter.vmdl"	// Model.
 		"BaseClass"					"npc_dota_creature"
 		"SoundSet"					"n_creep_Melee"
@@ -6469,6 +6483,8 @@
 	{										
 		// General
 		//----------------------------------------------------------------
+		"vscripts"	"ai/ability_system.lua"
+
 		"Model"						"models/creeps/neutral_creeps/n_creep_golem_b/n_creep_golem_b.vmdl"	// Model.
 		"BaseClass"					"npc_dota_creature"
 		"SoundSet"					"n_creep_Melee"
@@ -6543,6 +6559,8 @@
 	{										
 		// General
 		//----------------------------------------------------------------
+		"vscripts"	"ai/ability_system.lua"
+
 		"Model"						"models/creeps/neutral_creeps/n_creep_golem_b/n_creep_golem_b.vmdl"	// Model.
 		"BaseClass"					"npc_dota_creature"
 		"SoundSet"					"n_creep_Melee"
@@ -6617,6 +6635,8 @@
 	{										
 		// General
 		//----------------------------------------------------------------
+		"vscripts"	"ai/ability_system.lua"
+
 		"Model"						"models/heroes/doom/doom.vmdl"	// Model.
 		"BaseClass"					"npc_dota_creature"
 		"SoundSet"					"Hero_DoomBringer"													// Name of sound set.
@@ -6692,6 +6712,8 @@
 	{										
 		// General
 		//----------------------------------------------------------------
+		"vscripts"	"ai/ability_system.lua"
+
 		"Model"						"models/creeps/neutral_creeps/n_creep_ogre_med/n_creep_ogre_med.vmdl"	// Model.
 		"BaseClass"					"npc_dota_creature"
 		"SoundSet"					"n_creep_Melee"
@@ -6765,6 +6787,8 @@
 	{										
 		// General
 		//----------------------------------------------------------------
+		"vscripts"	"ai/ability_system.lua"
+
 		"Model"						"models/creeps/neutral_creeps/n_creep_ogre_lrg/n_creep_ogre_lrg.vmdl"	// Model.
 		"BaseClass"					"npc_dota_creature"
 		"SoundSet"					"n_creep_Melee"
@@ -6838,6 +6862,8 @@
 	{										
 		// General
 		//----------------------------------------------------------------
+		"vscripts"	"ai/ability_system.lua"
+
 		"Model"						"models/creeps/neutral_creeps/n_creep_worg_small/n_creep_worg_small.vmdl"	// Model.
 		"BaseClass"					"npc_dota_creature"
 		"SoundSet"					"n_creep_Melee"
@@ -6911,6 +6937,8 @@
 	{										
 		// General
 		//----------------------------------------------------------------
+		"vscripts"	"ai/ability_system.lua"
+
 		"Model"						"models/creeps/neutral_creeps/n_creep_worg_large/n_creep_worg_large.vmdl"	// Model.
 		"BaseClass"					"npc_dota_creature"
 		"SoundSet"					"n_creep_Melee"
@@ -6980,15 +7008,17 @@
 //=================================================================================
 // Neutral: Vulture
 //=================================================================================
-	"npc_dota_wildkin"
+	"wildkin"
 	{										
 		// General
 		//----------------------------------------------------------------
+		"vscripts"					"ai/ability_system.lua"
+
 		"Model"						"models/creeps/neutral_creeps/n_creep_vulture_b/n_creep_vulture_b.vmdl"	// Model.
 		"BaseClass"					"npc_dota_creature"
 		"SoundSet"					"n_creep_Melee"
 		"Level"						"1"
-		"ModelScale" 					".80"
+		"ModelScale" 				".80"
 		"IsNeutralUnitType"			"1"
 
 		// Abilities
@@ -7053,10 +7083,12 @@
 //=================================================================================
 // Neutral: Enraged Vulture
 //=================================================================================
-	"npc_dota_enraged_wildkin"
+	"enraged_wildkin"
 	{										
 		// General
 		//----------------------------------------------------------------
+		"vscripts"					"ai/ability_system.lua"
+
 		"Model"						"models/creeps/neutral_creeps/n_creep_vulture_a/n_creep_vulture_a.vmdl"	// Model.
 		"BaseClass"					"npc_dota_creature"
 		"SoundSet"					"n_creep_Melee"
@@ -7126,10 +7158,12 @@
 //=================================================================================
 // Neutral: Satyr Soulstealer
 //=================================================================================
-	"npc_dota_satyr_soulstealer"
+	"satyr_soulstealer"
 	{										
 		// General
 		//----------------------------------------------------------------
+		"vscripts"					"ai/ability_system.lua"
+
 		"Model"						"models/creeps/neutral_creeps/n_creep_satyr_c/n_creep_satyr_c.vmdl"	// Model.
 		"BaseClass"					"npc_dota_creature"
 		"SoundSet"					"n_creep_Melee"
@@ -7199,10 +7233,12 @@
 //=================================================================================
 // Neutral: Satyr Hellcaller
 //=================================================================================
-	"npc_dota_satyr_hellcaller"
+	"satyr_hellcaller"
 	{										
 		// General
 		//----------------------------------------------------------------
+		"vscripts"					"ai/ability_system.lua"
+
 		"Model"						"models/creeps/neutral_creeps/n_creep_satyr_a/n_creep_satyr_a.vmdl"	// Model.
 		"BaseClass"					"npc_dota_creature"
 		"SoundSet"					"n_creep_Melee"
@@ -8156,10 +8192,12 @@
 //=================================================================================	
 // Neutral: Satyr Trickster
 //=================================================================================
-	"npc_dota_satyr_trickster"	
+	"satyr_trickster"	
 	{
 		// General
 		//----------------------------------------------------------------
+		"vscripts"	"ai/ability_system.lua"
+
 		"Model"						"models/creeps/neutral_creeps/n_creep_satyr_b/n_creep_satyr_b.vmdl"	// Model.
 		"BaseClass"					"npc_dota_creature"
 		"SoundSet"					"n_creep_Ranged"

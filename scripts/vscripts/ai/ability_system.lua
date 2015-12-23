@@ -27,6 +27,8 @@ local UTILITY_TYPE_OBSTRUCTION = 3
 
 function Spawn( entityKeyValues )
 
+	print("SPAWning")
+
 	behaviorSystem = AICore:CreateBehaviorSystem( { BehaviorMovementSystem, BehaviorAbility } )
 
 	Timers:CreateTimer(2, function()
@@ -101,7 +103,7 @@ end
 BehaviorAbility = {}
 
 function BehaviorAbility:Evaluate()
-	----print("abilityealuate")
+	print("abilityealuate")
 	self.ID = 7
 
 	self.unit = thisEntity
@@ -499,24 +501,24 @@ function BehaviorAbility:Evaluate()
 					if value > bestValue then
 						bestValue = value
 						bestAbility = ability
-						----print("setting best ability")
+						print("setting best ability")
 					end
 				end
 			end
 		end
 	end
 
-	----print(string.format("value: %f", bestValue))
+	print(string.format("value: %f", bestValue))
 	local desire = 0
 
 	if bestAbility ~= nil then
-		----print("found best ability")
+		print("found best ability")
 
 		self.ability = bestAbility
 		desire = bestValue
 
 		if position ~= nil then
-			----print("setting point order")	
+			print("setting point order")	
 
 			self.order =
 			{
@@ -528,7 +530,7 @@ function BehaviorAbility:Evaluate()
 		end
 
 		if target ~= nil then
-			----print("setting target order")	
+			print("setting target order")	
 
 			self.order =
 			{
@@ -540,7 +542,7 @@ function BehaviorAbility:Evaluate()
 		end
 
 		if target == nil and position == nil then
-			----print("setting no target order")	
+			print("setting no target order")	
 
 			self.order =
 			{
@@ -549,7 +551,7 @@ function BehaviorAbility:Evaluate()
 				AbilityIndex = self.ability:entindex()
 			}
 		end
-		------print (string.format( "Earthsplitter Desire: %d", desire))
+		--print (string.format( "Earthsplitter Desire: %d", desire))
 	end
 
 	return desire

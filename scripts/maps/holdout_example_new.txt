@@ -60,179 +60,75 @@
 			"npc_dota_creature_boss_skeleton_king_3"	"1"
 		}
 	}
-	
-	"Round1" // Kobolde - Duration 100s + 4s Break
+
+	"Round1" // Satyr
 	{
-		"round_quest_title"			"#DOTA_Holdout_Round_Kobolds_Quest_Title"
-		"round_title"				"#DOTA_Holdout_Round_Kobolds_Title"
-		"MaxGold"					"500"
-		"BagCount"					"50"
-		"BagVariance"				"30"
-		"FixedXP"					"600"
-		
-		// Stage 1 - Duration 40s ================================================
+		// Duration 60s + 30 s Break
+		"round_quest_title"			"#DOTA_Holdout_Round_BearForceOne_Quest_Title"
+		"round_title"				"#DOTA_Holdout_Round_BearForceOne_Title"
+		"MaxGold"					"3500"
+		"BagCount"					"45"
+		"BagVariance"				"100"
+		"FixedXP"					"5400"
 
 		"Packs"
 		{
-			"pack1"
+			"satyr"
 			{
-
-
 				"1"
 				{
-					"NPCName" "npc_dota_creature_kobold_tunneler"
-					"CoreValue" "1"
-					"UnitsPerSpawn" "2"
+					"NPCName"				"satyr_trickster"
+					"CoreValue" 			"1"
+					"UnitsPerSpawn"			"1"
+				}
+				"2"
+				{
+					"NPCName"				"satyr_soulstealer"
+					"CoreValue" 			"1"
+					"UnitsPerSpawn"			"1"
+				}
+				"3"
+				{
+					"NPCName"				"satyr_hellcaller"
+					"CoreValue" 			"1"
+					"UnitsPerSpawn"			"1"
+				}
+			}
+
+			"wildkin"
+			{
+				"1"
+				{
+					"NPCName"				"wildkin"
+					"CoreValue" 			"1"
+					"UnitsPerSpawn"			"1"
 				}
 
 				"2"
 				{
-					"NPCName" "npc_dota_creature_kobold_tunneler"
-					"CoreValue" "1"
-					"UnitsPerSpawn" "1"
-					"SkipSpawns"	"0"
-					"SpawnInterval" "2"
-				}
-
-				"3"
-				{
-					"NPCName" "npc_dota_creature_gnoll_assassin"
-					"CoreValue" "1"
-					"UnitsPerSpawn" "1"
-					"SkipSpawns"	"1"
-					"SpawnInterval" "2"
-				}
-
-				"4"
-				{
-					"NPCName" "npc_dota_kobold_taskmaster"
-					"CoreValue" "2"
-					"UnitsPerSpawn" "1"
-					"SkipSpawns"	"4"
-					"SpawnInterval" "7"
-				}
-
-				"5"
-				{
-					"NPCName" "npc_dota_creature_troll_healer"
-					"CoreValue" "2"
-					"UnitsPerSpawn" "1"
-					"SkipSpawns"	"9"
-					"SpawnInterval" "10"
+					"NPCName"				"enraged_wildkin"
+					"CoreValue" 			"1"
+					"UnitsPerSpawn"			"1"
 				}
 			}
 		}
 
-		"UnitMelee_1" // Duration 12s 
+		"Wave1"
 		{
-			"PackName"				"pack1"
-			"TotalPacksToSpawn"		"20"
+			"PackName"				"satyr"
+			"TotalPacksToSpawn"		"30"
 			"SpawnInterval"			"5"
 			"SpawnerName"			"left"
-		}
-	}
+		}	
 
-	"Round2" // Kobolde - Duration 100s + 4s Break
-	{
-		"round_quest_title"			"#DOTA_Holdout_Round_Kobolds_Quest_Title"
-		"round_title"				"#DOTA_Holdout_Round_Kobolds_Title"
-		"MaxGold"					"500"
-		"BagCount"					"50"
-		"BagVariance"				"30"
-		"FixedXP"					"600"
-		
-		// Stage 1 - Duration 40s ================================================
-
-		"Packs"
+		"Wave2"
 		{
-			"pack1"
-			{
-				"1"
-				{
-					"NPCName" "npc_dota_creature_kobold_tunneler"
-					"CoreValue" "1"
-					"UnitsPerSpawn" "2"
-				}
-
-				"2"
-				{
-					"NPCName" "npc_dota_creature_kobold_tunneler"
-					"CoreValue" "2"
-					"UnitsPerSpawn" "3"
-				}
-			}
-		}
-
-		"UnitMelee_1" // Duration 12s
-		{
-			"PackName"				"pack1"
-			"TotalPacksToSpawn"		"5"
-			"SpawnInterval"			"3"
+			"WaitForPack"			"Wave1"
+			"WaitForTime"			"10"
+			"PackName"				"wildkin"
+			"TotalPacksToSpawn"		"30"
+			"SpawnInterval"			"5"
 			"SpawnerName"			"left"
-		}
-	}
-
-	"Round3" // Kobolde - Duration 100s + 4s Break
-	{
-		"round_quest_title"			"#DOTA_Holdout_Round_Kobolds_Quest_Title"
-		"round_title"				"#DOTA_Holdout_Round_Kobolds_Title"
-		"MaxGold"					"500"
-		"BagCount"					"50"
-		"BagVariance"				"30"
-		"FixedXP"					"600"
-		
-		// Stage 1 - Duration 40s ================================================
-
-		"Packs"
-		{
-			"pack1"
-			{
-				"1"
-				{
-					"NPCName" "npc_dota_creature_kobold_tunneler"
-					"CoreValue" "1"
-					"UnitsPerSpawn" "3"
-				}
-
-				"2"
-				{
-					"NPCName" "npc_dota_creature_kobold_tunneler"
-					"CoreValue" "2"
-					"UnitsPerSpawn" "3"
-				}
-			}
-
-			"pack2"
-			{
-				"1"
-				{
-					"NPCName" "npc_dota_creature_kobold_tunneler"
-					"CoreValue" "1"
-					"UnitsPerSpawn" "3"
-				}
-
-				"2"
-				{
-					"NPCName" "npc_dota_creature_kobold_tunneler"
-					"CoreValue" "3"
-					"UnitsPerSpawn" "3"
-				}
-
-				"3"
-				{
-					"NPCName" "npc_dota_creature_kobold_tunneler"
-					"CoreValue" "4"
-					"UnitsPerSpawn" "3"
-				}
-			}
-		}
-
-		"UnitMelee_1" // Duration 12s
-		{
-			"PackName"				"pack2"
-			"TotalPacksToSpawn"		"5"
-			"SpawnInterval"			"3"
-			"SpawnerName"			"left"
-		}
+		}	
 	}
 }

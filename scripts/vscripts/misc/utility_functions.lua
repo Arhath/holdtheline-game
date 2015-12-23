@@ -21,6 +21,14 @@ function ApplyModifier(source, target, modifier_name, modifierArgs, overwrite)
    -- DebugDrawLine(source:GetAbsOrigin(), target:GetAbsOrigin(), 255, 255, 255, true, 10)
 end
 
+function Modulo2(a, b)
+    if b == 0 then
+        return a
+    end
+
+    return a % b
+end
+
 
 function Assert( handle )
 	if handle ~= nil then 

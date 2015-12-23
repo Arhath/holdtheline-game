@@ -203,7 +203,7 @@ function CHoldoutGameSpawner:_DoSpawn()
 
 		--spawn delayed
 
-		if self._nInterval >= unit.nDelay and ((self._nInterval - unit.nDelay) % unit.nInterval == 0) then
+		if self._nInterval >= unit.nDelay and Modulo2(math.max((self._nInterval - unit.nDelay), 0), unit.nInterval) == 0 then
 
 			if unit.szNPCClassToSpawn ~= "" then
 				self._nTimers = self._nTimers + 1
