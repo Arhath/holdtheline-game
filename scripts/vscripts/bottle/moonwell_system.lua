@@ -66,8 +66,13 @@ function CMoonwell:Think()
 		end
 
 		local dist = (e:GetAbsOrigin() - self._entMoonwell:GetAbsOrigin()):Length2D()
-		--local height = GetGroundHeight(Vector Vector_1, handle handle_2)
-		return dist <= self._fMaxDistRefill
+		local heightDiff = 0
+
+		if not self._bRefillOnHighground then
+			heightDiff = (GetGroundHeight(self._entMoonwell:GetAbsOrigin(), nil) - GetGroundHeight(e:GetAbsOrigin(), nil))
+		end
+
+		return dist <= self._fMaxDistRefill and heightDiff >= 0
 	end
 	)
 

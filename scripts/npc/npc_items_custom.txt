@@ -86,6 +86,17 @@
 				"EffectAttachType"		"follow_absorigin"
 			}
 
+			"modifier_glyph_mana_show"
+			{
+				"Passive"				"1"
+				"IsHidden"				"0"
+				"IsDebuff"				"0"
+				"TextureName"			"item_energy_booster"
+				
+				"EffectName"			"particles/generic_gameplay/rune_regen_owner.vpcf"
+				"EffectAttachType"		"follow_absorigin"
+			}
+
 
 
 			"modifier_teleport_start_fx"

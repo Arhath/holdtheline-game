@@ -18,6 +18,11 @@ GLYPH_ABILITY_ =
 	"glyph_ability_mana",
 }
 
+GLYPH_MODIFIER_SHOW_ =
+{
+	"modifier_glyph_mana_show",
+}
+
 GLYPH_MODIFIER_ =
 {
 	"modifier_glyph_mana",
@@ -145,6 +150,7 @@ end
 
 function CGlyphObj:PickUp( hero )
 	self._entOwner = hero
+	ApplyModifier(self._entOwner, self._entOwner, GLYPH_MODIFIER_SHOW_[GLYPH_BOTTLE_TYPE_[self._nType]], {Duration = -1}, true)
 end
 
 
@@ -159,6 +165,7 @@ end
 
 function CGlyphObj:Activate()
 	DebugDrawText(self._entOwner:GetAbsOrigin(), "glyph activated", true, 4)
+	self._entOwner:RemoveModifierByName(GLYPH_MODIFIER_SHOW_[GLYPH_BOTTLE_TYPE_[self._nType]])
 	
 	local teamEnemy = DOTA_TEAM_BADGUYS
 

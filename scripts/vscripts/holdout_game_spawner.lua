@@ -25,6 +25,10 @@ function CHoldoutGameSpawner:ReadConfiguration( name, kv, gameRound )
 	self._bDontOffsetSpawn = ( tonumber( kv.DontOffsetSpawn or 0 ) ~= 0 )
 
 	self._vg = {}
+	self._nTimers = 0
+	self._vUnitTables = {}
+
+	self._nInterval = 0
 end
 
 
@@ -41,6 +45,20 @@ function CHoldoutGameSpawner:PostLoad( spawnerList )
 		print ( self._szName .. " has a group with unit " .. self._szGroupWithPack .. " that is missing from the round data." )
 	elseif self._groupWithUnit then
 		table.insert( self._groupWithUnit._dependentSpawners, self )
+	end
+
+	for _, unit in pairs(self._gameRound._vPacks[self._szPackName]) do
+
+		local uTable = {}
+
+		uTable.szNPCClassToSpawn = unit["NPCName"] or ""
+		uTable.cValue = tonumber(unit["CoreValue"] or 1)
+		uTable.nSpawn = tonumber(unit["UnitsPerSpawn"] or 1)
+		uTable.fWait = tonumber(unit["WaitForTime"] or 0)
+		uTable.nInterval = tonumber(unit["SpawnInterval"] or 1)
+		uTable.nDelay = tonumber(unit["SkipSpawns"] or 0)
+
+		table.insert(self._vUnitTables, uTable)
 	end
 end
 
@@ -132,7 +150,7 @@ end
 
 
 function CHoldoutGameSpawner:IsFinishedSpawning()
-	return ( self._nTotalPacksToSpawn <= self._nPacksSpawnedThisRound ) or ( self._groupWithUnit ~= nil )
+	return (( self._nTotalPacksToSpawn <= self._nPacksSpawnedThisRound ) or ( self._groupWithUnit ~= nil )) and (self._nTimers == 0)
 end
 
 
@@ -181,48 +199,60 @@ function CHoldoutGameSpawner:_DoSpawn()
 
 	----for each unit in pack spawn units and set core values accordingly
 
-	for _, unit in pairs(self._gameRound._vPacks[self._szPackName]) do
+	for _, unit in pairs(self._vUnitTables) do
 
-		local AddCoreValue = 0
-		local szNPCClassToSpawn = unit["NPCName"]
-		local cValue = unit["CoreValue"]
-		local nSpawn = unit["UnitsPerSpawn"]
+		--spawn delayed
 
-		for n = 1, nSpawn do
+		if self._nInterval >= unit.nDelay and ((self._nInterval - unit.nDelay) % unit.nInterval == 0) then
 
-			local vSpawnLocation = vBaseSpawnLocation
-			if not self._bDontOffsetSpawn then
-				vSpawnLocation = vSpawnLocation + RandomVector( RandomFloat( 0, 200 ) )
-			end
+			if unit.szNPCClassToSpawn ~= "" then
+				self._nTimers = self._nTimers + 1
 
-			local entUnit = CreateUnitByName( szNPCClassToSpawn, vSpawnLocation, true, nil, nil, DOTA_TEAM_BADGUYS )
-			if entUnit then
-				if entUnit:IsCreature() then
-					entUnit:CreatureLevelUp( self._nCreatureLevel - 1 )
+				local spawnTimer = Timers:CreateTimer(unit.fWait, function()
+					for n = 1, unit.nSpawn do
+
+						local vSpawnLocation = vBaseSpawnLocation
+						if not self._bDontOffsetSpawn then
+							vSpawnLocation = vSpawnLocation + RandomVector( RandomFloat( 0, 200 ) )
+						end
+
+						local entUnit = CreateUnitByName( unit.szNPCClassToSpawn, vSpawnLocation, true, nil, nil, DOTA_TEAM_BADGUYS )
+						if entUnit then
+							if entUnit:IsCreature() then
+								entUnit:CreatureLevelUp( self._nCreatureLevel - 1 )
+							end
+
+							ApplyModifier(entUnit, entUnit, "modifier_nether_buff_passive", {duration=-1}, false)
+							ApplyModifier(entUnit, entUnit, "modifier_nether_buff_fx", {duration=-1}, false)
+							
+							entUnit.Holdout_CoreNum = self._gameRound._nRoundNumber
+							entUnit.CoreValue = unit.cValue 
+							entUnit:SetDeathXP(0)
+							entUnit:SetMaximumGoldBounty(0)
+							entUnit:SetBountyGain(0)
+							entUnit:SetMinimumGoldBounty(0)
+							entUnit.RewardXP = math.floor(self._gameRound:GetXPPerCoreUnit() * unit.cValue)
+							entUnit.RewardGold = math.floor(self._gameRound:GetGoldPerCoreUnit() * unit.cValue)
+
+							self._gameRound._nCoreUnitsSpawnedValue = self._gameRound._nCoreUnitsSpawnedValue + unit.cValue
+						end
+					end
+
+					if self._gameRound._entKillCountSubquest then
+						self._gameRound._entKillCountSubquest:SetTextReplaceValue( QUEST_TEXT_REPLACE_VALUE_CURRENT_VALUE, self._gameRound._nCoreUnitsSpawnedValue)
+					end
+
+					self._nTimers = self._nTimers - 1
+
+					return nil
 				end
-
-				ApplyModifier(entUnit, entUnit, "modifier_nether_buff_passive", {duration=-1}, false)
-				ApplyModifier(entUnit, entUnit, "modifier_nether_buff_fx", {duration=-1}, false)
-				
-				entUnit.Holdout_CoreNum = self._gameRound._nRoundNumber
-				entUnit.CoreValue = cValue 
-				entUnit:SetDeathXP(0)
-				entUnit:SetMaximumGoldBounty(0)
-				entUnit:SetBountyGain(0)
-				entUnit:SetMinimumGoldBounty(0)
-				entUnit.RewardXP = math.floor(self._gameRound:GetXPPerCoreUnit() * cValue)
-				entUnit.RewardGold = math.floor(self._gameRound:GetGoldPerCoreUnit() * cValue)
-
-				self._gameRound._nCoreUnitsSpawnedValue = self._gameRound._nCoreUnitsSpawnedValue + cValue
+				)
 			end
 		end
 	end
 
 	self._nPacksSpawnedThisRound = self._nPacksSpawnedThisRound + 1
-
-	if self._gameRound._entKillCountSubquest then
-		self._gameRound._entKillCountSubquest:SetTextReplaceValue( QUEST_TEXT_REPLACE_VALUE_CURRENT_VALUE, self._gameRound._nCoreUnitsSpawnedValue)
-	end
+	self._nInterval = self._nInterval + 1
 end
 
 

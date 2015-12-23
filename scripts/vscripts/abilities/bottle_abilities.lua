@@ -73,12 +73,12 @@ function bottle_health:OnSpellStart()
 	local hCaster = self:GetCaster()
 	local hTarget = self:GetCursorTarget()
 
-	if hCaster == nil or hTarget == nil then
+	if hCaster == nil or hCaster.BottleSystem == nil then
 		return
 	end
 
-	if hCaster.BottleSystem == nil then
-		return
+	if hTarget == nil then
+		hTarget = hCaster
 	end
 
 	local bUseBottle = GameRules.holdOut._bottleSystem:HeroUseBottle(hCaster, hTarget, BOTTLE_HEALTH)
@@ -130,12 +130,12 @@ function bottle_mana:OnSpellStart()
 	local hCaster = self:GetCaster()
 	local hTarget = self:GetCursorTarget()
 
-	if hCaster == nil or hTarget == nil then
+	if hCaster == nil or hCaster.BottleSystem == nil then
 		return
 	end
 
-	if hCaster.BottleSystem == nil then
-		return
+	if hTarget == nil then
+		hTarget = hCaster
 	end
 
 	local bUseBottle = GameRules.holdOut._bottleSystem:HeroUseBottle(hCaster, hTarget, BOTTLE_MANA)

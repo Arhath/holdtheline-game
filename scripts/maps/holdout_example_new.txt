@@ -76,11 +76,82 @@
 		{
 			"pack1"
 			{
+
+
 				"1"
 				{
 					"NPCName" "npc_dota_creature_kobold_tunneler"
 					"CoreValue" "1"
-					"UnitsPerSpawn" "3"
+					"UnitsPerSpawn" "2"
+				}
+
+				"2"
+				{
+					"NPCName" "npc_dota_creature_kobold_tunneler"
+					"CoreValue" "1"
+					"UnitsPerSpawn" "1"
+					"SkipSpawns"	"0"
+					"SpawnInterval" "2"
+				}
+
+				"3"
+				{
+					"NPCName" "npc_dota_creature_gnoll_assassin"
+					"CoreValue" "1"
+					"UnitsPerSpawn" "1"
+					"SkipSpawns"	"1"
+					"SpawnInterval" "2"
+				}
+
+				"4"
+				{
+					"NPCName" "npc_dota_kobold_taskmaster"
+					"CoreValue" "2"
+					"UnitsPerSpawn" "1"
+					"SkipSpawns"	"4"
+					"SpawnInterval" "7"
+				}
+
+				"5"
+				{
+					"NPCName" "npc_dota_creature_troll_healer"
+					"CoreValue" "2"
+					"UnitsPerSpawn" "1"
+					"SkipSpawns"	"9"
+					"SpawnInterval" "10"
+				}
+			}
+		}
+
+		"UnitMelee_1" // Duration 12s 
+		{
+			"PackName"				"pack1"
+			"TotalPacksToSpawn"		"100"
+			"SpawnInterval"			"5"
+			"SpawnerName"			"left"
+		}
+	}
+
+	"Round2" // Kobolde - Duration 100s + 4s Break
+	{
+		"round_quest_title"			"#DOTA_Holdout_Round_Kobolds_Quest_Title"
+		"round_title"				"#DOTA_Holdout_Round_Kobolds_Title"
+		"MaxGold"					"500"
+		"BagCount"					"50"
+		"BagVariance"				"30"
+		"FixedXP"					"600"
+		
+		// Stage 1 - Duration 40s ================================================
+
+		"Packs"
+		{
+			"pack1"
+			{
+				"1"
+				{
+					"NPCName" "npc_dota_creature_kobold_tunneler"
+					"CoreValue" "1"
+					"UnitsPerSpawn" "2"
 				}
 
 				"2"
@@ -90,44 +161,10 @@
 					"UnitsPerSpawn" "3"
 				}
 			}
-
-			"pack2"
-			{
-				"1"
-				{
-					"NPCName" "npc_dota_creature_kobold_tunneler"
-					"CoreValue" "1"
-					"UnitsPerSpawn" "3"
-				}
-
-				"2"
-				{
-					"NPCName" "npc_dota_creature_kobold_tunneler"
-					"CoreValue" "3"
-					"UnitsPerSpawn" "3"
-				}
-
-				"3"
-				{
-					"NPCName" "npc_dota_creature_kobold_tunneler"
-					"CoreValue" "4"
-					"UnitsPerSpawn" "3"
-				}
-			}
 		}
 
-		"UnitMelee_1" // Duration 12s 
+		"UnitMelee_1" // Duration 12s
 		{
-			"PackName"				"pack1"
-			"TotalPacksToSpawn"		"5"
-			"SpawnInterval"			"3"
-			"SpawnerName"			"left"
-		}
-
-		"UnitMelee_2" // Duration 12s 
-		{
-			"WaitForTime"				"5"
-			"WaitForPack"			"UnitMelee_1"
 			"PackName"				"pack1"
 			"TotalPacksToSpawn"		"5"
 			"SpawnInterval"			"3"
@@ -135,7 +172,7 @@
 		}
 	}
 
-	"Round2" // Kobolde - Duration 100s + 4s Break
+	"Round3" // Kobolde - Duration 100s + 4s Break
 	{
 		"round_quest_title"			"#DOTA_Holdout_Round_Kobolds_Quest_Title"
 		"round_title"				"#DOTA_Holdout_Round_Kobolds_Title"
@@ -192,7 +229,7 @@
 
 		"UnitMelee_1" // Duration 12s
 		{
-			"PackName"				"pack1"
+			"PackName"				"pack2"
 			"TotalPacksToSpawn"		"5"
 			"SpawnInterval"			"3"
 			"SpawnerName"			"left"

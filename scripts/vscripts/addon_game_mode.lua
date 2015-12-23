@@ -429,7 +429,6 @@ function CHoldoutGameMode:OnUnitRightClick( event )
 	--print("loc")
 	--print(mPos)
 
-
 	if unit:IsRealHero() then
 		--unit:AddExperience(100, DOTA_ModifyXP_CreepKill, true, false)
 		unit.MoveOrder = mPos

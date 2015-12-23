@@ -64,10 +64,30 @@ function CBottleSystem:Init( gameMode, team )
 	--)
 
 	Timers:CreateTimer(function()
-		
 		return self:GlyphThink()
 	end
 	)
+
+	Timers:CreateTimer(function()
+		return self:Think()
+	end
+	)
+end
+
+function CBottleSystem:Think()
+	for _, hero in pairs(self._vHeroes) do
+		if hero.BottleSystem then
+			for n = 1, 2 do
+				local reg = hero.BottleSystem[n].Reg * self:GetTickrate()
+				hero.BottleSystem[n].RegExtern = hero.BottleSystem[n].Charges - hero.BottleSystem[n].LastCharges
+				self:BottleAddCharges(hero, n, reg)
+
+				hero.BottleSystem[n].LastCharges = hero.BottleSystem[n].Charges
+			end
+		end
+	end
+
+	return self:GetTickrate()
 end
 
 --[[for _, glyph in pairs(self._vGlyphs) do
@@ -105,7 +125,7 @@ end
 
 function CBottleSystem:GlyphThink()
 	if #self._vGlyphs > 0 then
-		for _, hero in pairs(self._gameMode._vHeroes) do
+		for _, hero in pairs(self._vHeroes) do
 			if not hero:IsStunned() and hero:IsAlive() then
 				DebugDrawCircle(hero:GetAbsOrigin(), Vector(0, 255, 0), 0, 200, true, 0.25)
 				for _, glyph in pairs(self._vGlyphs) do
@@ -249,16 +269,16 @@ function CBottleSystem:HeroPickUpGlyph( hero, glyph )
 	local glyphBottle = glyph:GetBottleType()
 
 	if hero.BottleSystem[glyphBottle].Glyph == nil then
-		hero:RemoveAbility(ABILITY_[glyphBottle])
+		--hero:RemoveAbility(ABILITY_[glyphBottle])
 	else
 		hero.BottleSystem[glyphBottle].Glyph:Activate()
-		hero:RemoveAbility(GLYPH_ABILITY_[hero.BottleSystem[glyphBottle].Glyph._nType])
+		--hero:RemoveAbility(GLYPH_ABILITY_[hero.BottleSystem[glyphBottle].Glyph._nType])
 		hero.BottleSystem[glyphBottle].Glyph = nil
 	end
 
 	hero.BottleSystem[glyphBottle].Glyph = glyph
-	hero.BottleSystem[glyphBottle].Ability = hero:AddAbility(GLYPH_ABILITY_[glyph._nType])
-	hero.BottleSystem[glyphBottle].Ability:SetLevel(glyph._nLevel)
+	--hero.BottleSystem[glyphBottle].Ability = hero:AddAbility(GLYPH_ABILITY_[glyph._nType])
+	--hero.BottleSystem[glyphBottle].Ability:SetLevel(glyph._nLevel)
 	glyph:PickUp(hero)
 
 	if glyph._entItem3D ~= nil and not glyph._entItem3D:IsNull() then
@@ -296,10 +316,13 @@ function CBottleSystem:OnHeroInGame( hero )
 		--Health Bottle
 		{
 			Charges = 0,
+			LastCharges = 0,
 			ChargesMax = 100,
 			ChargesCost = 25,
 			Lvl = 1,
-			Ability = hero:AddAbility(ABILITY_[1]), -- hero:FindAbilityByName(ABILITY_[1]),
+			Ability = hero:FindAbilityByName(ABILITY_[1]), --hero:AddAbility(ABILITY_[1]),
+			Cooldown = 1,
+
 			Think = {
 				TimeLeft = 0,
 				Healing = 0,
@@ -307,17 +330,24 @@ function CBottleSystem:OnHeroInGame( hero )
 				Hps = 0,
 				Tickrate = self:GetTickrate(),
 				Timer = nil,
-
+				TimeUsed = GameRules:GetGameTime(),
 			},
+
+			UpdateTimer = nil,
 			Glyph = nil,
+			Reg = 0.5,
+			RegExtern = 0,
 		},
 		--Mana Bottle
 		{
 			Charges = 0,
+			LastCharges = 0,
 			ChargesMax = 100,
 			ChargesCost = 25,
 			Lvl = 1,
-			Ability = hero:AddAbility(ABILITY_[2]), --hero:FindAbilityByName(ABILITY_[2]), 
+			Ability = hero:FindAbilityByName(ABILITY_[2]), --hero:AddAbility(ABILITY_[2]),
+			Cooldown = 1,
+
 			Think = {
 				TimeLeft = 0,
 				Healing = 0,
@@ -325,15 +355,22 @@ function CBottleSystem:OnHeroInGame( hero )
 				Hps = 0,
 				Tickrate = self:GetTickrate(),
 				Timer = nil,
+				TimeUsed = GameRules:GetGameTime(),
 			},
+
+			UpdateTimer = nil,
 			Glyph = nil,
+			Reg = 0.5,
+			RegExtern = 0,
 		},
 		
 		BottleShop = nil
 	}
 
-	local pID = hero:GetPlayerOwnerID()
+	hero.BottleSystem[BOTTLE_HEALTH].Ability:SetLevel(1)
+	hero.BottleSystem[BOTTLE_MANA].Ability:SetLevel(1)
 
+	local pID = hero:GetPlayerOwnerID()
 	self:InitBottleShop(pID)
 	--hero.BottleSystem[1].Ability:SetLevel(4)
 	--hero.BottleSystem[2].Ability:SetLevel(4)
@@ -355,8 +392,34 @@ function CBottleSystem:HeroUpdateBottle(hero, bottle)
 	hero.BottleSystem[bottle].ChargesCost = 20 - (data[5]-1) * 2
 
 	if hero:HasAbility(ABILITY_[bottle]) then
+		local cdOld = hero.BottleSystem[bottle].Ability:GetCooldownTimeRemaining()
+		local cdNew = 0
+		--print(cdOld)
 
-		local pctCharges = hero.BottleSystem[bottle].Charges / hero.BottleSystem[bottle].ChargesMax
+		if hero.BottleSystem[bottle].Glyph == nil then
+			if hero.BottleSystem[bottle].Charges < hero.BottleSystem[bottle].ChargesCost then
+				cdNew = (hero.BottleSystem[bottle].ChargesCost - hero.BottleSystem[bottle].Charges) / hero.BottleSystem[bottle].Reg --hero.BottleSystem[bottle].RegExtern
+			elseif GameRules:GetGameTime() < hero.BottleSystem[bottle].Think.TimeUsed + hero.BottleSystem[bottle].Cooldown then
+				cdNew = hero.BottleSystem[bottle].Think.TimeUsed + hero.BottleSystem[bottle].Cooldown - GameRules:GetGameTime()
+			end
+
+			if cdOld > 0 and cdNew == 0 then
+				hero.BottleSystem[bottle].Ability:EndCooldown()
+			elseif math.abs(cdOld - cdNew) > self:GetTickrate() then
+				--print(cdOld)
+				--print(cdNew)
+				--print("starting new cooldown")
+				hero.BottleSystem[bottle].Ability:EndCooldown()
+				hero.BottleSystem[bottle].Ability:StartCooldown(cdNew)
+				--print(hero.BottleSystem[bottle].Ability:GetCooldownTimeRemaining())
+			end
+		elseif cdOld > 0 then
+			hero.BottleSystem[bottle].Ability:EndCooldown()
+			--print("ending cooldown 2")
+		end
+	end
+
+		--[[local pctCharges = hero.BottleSystem[bottle].Charges / hero.BottleSystem[bottle].ChargesMax
 
 		if hero.BottleSystem[bottle].Charges < hero.BottleSystem[bottle].ChargesCost then
 			if hero.BottleSystem[bottle].Ability:GetLevel() ~= 0 then
@@ -379,7 +442,7 @@ function CBottleSystem:HeroUpdateBottle(hero, bottle)
 				hero.BottleSystem[bottle].Ability:SetLevel(1)
 			end
 		end
-	end
+	end]]
 end
 
 
@@ -389,9 +452,10 @@ function CBottleSystem:HeroUseBottle( hero, target, bottle )
 	if hero.BottleSystem[bottle].Glyph ~= nil then
 		--print("glyph")
 		hero.BottleSystem[bottle].Glyph:Activate()
-		hero:RemoveAbility(GLYPH_ABILITY_[hero.BottleSystem[bottle].Glyph._nType])
+		--hero:RemoveAbility(GLYPH_ABILITY_[hero.BottleSystem[bottle].Glyph._nType])
 		hero.BottleSystem[bottle].Glyph = nil
-		hero.BottleSystem[bottle].Ability = hero:AddAbility(ABILITY_[bottle])
+		--hero.BottleSystem[bottle].Ability = hero:AddAbility(ABILITY_[bottle])
+		--hero.BottleSystem[bottle].Ability:SetLevel(1)
 
 		bReturn = true
 	else
@@ -399,6 +463,7 @@ function CBottleSystem:HeroUseBottle( hero, target, bottle )
 		if hero.BottleSystem[bottle].Charges >= hero.BottleSystem[bottle].ChargesCost then
 			self:BottleAddCharges(hero, bottle, -hero.BottleSystem[bottle].ChargesCost)
 			self:BottleActivate(hero, target, bottle)
+			hero.BottleSystem[bottle].Think.TimeUsed = GameRules:GetGameTime()
 			bReturn = true
 		end
 	end
