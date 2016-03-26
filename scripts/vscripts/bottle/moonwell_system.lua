@@ -96,13 +96,7 @@ function CMoonwell:RefillBottles()
 	while manaLeft > 0.01 do
 		local BottleUnits = ListFilterWithFn(self._vBottleUnits,
 										function(e)
-											if IsBottleFull(e, BOTTLE_HEALTH) and IsBottleFull(e, BOTTLE_MANA) then
-												--DebugDrawText(e:GetAbsOrigin() + Vector(0,0,200), "true", true, self._TICKRATE)
-												return false
-											else
-												--DebugDrawText(e:GetAbsOrigin() + Vector(0,0,200), "false", true, self._TICKRATE)
-												return true
-											end
+											return not IsBottleFull(e)
 										end
 										)
 		--print(#BottleUnits)
@@ -119,19 +113,7 @@ function CMoonwell:RefillBottles()
 
 				local refillAmount = refillPerUnit
 
-				local healMax = u.BottleSystem[BOTTLE_HEALTH].ChargesMax
-				local manaMax = u.BottleSystem[BOTTLE_MANA].ChargesMax
-				local sumCharges = healMax + manaMax
-
-				local healPct = healMax / sumCharges
-				local manaPct = manaMax / sumCharges
-
-				refillAmount = refillAmount - self._bottleSystem:BottleAddCharges(u, BOTTLE_HEALTH, refillAmount * healPct)
-
-				refillAmount = refillAmount - self._bottleSystem:BottleAddCharges(u, BOTTLE_MANA, refillAmount)
-
-				refillAmount = refillAmount - self._bottleSystem:BottleAddCharges(u, BOTTLE_HEALTH, refillAmount)
-
+				refillAmount = refillAmount - self._bottleSystem:BottleAddCharges(u, refillAmount)
 				--DebugDrawText(u:GetAbsOrigin() + Vector(0,0,100) , string.format(refillPerUnit - refillAmount), true, self._TICKRATE)
 
 				manaLeft = manaLeft - (refillPerUnit - refillAmount)
@@ -246,34 +228,6 @@ function CMoonwell:RemoveBottleUnit( unit )
 			--print("removing bottle unit from table")
 			table.remove(self._vBottleUnits, n)
 			break
-		end
-	end
-end
-
-
-function CMoonwell:RefillBottle(unit, trigger)
-	for _,moonwell in pairs(self._vMoonwells) do
-		if trigger:GetName() == moonwell._strTrigger then
-			--local bottle = findItemOnUnit( unit, "item_bottle", false)
-
-			if unit.BottleSystem == nil then
-				--print("bottle system not found")
-				return
-			end
-	
-			if unit.BottleSystem[1].Charges < unit.BottleSystem[1].ChargesMax then
-				----print("refreshing bottle")
-				----print(bottle:GetCurrentCharges())
-				if moonwell:GetMana() >= 20 then
-					----print("add bottle charge")
-					--bottle:SetCurrentCharges(bottle:GetCurrentCharges() + 1)
-					self._bottleSystem:BottleAddCharges(unit, BOTTLE_HEALTH, 20)
-					moonwell:AddMana(-20, true)
-					PopupNumbers(unit, PATTACH_ABSORIGIN_FOLLOW, "gold", Vector(255, 0, 255), 1.0, 1, POPUP_SYMBOL_POST_EXCLAMATION, nil, -1)
-				end
-			else
-				----print("no bottle found")
-			end
 		end
 	end
 end

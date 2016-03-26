@@ -180,6 +180,7 @@ function CBottleShop:OnSpellStart( name )
 end
 
 
+
 function CBottleShop:GetToggledState()
 	if self._shopToggleState == BOTTLE_HEALTH then
 		return BOTTLE_MANA
@@ -191,6 +192,7 @@ end
 
 function CBottleShop:GetUpgradeLevels(bottle)
 	local copy = shallowcopy(self._vAbilityLevels[bottle])
+	
 	return copy
 end
 

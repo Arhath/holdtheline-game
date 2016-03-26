@@ -71,7 +71,7 @@ function CHoldoutGameRound:ReadConfiguration( kv, gameMode, roundNumber )
 	if self:IsBoss() then
 		self._bossHandler = CBossHandler()
 		self._bossHandler:Init(self, self._nBoss)
-		print("is boss init")
+		--print("is boss init")
 	else
 
 		--init Packs
@@ -144,10 +144,10 @@ function CHoldoutGameRound:ReadConfiguration( kv, gameMode, roundNumber )
 		end
 
 		for _, spawner in pairs( self._vSpawners ) do
-			print(string.format("name: " .. spawner._szName))
-			print(string.format("spawn: " .. spawner._szSpawnerName))
-			print(string.format("wait: " .. spawner._szWaitForPack))
-			print(string.format("group: " .. spawner._szGroupWithPack))
+			--print(string.format("name: " .. spawner._szName))
+			--print(string.format("spawn: " .. spawner._szSpawnerName))
+			--print(string.format("wait: " .. spawner._szWaitForPack))
+			--print(string.format("group: " .. spawner._szGroupWithPack))
 
 
 			spawner:PostLoad( self._vSpawners )
@@ -188,10 +188,9 @@ end
 function CHoldoutGameRound:Prepare()
 	if self:IsBoss() then
 		self._bossHandler:Prepare()
-		
-		print("prepare boss")
+		--print("prepare boss")
 	end
-	print("prepare round")
+	--print("prepare round")
 	self._gameMode._flPrepTimeBetweenRounds = self._flPrepTime
 end
 
@@ -207,7 +206,7 @@ end
 function CHoldoutGameRound:UpdateBossDifficulty()
 	if self:IsBoss() then
 		self._bossHandler:UpdateBossDifficulty()
-		print("update boss difficulty")
+		--print("update boss difficulty")
 	end
 end
 

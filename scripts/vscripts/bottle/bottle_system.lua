@@ -19,10 +19,7 @@ MODIFIER_FX_ = {
 	"modifier_bottle_mana_fx",
 }
 
-MODIFIER_STACKS_ = {
-	"modifier_bottle_health_stacks",
-	"modifier_bottle_mana_stacks",
-}
+MODIFIER_CHARGES = "modifier_bottle_charges"
 
 MODIFIER_APPLIER_ = {
 	"item_bottle_health_applier",
@@ -37,6 +34,10 @@ ABILITY_ = {
 BOTTLE_HEALTH_DURATION_BASE = 4.0
 BOTTLE_MANA_DURATION_BASE = 4.0
 GLYPH_EXPIRE_TIME = 90.0
+
+BOTTLE_CHARGES_MAX_START = 100
+
+BOTTLE_COST_START = 20
 
 
 function CBottleSystem:Init( gameMode, team )
@@ -77,13 +78,9 @@ end
 function CBottleSystem:Think()
 	for _, hero in pairs(self._vHeroes) do
 		if hero.BottleSystem then
-			for n = 1, 2 do
-				local reg = hero.BottleSystem[n].Reg * self:GetTickrate()
-				hero.BottleSystem[n].RegExtern = hero.BottleSystem[n].Charges - hero.BottleSystem[n].LastCharges
-				self:BottleAddCharges(hero, n, reg)
-
-				hero.BottleSystem[n].LastCharges = hero.BottleSystem[n].Charges
-			end
+			local reg = hero.BottleSystem.Reg * self:GetTickrate()
+			hero.BottleSystem.RegExtern = hero.BottleSystem.Charges - hero.BottleSystem.LastCharges
+			self:BottleAddCharges(hero, reg)
 		end
 	end
 
@@ -300,10 +297,8 @@ function CBottleSystem:OnHeroSpawned( hero )
 		self._vBottleShops[pID]:AddHero(hero)
 	end
 
-	for i = 1, 2 do
-		ApplyModifier(hero, hero, MODIFIER_STACKS_[i], {duration=-1})
-		self:BottleAddCharges(hero, i, hero.BottleSystem[i].ChargesMax)
-	end
+	ApplyModifier(hero, hero, MODIFIER_CHARGES, {duration=-1})
+	self:BottleAddCharges(hero, hero.BottleSystem.ChargesMax)
 end
 
 
@@ -314,17 +309,15 @@ function CBottleSystem:OnHeroInGame( hero )
 
 	hero.BottleSystem = {
 		--Health Bottle
-		{
-			Charges = 0,
+		[BOTTLE_HEALTH] = {
 			LastCharges = 0,
-			ChargesMax = 100,
-			ChargesCost = 25,
+			ChargesCost = BOTTLE_COST_START,
 			Lvl = 1,
 			Ability = hero:FindAbilityByName(ABILITY_[1]), --hero:AddAbility(ABILITY_[1]),
 			Cooldown = 1,
 
 			Think = {
-				TimeLeft = 0,
+				Expire = 0,
 				Healing = 0,
 				HealInstant = 0,
 				Hps = 0,
@@ -335,24 +328,21 @@ function CBottleSystem:OnHeroInGame( hero )
 
 			UpdateTimer = nil,
 			Glyph = nil,
-			Reg = 0.5,
-			RegExtern = 0,
 		},
 		--Mana Bottle
-		{
-			Charges = 0,
+		[BOTTLE_MANA] = {
 			LastCharges = 0,
-			ChargesMax = 100,
-			ChargesCost = 25,
+			ChargesCost = BOTTLE_COST_START,
 			Lvl = 1,
 			Ability = hero:FindAbilityByName(ABILITY_[2]), --hero:AddAbility(ABILITY_[2]),
 			Cooldown = 1,
 
 			Think = {
-				TimeLeft = 0,
+				Duration = 0,
 				Healing = 0,
 				HealInstant = 0,
 				Hps = 0,
+				Expire = 0,
 				Tickrate = self:GetTickrate(),
 				Timer = nil,
 				TimeUsed = GameRules:GetGameTime(),
@@ -360,11 +350,15 @@ function CBottleSystem:OnHeroInGame( hero )
 
 			UpdateTimer = nil,
 			Glyph = nil,
-			Reg = 0.5,
-			RegExtern = 0,
 		},
-		
-		BottleShop = nil
+
+		ChargesMax = BOTTLE_CHARGES_MAX_START,
+		Charges = 0,
+
+		Reg = 0.5,
+		RegExtern = 0,
+
+		BottleShop = nil,
 	}
 
 	hero.BottleSystem[BOTTLE_HEALTH].Ability:SetLevel(1)
@@ -388,8 +382,8 @@ function CBottleSystem:HeroUpdateBottle(hero, bottle)
 
 	local data = hero.BottleSystem.BottleShop:GetUpgradeLevels(bottle)
 
-	hero.BottleSystem[bottle].ChargesMax = 100 + (data[6]-1) * 10
-	hero.BottleSystem[bottle].ChargesCost = 20 - (data[5]-1) * 2
+	hero.BottleSystem.ChargesMax = BOTTLE_CHARGES_MAX_START + (data[6]-1) * 10
+	hero.BottleSystem[bottle].ChargesCost = BOTTLE_COST_START - (data[5]-1) * 2
 
 	if hero:HasAbility(ABILITY_[bottle]) then
 		local cdOld = hero.BottleSystem[bottle].Ability:GetCooldownTimeRemaining()
@@ -397,8 +391,8 @@ function CBottleSystem:HeroUpdateBottle(hero, bottle)
 		--print(cdOld)
 
 		if hero.BottleSystem[bottle].Glyph == nil then
-			if hero.BottleSystem[bottle].Charges < hero.BottleSystem[bottle].ChargesCost then
-				cdNew = (hero.BottleSystem[bottle].ChargesCost - hero.BottleSystem[bottle].Charges) / hero.BottleSystem[bottle].Reg --hero.BottleSystem[bottle].RegExtern
+			if hero.BottleSystem.Charges < hero.BottleSystem[bottle].ChargesCost then
+				cdNew = (hero.BottleSystem[bottle].ChargesCost - hero.BottleSystem.Charges) / hero.BottleSystem.Reg --hero.BottleSystem[bottle].RegExtern
 			elseif GameRules:GetGameTime() < hero.BottleSystem[bottle].Think.TimeUsed + hero.BottleSystem[bottle].Cooldown then
 				cdNew = hero.BottleSystem[bottle].Think.TimeUsed + hero.BottleSystem[bottle].Cooldown - GameRules:GetGameTime()
 			end
@@ -417,32 +411,13 @@ function CBottleSystem:HeroUpdateBottle(hero, bottle)
 			hero.BottleSystem[bottle].Ability:EndCooldown()
 			--print("ending cooldown 2")
 		end
+
+		local charges = math.floor(hero.BottleSystem.Charges / hero.BottleSystem[bottle].ChargesCost)
+
+		hero.BottleSystem[bottle].Ability.level = charges
+
+		--print(string.format("abilitylevel: %f", hero.BottleSystem[bottle].Ability.level))
 	end
-
-		--[[local pctCharges = hero.BottleSystem[bottle].Charges / hero.BottleSystem[bottle].ChargesMax
-
-		if hero.BottleSystem[bottle].Charges < hero.BottleSystem[bottle].ChargesCost then
-			if hero.BottleSystem[bottle].Ability:GetLevel() ~= 0 then
-				hero.BottleSystem[bottle].Ability:SetLevel(0)
-			end
-		elseif pctCharges >= 1 then
-			if hero.BottleSystem[bottle].Ability:GetLevel() ~= 4 then
-				hero.BottleSystem[bottle].Ability:SetLevel(4)
-			end
-		elseif pctCharges >= 0.75 then
-				if hero.BottleSystem[bottle].Ability:GetLevel() ~= 3 then
-				hero.BottleSystem[bottle].Ability:SetLevel(3)
-			end
-		elseif pctCharges >= 0.5 then
-			if hero.BottleSystem[bottle].Ability:GetLevel() ~= 2 then
-				hero.BottleSystem[bottle].Ability:SetLevel(2)
-			end
-		elseif pctCharges >= 0.25 then
-			if hero.BottleSystem[bottle].Ability:GetLevel() ~= 1 then
-				hero.BottleSystem[bottle].Ability:SetLevel(1)
-			end
-		end
-	end]]
 end
 
 
@@ -460,8 +435,8 @@ function CBottleSystem:HeroUseBottle( hero, target, bottle )
 		bReturn = true
 	else
 		--print("no glyph")
-		if hero.BottleSystem[bottle].Charges >= hero.BottleSystem[bottle].ChargesCost then
-			self:BottleAddCharges(hero, bottle, -hero.BottleSystem[bottle].ChargesCost)
+		if hero.BottleSystem.Charges >= hero.BottleSystem[bottle].ChargesCost then
+			self:BottleAddCharges(hero, -hero.BottleSystem[bottle].ChargesCost)
 			self:BottleActivate(hero, target, bottle)
 			hero.BottleSystem[bottle].Think.TimeUsed = GameRules:GetGameTime()
 			bReturn = true
@@ -489,30 +464,31 @@ end
 function CBottleSystem:BottleCalcThink( hero, bottle )
 	local data = hero.BottleSystem.BottleShop:GetUpgradeLevels(bottle)
 
+	local healTime = 0
+	local healPct = 0
+	local healPctInstant = 0
+	local hps = 0
+
 	if bottle == BOTTLE_HEALTH then
 
-		local healTime = 		BOTTLE_HEALTH_DURATION_BASE + 1 * ( data[3] - 1 )
-		local healPct = 		( 0.3 + ( data[1] - 1 ) * 0.1 ) * healTime / BOTTLE_HEALTH_DURATION_BASE
-		local healPctInstant = 	(0.2 + ( data[2] - 1 ) * 0.05 ) * healPct
-		local hps =				1 + ( data[4] - 1 ) * 0.1
-
-		hero.BottleSystem[bottle].Think.HealInstant = healPctInstant
-		hero.BottleSystem[bottle].Think.Healing = healPct * hps
-		hero.BottleSystem[bottle].Think.TimeLeft = healTime
-		hero.BottleSystem[bottle].Think.Hps = hero.BottleSystem[bottle].Think.Healing / healTime
+		healTime = 			BOTTLE_HEALTH_DURATION_BASE + 1 * ( data[3] - 1 )
+		healPct = 			( 0.3 + ( data[1] - 1 ) * 0.1 ) * healTime / BOTTLE_HEALTH_DURATION_BASE
+		healPctInstant = 	(0.2 + ( data[2] - 1 ) * 0.05 ) * healPct
+		hps =				1 + ( data[4] - 1 ) * 0.1
 
 	elseif bottle == BOTTLE_MANA then
 
-		local healTime = 		BOTTLE_MANA_DURATION_BASE + 1 * ( data[3] - 1 )
-		local healPct = 		( 0.3 + ( data[1] - 1 ) * 0.1 ) * healTime / BOTTLE_MANA_DURATION_BASE
-		local healPctInstant = 	(0.2 + ( data[2] - 1 ) * 0.05) * healPct
-		local hps =				1 + ( data[4] - 1 ) * 0.1
-
-		hero.BottleSystem[bottle].Think.HealInstant = healPctInstant
-		hero.BottleSystem[bottle].Think.Healing = healPct * hps
-		hero.BottleSystem[bottle].Think.TimeLeft = healTime
-		hero.BottleSystem[bottle].Think.Hps = hero.BottleSystem[bottle].Think.Healing / healTime
+		healTime = 			BOTTLE_MANA_DURATION_BASE + 1 * ( data[3] - 1 )
+		healPct = 			( 0.3 + ( data[1] - 1 ) * 0.1 ) * healTime / BOTTLE_MANA_DURATION_BASE
+		healPctInstant = 	(0.2 + ( data[2] - 1 ) * 0.05) * healPct
+		hps =				1 + ( data[4] - 1 ) * 0.1
 	end
+
+	hero.BottleSystem[bottle].Think.HealInstant = healPctInstant
+	hero.BottleSystem[bottle].Think.Healing = healPct * hps
+	hero.BottleSystem[bottle].Think.Duration = healTime
+	hero.BottleSystem[bottle].Think.Hps = hero.BottleSystem[bottle].Think.Healing / healTime
+	hero.BottleSystem[bottle].Think.Expire = GameRules:GetGameTime() + hero.BottleSystem[bottle].Think.Duration
 end
 
 
@@ -531,13 +507,13 @@ function CBottleSystem:BottleActivate(hero, target, bottle)
 	end
 
 	self:HeroBottleHeal(target, bottle, heal)
-	DebugDrawText(target:GetAbsOrigin() + Vector(0, 0, 450), string.format("inst: %f", heal), true, 2)
+	--DebugDrawText(target:GetAbsOrigin() + Vector(0, 0, 450), string.format("inst: %f", heal), true, 2)
 
 	target:RemoveModifierByName(MODIFIER_[bottle])
 	target:RemoveModifierByName(MODIFIER_FX_[bottle])
 
-	ApplyModifier(hero, target, MODIFIER_[bottle], {duration=hero.BottleSystem[bottle].Think.TimeLeft})
-	ApplyModifier(hero, target, MODIFIER_FX_[bottle], {duration=hero.BottleSystem[bottle].Think.TimeLeft})
+	ApplyModifier(hero, target, MODIFIER_[bottle], {duration=hero.BottleSystem[bottle].Think.Duration})
+	ApplyModifier(hero, target, MODIFIER_FX_[bottle], {duration=hero.BottleSystem[bottle].Think.Duration})
 
 	local timerID = DoUniqueString('bottle')
 	target.BottleSystem[bottle].Think.Timer = timerID
@@ -552,7 +528,7 @@ function CBottleSystem:BottleThink( hero, target, bottle, timer )
 		return nil
 	end
 
-	if hero.BottleSystem[bottle].Think.TimeLeft > 0 then
+	if hero.BottleSystem[bottle].Think.Expire >= GameRules:GetGameTime() then
 
 		local heal = hero.BottleSystem[bottle].Think.Hps
 
@@ -564,12 +540,14 @@ function CBottleSystem:BottleThink( hero, target, bottle, timer )
 			end
 		end
 
+		local duration = math.ceil(hero.BottleSystem[bottle].Think.Expire - GameRules:GetGameTime())
+
+		target:SetModifierStackCount(MODIFIER_[bottle], hero, duration)
+
 		heal = heal * hero.BottleSystem[bottle].Think.Tickrate
 
 		self:HeroBottleHeal(target, bottle, heal)
-		DebugDrawText(target:GetAbsOrigin()+ Vector(0, 0, 400), string.format("h: %f", heal), true, 0.2)
-
-		hero.BottleSystem[bottle].Think.TimeLeft = hero.BottleSystem[bottle].Think.TimeLeft - hero.BottleSystem[bottle].Think.Tickrate
+		--DebugDrawText(target:GetAbsOrigin()+ Vector(0, 0, 400), string.format("h: %f", heal), true, 0.2)
 
 		return hero.BottleSystem[bottle].Think.Tickrate
 	end
@@ -578,8 +556,8 @@ function CBottleSystem:BottleThink( hero, target, bottle, timer )
 end
 
 
-function IsBottleFull( hero, bottle )
-	if hero.BottleSystem[bottle].Charges == hero.BottleSystem[bottle].ChargesMax then
+function IsBottleFull(hero)
+	if hero.BottleSystem.Charges >= hero.BottleSystem.ChargesMax then
 		return true
 	else
 		return false
@@ -606,46 +584,34 @@ function CBottleSystem:HeroBottleHeal( hero, bottle, amount )
 end
 
 
-function CBottleSystem:BottleAddCharges( hero, bottle, charges)
+function CBottleSystem:BottleAddCharges( hero, charges)
 
 	if hero == nil or hero.BottleSystem == nil then
 		return 0
 	end
 
 	local chargesUsed = 0
-	local oldCharges = hero.BottleSystem[bottle].Charges
+	local oldCharges = hero.BottleSystem.Charges
 
 	if charges == 0 then
 		return 0
 	end
 
-	if charges > 0 then
-		if IsBottleFull(hero, bottle) then
-			return 0
-		end
-		if hero.BottleSystem[bottle].Charges + charges < hero.BottleSystem[bottle].ChargesMax then
-			hero.BottleSystem[bottle].Charges = hero.BottleSystem[bottle].Charges + charges
-			chargesUsed = charges
-		else
-			chargesUsed = hero.BottleSystem[bottle].ChargesMax - hero.BottleSystem[bottle].Charges
-			hero.BottleSystem[bottle].Charges = hero.BottleSystem[bottle].ChargesMax
-		end
-	else
-		if hero.BottleSystem[bottle].Charges + charges > 0 then
-			hero.BottleSystem[bottle].Charges = hero.BottleSystem[bottle].Charges + charges
-			chargesUsed = charges
-		else
-			chargesUsed = -(hero.BottleSystem[bottle].ChargesMax - hero.BottleSystem[bottle].Charges)
-			hero.BottleSystem[bottle].Charges = 0
-		end
-	end
+	local newCharges = math.max(hero.BottleSystem.Charges + charges, 0)
+	newCharges = math.min(newCharges, hero.BottleSystem.ChargesMax)
 
-	self:HeroUpdateBottle(hero, bottle)
-	
-	if math.floor(hero.BottleSystem[bottle].Charges) ~= math.floor(oldCharges) then
-		hero:SetModifierStackCount(MODIFIER_STACKS_[bottle], hero, math.floor(hero.BottleSystem[bottle].Charges))
+	chargesUsed = newCharges - hero.BottleSystem.Charges
+	hero.BottleSystem.Charges = newCharges
+	hero.BottleSystem.LastCharges = hero.BottleSystem.Charges
+
+	for n = 1, 2 do
+		self:HeroUpdateBottle(hero, n)
 	end
-	----print(string.format("charges: %f", hero.BottleSystem[bottle].Charges))
+	
+	if math.floor(hero.BottleSystem.Charges) ~= math.floor(oldCharges) then
+		hero:SetModifierStackCount(MODIFIER_CHARGES, hero, math.floor(hero.BottleSystem.Charges))
+	end
+	----print(string.format("charges: %f", hero.BottleSystem.Charges))
 	----print(string.format("refilled: %f", chargesUsed))
 	return chargesUsed
 end

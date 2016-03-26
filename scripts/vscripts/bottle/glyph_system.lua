@@ -28,6 +28,12 @@ GLYPH_MODIFIER_ =
 	"modifier_glyph_mana",
 }
 
+GLYPH_FX_BOTTLE_GLOW_ =
+{
+	"particles/customgames/capturepoints/cp_allied_fire.vpcf",
+
+}
+
 GLYPH_MODIFIER_STACKS_ =
 {
 	{
@@ -261,9 +267,13 @@ end
 
 
 function CGlyphObj:SpawnOnPosition(pos)
-	self._entItem3D = CreateItemOnPositionSync(pos, self._entGlyph)
 	self._fSpawnTime = GameRules:GetGameTime()
-	--self._entGlyph:LaunchLootInitialHeight(true, 3000, 3000, 4, pos + RandomVector( RandomFloat( 50, 200 ) ))--LaunchLoot( true, 0, 1.0, pos + RandomVector( RandomFloat( 0, 0 ) ) )
+	self._entItem3D = CreateItemOnPositionSync(pos, self._entGlyph)
+
+	local posFx = GetGroundPosition(self._entItem3D:GetAbsOrigin(), nil)
+	self._fxGlow = ParticleManager:CreateParticle(GLYPH_FX_BOTTLE_GLOW_[self._nBottleType], PATTACH_ABSORIGIN_FOLLOW, self._entItem3D)
+	ParticleManager:SetParticleControl(self._fxGlow , 0, posFx)
+	ParticleManager:ReleaseParticleIndex(self._fxGlow)
 end
 
 

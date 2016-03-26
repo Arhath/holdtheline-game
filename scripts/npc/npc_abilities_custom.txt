@@ -44,6 +44,8 @@
 		"RequiredLevel"					"1000"
 	}
 
+	
+
 	"gate_ability_fortify"
 	{
 		// General

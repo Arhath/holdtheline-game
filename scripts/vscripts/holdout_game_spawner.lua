@@ -64,11 +64,11 @@ end
 
 
 function CHoldoutGameSpawner:Precache()
-	print(self._szPackName)
-	print(self._gameRound._vPacks[self._szPackName])
-	print(self._nTotalPacksToSpawn)
-	print(self:GetTotalUnitsToSpawn())
-	print(self:GetTotalCoreValue())
+	--print(self._szPackName)
+	--print(self._gameRound._vPacks[self._szPackName])
+	--print(self._nTotalPacksToSpawn)
+	--print(self:GetTotalUnitsToSpawn())
+	--print(self:GetTotalCoreValue())
 
 	for _, n in pairs(self._gameRound._vPacks[self._szPackName]) do
 		local name = n["NPCName"]

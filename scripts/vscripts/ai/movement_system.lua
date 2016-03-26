@@ -48,6 +48,9 @@ AGGRO_OVERWRITE_NORMAL	= 1
 UPDATE_INTERVALL = 0.5
 
 UNIT_TYPE_NORMAL = 1
+UNIT_TYPE_MOVE = 2
+UNIT_TYPE_GUARD_UNIT = 3
+UNIT_TYPE_GUARD_POINT = 4
 
 
 
@@ -72,9 +75,14 @@ function CMovementSystem:OnNPCSpawned( event )
 			Type = MOVEMENT_SYSTEM_TYPE_ATTACKER,
 			UnitType = UNIT_TYPE_NORMAL,
 			NextWaypoint = nil,
+
 			TargetList = {},
 			TargetNum = 0,
 			Target = nil,
+			GuardUnit = nil,
+			GuardPoint = nil,
+			GuardRangeMove = 700,
+			GuardRangeAggro = 1500,
 			AggroType = 0,
 			IgnoreTarget = nil,
 			IgnoreTime = 0,
@@ -426,8 +434,8 @@ function CMovementSystem:Think()
 			self:UnitAggroTarget(nt, au, MAX_TARGET_TIME, 4, AGGRO_TYPE_SIGHT, AGGRO_OVERWRITE_NORMAL)
 		end
 
-		--DebugDrawText(au:GetOrigin(), string.format("Targets: %d", aggroNum), true, 0.25)
-		--DebugDrawCircle(au:GetOrigin(), Vector(0, 255, 0), 0, aggroRange, true, 0.25)
+		DebugDrawText(au:GetOrigin(), string.format("Targets: %d", aggroNum), true, 0.25)
+		DebugDrawCircle(au:GetOrigin(), Vector(0, 255, 0), 0, aggroRange, true, 0.25)
 	end
 
 	local gameTime = GameRules:GetGameTime()
@@ -458,139 +466,182 @@ function CMovementSystem:UnitThink( unit )
 		if unit.MovementSystem.State == MOVEMENT_SYSTEM_STATE_PAUSE then
 			self:UnitSetTarget(unit, nil, false)
 			unit.MovementSystem.NextWaypoint = nil
+			
+			return
+		end
+	end
+
+
+	if unit.MovementSystem.UnitType == UNIT_TYPE_MOVE then
+		self:UnitThinkMovement(unit)
+
+		return
+	end
+
+	if unit.MovementSystem.UnitType == UNIT_TYPE_GUARD_UNIT then
+		if unit.MovementSystem.Target then
+			local dist = (unit.MovementSystem.Target:GetAbsOrigin() - unit.MovementSystem.GuardUnit:GetAbsOrigin()):Length2D()
+
+			if dist >= unit.MovementSystem.GuardRangeAggro then
+				self:UnitSetTarget(unit, nil, true)
+			end
+
+			unit.MovementSystem.MoveOrder = nil
+		end
+
+		if not unit.MovementSystem.Target then
+			if unit.MovementSystem.MoveOrder then
+				local distOrder = (unit.MovementSystem.MoveOrder - unit.MovementSystem.GuardUnit:GetAbsOrigin()):Length2D()
+				if distOrder > unit.MovementSystem.GuardRangeMove then
+					unit.MovementSystem.MoveOrder = nil
+				elseif (unit.MovementSystem.MoveOrder - unit:GetAbsOrigin()):Length2D() <= unit:GetMoveSpeedModifier(unit:GetBaseMoveSpeed()) * self:GetTickrate() then
+					unit.MovementSystem.MoveOrder = nil
+				elseif (unit.MovementSystem.GuardUnit:GetAbsOrigin() - unit:GetAbsOrigin()):Length2D() > unit.MovementSystem.GuardRangeMove then
+					unit.MovementSystem.MoveOrder = nil
+				end
+			end
+
+			if not unit.MovementSystem.MoveOrder then
+				--local guardFacing = unit.MovementSystem.GuardUnit:GetAngles()
+				--guardVector = guardFacing:GetAnglesAsVector() * unit.MovementSystem.GuardUnit:GetBaseMoveSpeed() * self:GetTickrate()
+				movePos = GetRandomPointInAoe(unit.MovementSystem.GuardUnit:GetAbsOrigin(), unit.MovementSystem.GuardRangeMove) --+ guardVector
+
+				unit.MovementSystem.MoveOrder = movePos
+			end
+		end
+	end
+
+
+	if unit.MovementSystem.StuckTime >= MAX_STUCK_TIME then
+		SetPhasing(unit, 2)
+		unit.MovementSystem.StuckTime = 0
+
+		if unit.MovementSystem.OrderPosition and GridNav:FindPathLength(unit.MovementSystem.OrderPosition, unit:GetAbsOrigin()) == -1 then
+			unit.MovementSystem.OrderPosition = nil
 		end
 	else
-		if unit.MovementSystem.StuckTime >= MAX_STUCK_TIME then
-			SetPhasing(unit, 2)
+		if (unit:GetAbsOrigin() - unit.MovementSystem.LastPosition):Length() == 0 and not unit:IsStunned() and not unit:IsRooted() then
+			unit.MovementSystem.StuckTime = unit.MovementSystem.StuckTime + timePassed
+		else
 			unit.MovementSystem.StuckTime = 0
+		end
 
-			if GridNav:FindPathLength(unit.MovementSystem.OrderPosition, unit:GetAbsOrigin()) == -1 then
-				unit.MovementSystem.OrderPosition = nil
-			end
+		unit.MovementSystem.LastPosition = unit:GetAbsOrigin()
+	end
+
+	if unit.MovementSystem.IgnoreTarget then
+		if unit.MovementSystem.IgnoreTime >= MAX_TIME_IGNORE then
+			unit.MovementSystem.IgnoreTarget = nil
+			unit.MovementSystem.IgnoreTime = 0
+			--print("unignoring target")
 		else
-			if (unit:GetAbsOrigin() - unit.MovementSystem.LastPosition):Length() == 0 then
-				unit.MovementSystem.StuckTime = unit.MovementSystem.StuckTime + timePassed
-			else
-				unit.MovementSystem.StuckTime = 0
-			end
-
-			unit.MovementSystem.LastPosition = unit:GetAbsOrigin()
+			--print(string.format("ignore time: %d", unit.MovementSystem.IgnoreTime))
+			unit.MovementSystem.IgnoreTime = unit.MovementSystem.IgnoreTime + timePassed
 		end
+	end
 
-		if unit.MovementSystem.IgnoreTarget then
-			if unit.MovementSystem.IgnoreTime >= MAX_TIME_IGNORE then
-				unit.MovementSystem.IgnoreTarget = nil
-				unit.MovementSystem.IgnoreTime = 0
-				--print("unignoring target")
+	if unit.MovementSystem.Target then
+
+		if UnitIsDead(unit.MovementSystem.Target) then
+			self:UnitSetTarget(unit, nil, false)
+		else
+			if unit.MovementSystem.TargetTime >= unit.MovementSystem.MaxTargetTime then
+
+				self:UnitSetTarget(unit, nil, true)
+
+				--print("max target time reached")
+				--print("ignore unit: " .. unit.MovementSystem.IgnoreTarget:GetName())
 			else
-				--print(string.format("ignore time: %d", unit.MovementSystem.IgnoreTime))
-				unit.MovementSystem.IgnoreTime = unit.MovementSystem.IgnoreTime + timePassed
-			end
-		end
-
-		if unit.MovementSystem.Target then
-
-			if UnitIsDead(unit.MovementSystem.Target) then
-				self:UnitSetTarget(unit, nil, false)
-			else
-				if unit.MovementSystem.TargetTime >= unit.MovementSystem.MaxTargetTime then
-
-					self:UnitSetTarget(unit, nil, true)
-
-					--print("max target time reached")
-					--print("ignore unit: " .. unit.MovementSystem.IgnoreTarget:GetName())
-				else
-					if not unit:CanEntityBeSeenByMyTeam(unit.MovementSystem.Target) then
-						if unit.MovementSystem.Target:IsInvisible() then
-							self:UnitSetTarget(unit, nil, false)
-						else
-							if unit.MovementSystem.NoVisionTime >= MAX_TIME_FOLLOW_NO_VISION then
-								self:UnitSetTarget(unit, nil, true)
-							else
-								unit.MovementSystem.NoVisionTime = unit.MovementSystem.NoVisionTime + timePassed
-							end
-						end
-					else
-						unit.MovementSystem.NoVisionTime = 0
-					end
-
-
-
-					if  unit.MovementSystem.Target then
-						local posUnit = unit:GetAbsOrigin()
-						local posTarget = unit.MovementSystem.Target:GetAbsOrigin()
-						local dist = (posUnit - posTarget):Length2D()
-
-						local tAtkRange = unit.MovementSystem.Target:GetAttackRange()
-						local uAtkRange = unit:GetAttackRange()
-						--local distNav = GridNav:FindPathLength(posUnit, posTarget)
-						if tAtkRange < dist then
-							if dist > uAtkRange + MAX_DISTANCE_AGGRO then --or distNav > MAX_DISTANCE_AGGRO then
-								self:UnitSetTarget(unit, nil, true)
-							end
-						end
-					end
-
-					if  unit.MovementSystem.Target then
-
-						if unit.MovementSystem.TargetTime >= unit.MovementSystem.MinTargetTime then
-							unit.MovementSystem.CanChangeTarget = true
-						end
-
-						--print(string.format("target time: %d", unit.MovementSystem.TargetTime))
-						unit.MovementSystem.TargetTime = unit.MovementSystem.TargetTime + timePassed
-					end
-				end
-			end
-		end
-
-		if unit.MovementSystem.Target then
-			if not unit.MovementSystem.IgnoreSight then
-				if unit.MovementSystem.NoDamageTime + unit.MovementSystem.NoDamageTimeTarget > MAX_TIME_NO_DAMAGE then
-					unit.MovementSystem.IgnoreSight = true
-					unit.MovementSystem.NoDamageTime = 0
-					unit.MovementSystem.NoDamageTimeTarget = 0
-
-					if unit.MovementSystem.AggroType < AGGRO_TYPE_DAMAGE_OWN then
+				if not unit:CanEntityBeSeenByMyTeam(unit.MovementSystem.Target) then
+					if unit.MovementSystem.Target:IsInvisible() then
 						self:UnitSetTarget(unit, nil, false)
+					else
+						if unit.MovementSystem.NoVisionTime >= MAX_TIME_FOLLOW_NO_VISION then
+							self:UnitSetTarget(unit, nil, true)
+						else
+							unit.MovementSystem.NoVisionTime = unit.MovementSystem.NoVisionTime + timePassed
+						end
 					end
-				elseif unit.MovementSystem.NoDamageTimeTarget < MAX_TIME_NO_DAMAGE_TARGET then
-					unit.MovementSystem.NoDamageTimeTarget = unit.MovementSystem.NoDamageTimeTarget + math.min(timePassed, MAX_TIME_NO_DAMAGE_TARGET - unit.MovementSystem.NoDamageTimeTarget)
-				end
-			end
-		else
-			if unit.MovementSystem.IgnoreSight == true then
-				if unit.MovementSystem.NoDamageTime > MAX_TIME_IGNORE_SIGHT then
-					unit.MovementSystem.IgnoreSight = false
-					unit.MovementSystem.NoDamageTime = 0
 				else
-					unit.MovementSystem.NoDamageTime = unit.MovementSystem.NoDamageTime + timePassed
+					unit.MovementSystem.NoVisionTime = 0
 				end
-			else
-				if unit.MovementSystem.NoDamageTime > 0 then
-					unit.MovementSystem.NoDamageTime = unit.MovementSystem.NoDamageTime - math.min(unit.MovementSystem.NoDamageTime, timePassed)
+
+
+
+				if  unit.MovementSystem.Target then
+					local posUnit = unit:GetAbsOrigin()
+					local posTarget = unit.MovementSystem.Target:GetAbsOrigin()
+					local dist = (posUnit - posTarget):Length2D()
+
+					local tAtkRange = unit.MovementSystem.Target:GetAttackRange()
+					local uAtkRange = unit:GetAttackRange()
+					--local distNav = GridNav:FindPathLength(posUnit, posTarget)
+					if tAtkRange < dist then
+						if dist > uAtkRange + MAX_DISTANCE_AGGRO then --or distNav > MAX_DISTANCE_AGGRO then
+							self:UnitSetTarget(unit, nil, true)
+						end
+					end
+				end
+
+				if  unit.MovementSystem.Target then
+
+					if unit.MovementSystem.TargetTime >= unit.MovementSystem.MinTargetTime then
+						unit.MovementSystem.CanChangeTarget = true
+					end
+
+					--print(string.format("target time: %d", unit.MovementSystem.TargetTime))
+					unit.MovementSystem.TargetTime = unit.MovementSystem.TargetTime + timePassed
 				end
 			end
 		end
+	end
 
-		
-		if unit.MovementSystem.Target then
-			self:UnitAttackTarget(unit, unit.MovementSystem.Target)
-			unit.MovementSystem.ForceUpdate = true
-			----print("unitthinkattack")
+	if unit.MovementSystem.Target then
+		if not unit.MovementSystem.IgnoreSight then
+			if unit.MovementSystem.NoDamageTime + unit.MovementSystem.NoDamageTimeTarget > MAX_TIME_NO_DAMAGE then
+				unit.MovementSystem.IgnoreSight = true
+				unit.MovementSystem.NoDamageTime = 0
+				unit.MovementSystem.NoDamageTimeTarget = 0
+
+				if unit.MovementSystem.AggroType < AGGRO_TYPE_DAMAGE_OWN then
+					self:UnitSetTarget(unit, nil, false)
+				end
+			elseif unit.MovementSystem.NoDamageTimeTarget < MAX_TIME_NO_DAMAGE_TARGET then
+				unit.MovementSystem.NoDamageTimeTarget = unit.MovementSystem.NoDamageTimeTarget + math.min(timePassed, MAX_TIME_NO_DAMAGE_TARGET - unit.MovementSystem.NoDamageTimeTarget)
+			end
+		end
+	else
+		if unit.MovementSystem.IgnoreSight == true then
+			if unit.MovementSystem.NoDamageTime > MAX_TIME_IGNORE_SIGHT then
+				unit.MovementSystem.IgnoreSight = false
+				unit.MovementSystem.NoDamageTime = 0
+			else
+				unit.MovementSystem.NoDamageTime = unit.MovementSystem.NoDamageTime + timePassed
+			end
 		else
-			----print("UnitThinkMovement")
-
-			self:UnitThinkMovement(unit)
+			if unit.MovementSystem.NoDamageTime > 0 then
+				unit.MovementSystem.NoDamageTime = unit.MovementSystem.NoDamageTime - math.min(unit.MovementSystem.NoDamageTime, timePassed)
+			end
 		end
+	end
+
+	
+	if unit.MovementSystem.Target then
+		self:UnitAttackTarget(unit, unit.MovementSystem.Target)
+		unit.MovementSystem.ForceUpdate = true
+		----print("unitthinkattack")
+	else
+		----print("UnitThinkMovement")
+
+		self:UnitThinkMovement(unit)
+	end
 
 
-		if unit.MovementSystem.Target then
-			----DebugDrawText(unit:GetOrigin(), string.format("Target: %d", unit.MovementSystem.TargetTime), true, 0.25)
-			--DebugDrawText(unit:GetOrigin(), string.format("it: %d", unit.MovementSystem.NoDamageTime + unit.MovementSystem.NoDamageTimeTarget), true, 0.25)
-		elseif unit.MovementSystem.IgnoreTarget then
-			--DebugDrawText(unit:GetOrigin(), string.format("Ignore: %d", unit.MovementSystem.IgnoreTime), true, 0.25)
-		end
+	if unit.MovementSystem.Target then
+		----DebugDrawText(unit:GetOrigin(), string.format("Target: %d", unit.MovementSystem.TargetTime), true, 0.25)
+		--DebugDrawText(unit:GetOrigin(), string.format("it: %d", unit.MovementSystem.NoDamageTime + unit.MovementSystem.NoDamageTimeTarget), true, 0.25)
+	elseif unit.MovementSystem.IgnoreTarget then
+		--DebugDrawText(unit:GetOrigin(), string.format("Ignore: %d", unit.MovementSystem.IgnoreTime), true, 0.25)
 	end
 end
 
@@ -644,6 +695,26 @@ end
 function  CMovementSystem:UnitAggroTarget( unit, target, timeMax, timeMin, aggroType, overwrite)
 	if unit.MovementSystem == nil or target.MovementSystem == nil then
 		return
+	end
+
+	if unit.MovementSystem.UnitType == UNIT_TYPE_MOVE then
+		return
+	end
+
+	if unit.MovementSystem.UnitType == UNIT_TYPE_GUARD_UNIT then
+		local dist = (target:GetAbsOrigin() - unit.MovementSystem.GuardUnit:GetAbsOrigin()):Length2D()
+
+		if dist > unit.MovementSystem.GuardRangeAggro then
+			return
+		end
+	end
+
+	if unit.MovementSystem.UnitType == UNIT_TYPE_GUARD_POINT then
+		local dist = (target:GetAbsOrigin() - unit.MovementSystem.GuardPoint):Length2D()
+
+		if dist > unit.MovementSystem.GuardRangeAggro then
+			return
+		end
 	end
 
 	if  unit.MovementSystem.Type == MOVEMENT_SYSTEM_TYPE_ATTACKER and target.MovementSystem.Type == MOVEMENT_SYSTEM_TYPE_DEFENDER and unit:CanEntityBeSeenByMyTeam(target) then
@@ -709,6 +780,12 @@ end
 
 function CMovementSystem:UnitThinkMovement( unit )
 	if UnitIsDead(unit) then
+		return
+	end
+
+	if unit.MovementSystem.UnitType == UNIT_TYPE_GUARD_UNIT or unit.MovementSystem.UnitType == UNIT_TYPE_GUARD_POINT then
+		self:UnitMoveToPosition(unit, unit.MovementSystem.MoveOrder)
+
 		return
 	end
 

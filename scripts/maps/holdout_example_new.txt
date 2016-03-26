@@ -1,6 +1,6 @@
 "dota_holdout"
 {
-	"PrepTimeBetweenRounds"			"1"
+	"PrepTimeBetweenRounds"			"20"
 	"ItemExpireTime"				"10"
 	"RestoreHPAfterRound"			"0"
 	"RestoreMPAfterRound"			"0"
@@ -70,6 +70,7 @@
 		"BagCount"					"45"
 		"BagVariance"				"100"
 		"FixedXP"					"5400"
+		"Boss"						"0"
 
 		"Packs"
 		{

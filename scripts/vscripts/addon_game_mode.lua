@@ -10,6 +10,11 @@ Holdout Example
 		"b"		Boolean
 ]]
 
+if CHoldoutGameMode == nil then
+	CHoldoutGameMode = class({})
+	--print (string.format( "Create Class") )
+end
+
 require( "holdout_game_round" )
 require( "holdout_game_spawner" )
 require( "misc/trigger" )
@@ -18,18 +23,18 @@ require( "misc/utility_functions" )
 require( "boss/holdout_game_bosshandler" )
 require( "ai/movement_system" )
 require( "bottle/bottle_system" )
-require( "misc/gate_system")
-require('libraries/projectiles')
-
-if CHoldoutGameMode == nil then
-	CHoldoutGameMode = class({})
-	--print (string.format( "Create Class") )
-end
+require( "misc/gate_system" )
+require( "libraries/projectiles" )
 
 _TICKRATE = 0.2
 
 INTERVALL_SHOW_EXPERIENCE_MIN = 2.0
 INTERVALL_SHOW_EXPERIENCE_MAX = 7.0
+
+TREE_HEALTH = 10
+START_LUMBER = 500
+
+
 
 MAX_LEVEL = 125
 
@@ -41,32 +46,7 @@ for i=1, MAX_LEVEL - 1 do
 end
 
 
-_BoundingBox = {
-	{
-		Vector(-7729, 25, 129),
-		Vector(-1290, -7550, 129),
-	},
 
-	{
-		Vector(-7833, 7601, 0),
-		Vector(-1209, -1814, 0),
-	},
-}
-
-_vecTeleporter = 
-{
-	{
-		Vector(-6308, -3175, 0),
-		Vector(-2649, -3200, 0),	
-	},
-
-	{
-		Vector(-7471, 2111, 0),
-		Vector(-1479, 2094, 0),
-	},
-}
-
-_VecArena2 = Vector(-4485, -6108, 0)
 --_VecArena2.z = GetGroundHeight(_VecArena2, nil)
 
 _vecTeleporter[1][1][3] = GetGroundHeight(_vecTeleporter[1][1], nil)
@@ -94,6 +74,11 @@ function Precache( context )
 	PrecacheResource( "particle", "particles/econ/items/tinker/boots_of_travel/teleport_end_bots.vpcf", context )
 	PrecacheResource( "particle", "particles/units/heroes/hero_mirana/mirana_spell_arrow.vpcf", context )
 	PrecacheResource( "particle", "particles/econ/items/alchemist/alchemist_midas_knuckles/alch_knuckles_lasthit_coins.vpcf", context )
+	PrecacheResource( "particle", "particles/test_particle/treant_orb.vpcf", context )
+	PrecacheResource( "particle", "particles/units/heroes/hero_wisp/wisp_guardian_explosion_small.vpcf", context )
+	PrecacheResource( "particle", "particles/units/heroes/hero_treant/treant_eyesintheforest_d.vpcf", context )
+	PrecacheResource( "particle", "particles/wisp_force_field.vpcf", context )
+	PrecacheResource( "particle", "particles/units/heroes/hero_furion/furion_teleport_end.vpcf", context )
 	
 
 	PrecacheItemByNameSync( "item_tombstone", context )
@@ -110,9 +95,6 @@ function Activate()
 		--print (string.format( "Activated") )
 		GameRules.holdOut:InitGameMode()
 end
-
-TREE_HEALTH = 10
-START_LUMBER = 500
 
 function CHoldoutGameMode:InitGameMode()
 --print (string.format( "InitGameMode") )
@@ -140,6 +122,7 @@ function CHoldoutGameMode:InitGameMode()
 	self._gateSystem:Init(self, DOTA_TEAM_GOODGUYS)
 
 	self._bFirstRoundStarted = false
+	self._bFirstRoundPrepared = false
 
 	self._fGoldPerSecond = 0.5
 	
@@ -181,34 +164,12 @@ function CHoldoutGameMode:InitGameMode()
 	fSheepNextIdle = GameRules:GetGameTime()
 	fSheepIdleIntervall = 4.0
 
-	GameRules:SetCustomGameTeamMaxPlayers( DOTA_TEAM_GOODGUYS, 4 )
-	GameRules:SetCustomGameTeamMaxPlayers( DOTA_TEAM_BADGUYS, 0 )
+	self:ConfigGameRules()
 
-	self:_ReadGameConfiguration()
-	GameRules:SetTimeOfDay( 0.75 )
-	GameRules:SetHeroRespawnEnabled( true)
-	GameRules:SetUseUniversalShopMode( true )
-	GameRules:SetHeroSelectionTime( 30.0 )
-	GameRules:SetPreGameTime( 2.0 )
-	GameRules:SetPostGameTime( 60.0 )
-	GameRules:SetTreeRegrowTime( 120.0 )
-	GameRules:SetHeroMinimapIconScale( 0.7 )
-	GameRules:SetCreepMinimapIconScale( 0.7 )
-	GameRules:SetRuneMinimapIconScale( 0.7 )
-	GameRules:SetGoldTickTime( 0.5 )
-	GameRules:SetGoldPerTick( 0 )
-	GameRules:SetUseBaseGoldBountyOnHeroes(false)
-	GameRules:SetRuneSpawnTime(180.0)
+	GameMode:SetUseCustomHeroLevels ( true )
+	GameMode:SetCustomHeroMaxLevel ( MAX_LEVEL )
 
-	GameRules:GetGameModeEntity():SetRemoveIllusionsOnDeath( false )
-	GameRules:GetGameModeEntity():SetTopBarTeamValuesOverride( true )
-	GameRules:GetGameModeEntity():SetTopBarTeamValuesVisible( false )
-	GameRules:GetGameModeEntity():SetLoseGoldOnDeath( false )
-
-	mode:SetUseCustomHeroLevels ( true )
-	mode:SetCustomHeroMaxLevel ( MAX_LEVEL )
-
-	mode:SetCustomXPRequiredToReachNextLevel( XP_PER_LEVEL_TABLE )
+	GameMode:SetCustomXPRequiredToReachNextLevel( XP_PER_LEVEL_TABLE )
 
 
 --	GameRules:GetGameModeEntity():SetHUDVisible( DOTA_HUD_VISIBILITY_TOP_TIMEOFDAY, false )
@@ -238,6 +199,8 @@ function CHoldoutGameMode:InitGameMode()
 		tower:AddNewModifier( tower, nil, "modifier_invulnerable", {} )
 	end
 
+	GameMode:SetExecuteOrderFilter( Dynamic_Wrap( CHoldoutGameMode, "FilterExecuteOrder" ), self )
+
 	-- Hook into game events allowing reload of functions at run time
 	ListenToGameEvent( "npc_spawned", Dynamic_Wrap( CHoldoutGameMode, "OnNPCSpawned" ), self )
 	ListenToGameEvent( "player_reconnected", Dynamic_Wrap( CHoldoutGameMode, 'OnPlayerReconnected' ), self )
@@ -264,6 +227,32 @@ function CHoldoutGameMode:InitGameMode()
 	)
 end
 
+function CHoldoutGameMode:ConfigGameRules()
+	GameRules:SetCustomGameTeamMaxPlayers( DOTA_TEAM_GOODGUYS, 4 )
+	GameRules:SetCustomGameTeamMaxPlayers( DOTA_TEAM_BADGUYS, 0 )
+
+	self:_ReadGameConfiguration()
+	GameRules:SetTimeOfDay( 0.75 )
+	GameRules:SetHeroRespawnEnabled( true)
+	GameRules:SetUseUniversalShopMode( true )
+	GameRules:SetHeroSelectionTime( 30.0 )
+	GameRules:SetPreGameTime( 2.0 )
+	GameRules:SetPostGameTime( 60.0 )
+	GameRules:SetTreeRegrowTime( 120.0 )
+	GameRules:SetHeroMinimapIconScale( 0.7 )
+	GameRules:SetCreepMinimapIconScale( 0.7 )
+	GameRules:SetRuneMinimapIconScale( 0.7 )
+	GameRules:SetGoldTickTime( 0.5 )
+	GameRules:SetGoldPerTick( 0 )
+	GameRules:SetUseBaseGoldBountyOnHeroes(false)
+	GameRules:SetRuneSpawnTime(180.0)
+
+	GameRules:GetGameModeEntity():SetRemoveIllusionsOnDeath( false )
+	GameRules:GetGameModeEntity():SetTopBarTeamValuesOverride( true )
+	GameRules:GetGameModeEntity():SetTopBarTeamValuesVisible( false )
+	GameRules:GetGameModeEntity():SetLoseGoldOnDeath( false )
+end
+
 
 -- Read and assign configurable keyvalues if applicable
 function CHoldoutGameMode:_ReadGameConfiguration()
@@ -286,10 +275,10 @@ function CHoldoutGameMode:_ReadGameConfiguration()
 	self:_ReadLootItemDropsConfiguration( kv["ItemDrops"] )
 	self:_ReadRoundConfigurations( kv )
 	
-	mode = GameRules:GetGameModeEntity()        
-    mode:SetCameraDistanceOverride(1600.0)
-	mode:SetBuybackEnabled( false)
-	mode:SetFogOfWarDisabled(false)
+	GameMode = GameRules:GetGameModeEntity()        
+    GameMode:SetCameraDistanceOverride(1600.0)
+	GameMode:SetBuybackEnabled( false)
+	GameMode:SetFogOfWarDisabled(false)
 end
 
 
@@ -439,8 +428,9 @@ function CHoldoutGameMode:OnUnitRightClick( event )
 	--print(mPos)
 
 	if unit:IsRealHero() then
+		--ApplyModifier(unit, unit, "modifier_wisp_center_explosion", {Duration = 2}, true)
 		GameRules.holdOut:HeroAddExperience(unit, 0.5, DOTA_ModifyXP_CreepKill, true, false)
-		unit.MoveOrder = mPos
+		--[[unit.MoveOrder = mPos
 		unit.TargetOrder = target
 		if target then
 			unit.TargetOrder = EntIndexToHScript(target)
@@ -449,7 +439,7 @@ function CHoldoutGameMode:OnUnitRightClick( event )
 		unit.MoveOrderPickedUpGlyph = false
 		--print(unit.MoveOrder)
 
-		UnitProcessMovement(unit)
+		UnitProcessMovement(unit)]]
 	end
 
 	local dist = (mPos - unit:GetAbsOrigin()):Length()
@@ -457,7 +447,7 @@ function CHoldoutGameMode:OnUnitRightClick( event )
 	local distpath = GridNav:FindPathLength(mPos, unit:GetAbsOrigin())
 
 	--DebugDrawText(unit:GetAbsOrigin() + Vector(0,0,300), string.format("d: %f p: %f", dist, distpath) , true, 2)
-	--self._bottleSystem:SpawnGlyphOnPosition(unit:GetAbsOrigin(), 1, 1)
+	--GameRules.holdOut._bottleSystem:SpawnGlyphOnPosition(mPos, 1, 1)
 
 	--print(eventName)
 	--GameRules.holdOut._movementSystem:OnUnitRightClick( event )
@@ -474,7 +464,7 @@ function CHoldoutGameMode:OnUnitRightClick( event )
 
 	--unit:AddSpeechBubble(DOTA_SPEECH_USER_TEAM, "asdsadasd", 5, 0, 0)
 	--unit:DestroyAllSpeechBubbles()
-	print(event)
+	--print(event)
 	counter = counter + 1
 
 	if counter >= 9 then
@@ -483,8 +473,8 @@ function CHoldoutGameMode:OnUnitRightClick( event )
 end
 
 
-function UnitProcessMovement( unit )
-	print("processmovement")
+function CHoldoutGameMode:UnitProcessMovement( unit )
+	--print("processmovement")
 
 	local orig = unit:GetAbsOrigin()
 	local bSetMoveOrder = true
@@ -493,16 +483,17 @@ function UnitProcessMovement( unit )
 	if unit.MoveOrder ~= nil then
 
 		unit.UseTeleporter = nil
-		print("processmovement2")
+		--print("processmovement2")
 
 		--print(PosInBoundingBox(org, _BoundingBox[1]))
 		--print(PosInBoundingBox(unit.MoveOrder, _BoundingBox[2]))
 
 		local atkRange = 0
 
-		print(unit.TargetOrder)
+		--print(unit.TargetOrder)
 
 		if unit.TargetOrder then
+			--print(unit.TargetOrder)
 			target = unit.TargetOrder
 			atkRange = unit:GetAttackRange()
 
@@ -514,7 +505,7 @@ function UnitProcessMovement( unit )
 		end
 
 		if bSetMoveOrder then
-			print("setmoveorder")
+			--print("setmoveorder")
 			if (PosInBoundingBox(orig, _BoundingBox[1]) or PosInRangeOfPos(orig, _VecArena2, 1500)) and PosInBoundingBox(unit.MoveOrder, _BoundingBox[2]) and not PosInBoundingBox(unit.MoveOrder, _BoundingBox[1]) and not PosInRangeOfPos(unit.MoveOrder, _VecArena2, 1500) then
 				DebugDrawText(unit:GetAbsOrigin() + Vector(0,0,400), string.format("1 to 2") , true, 4)
 				local distSelf1 = (_vecTeleporter[1][1] - orig):Length()
@@ -572,10 +563,13 @@ function UnitProcessMovement( unit )
 	end
 
 	local sysOrder = nil
+
 	local tpOrder = nil
 
+	unit.TeleportOrder = nil
+
 	if unit.UseTeleporter then
-		print("useteleporter")
+		--print("useteleporter")
 		DebugDrawLine(unit:GetAbsOrigin(), unit.UseTeleporter, 255, 0, 0, true, 4)
 
 		sysOrder =
@@ -585,43 +579,46 @@ function UnitProcessMovement( unit )
 			Position = unit.UseTeleporter,
 		}
 
-		if target then
-			print("useteleporter with target")
+		if unit.current_order == DOTA_UNIT_ORDER_ATTACK_TARGET and target then
+			--print("useteleporter with target")
 			tpOrder =
 			{
 				UnitIndex = unit:entindex(),
 				OrderType = DOTA_UNIT_ORDER_ATTACK_TARGET,
 				TargetIndex = target:entindex(),
 			}
-		else
-			print("useteleporter with move")
+		elseif unit.current_order == DOTA_UNIT_ORDER_MOVE_TO_POSITION or unit.current_order == DOTA_UNIT_ORDER_ATTACK_MOVE then
+			--print("useteleporter with move")
 			tpOrder =
 			{
 				UnitIndex = unit:entindex(),
-				OrderType = DOTA_UNIT_ORDER_MOVE_TO_POSITION,
+				OrderType = unit.current_order,
 				Position = unit.MoveOrder,
 			}
 		end
 
 		unit.TeleportOrder = tpOrder
 
-		print("movingunit")
-
-		
-	elseif target then
-		print("in atk range")
+		--print("movingunit")	
+	elseif unit.current_order == DOTA_UNIT_ORDER_ATTACK_TARGET and target then
+		--print("in atk range")
 		sysOrder =
 		{
 			UnitIndex = unit:entindex(),
 			OrderType = DOTA_UNIT_ORDER_ATTACK_TARGET,
 			TargetIndex = target:entindex(),
 		}
+	elseif unit.current_order == DOTA_UNIT_ORDER_MOVE_TO_POSITION or unit.current_order == DOTA_UNIT_ORDER_ATTACK_MOVE then
+		--print("default order")
+		sysOrder =
+		{
+			UnitIndex = unit:entindex(),
+			OrderType = unit.current_order,
+			Position = unit.MoveOrder,
+		}
 	end
 
-	Timers:CreateTimer(0.01, function()
-		ExecuteOrderFromTable(sysOrder)
-	end
-	)
+	ExecuteOrderFromTable(sysOrder)
 end
 
 function CHoldoutGameMode:_PredictMovement()
@@ -952,6 +949,11 @@ end
 
 
 function CHoldoutGameMode:_ThinkPrepTime()
+	if not self._bFirstRoundPrepared then
+		self._vRounds[ self._nRoundNumber ]:Prepare()
+		self._bFirstRoundPrepared = true
+	end
+
 	if GameRules:GetGameTime() >= self._flPrepTimeEnd then
 		self._flPrepTimeEnd = nil
 		if self._entPrepTimeQuest then
@@ -1244,7 +1246,6 @@ function CHoldoutGameMode:OnPlayerReconnected( event )
 	end
 end
 
-
 function CHoldoutGameMode:OnEntityKilled( event )
 
 	self._movementSystem:OnEntityKilled(event)
@@ -1446,3 +1447,106 @@ function CHoldoutGameMode:_StatusReportConsoleCommand( cmdName )
 	end
 	--print( "*** Holdout Status Report End *** ")
 end
+
+
+function CHoldoutGameMode:FilterExecuteOrder( filterTable )
+
+    local units = filterTable["units"]
+    local order_type = filterTable["order_type"]
+    local issuer = filterTable["issuer_player_id_const"]
+    local abilityIndex = filterTable["entindex_ability"]
+    local targetIndex = filterTable["entindex_target"]
+    local x = tonumber(filterTable["position_x"])
+    local y = tonumber(filterTable["position_y"])
+    local z = tonumber(filterTable["position_z"])
+    local point = Vector(x,y,z)
+    local queue = tobool(filterTable["queue"])
+
+    if units then
+        for n,unit_index in pairs(units) do
+            local unit = EntIndexToHScript(unit_index)
+            if unit and IsValidEntity(unit) then
+                unit.current_order = order_type -- Track the last executed order
+                unit.orderTable = filterTable -- Keep the whole order table, to resume it later if needed
+            end
+        end
+    end
+
+    -- Skip Prevents order loops
+    local unit = EntIndexToHScript(units["0"])
+
+    if unit then
+    	if unit:GetTeamNumber() ~= self._nTeam or not unit:IsControllableByAnyPlayer() then
+    		return true
+    	end
+
+        if unit.skip then
+            unit.skip = false
+            --print("skip order")
+          return true
+        end
+    end
+
+    ------------------------------------------------
+    --               Attack Orders                --
+    ------------------------------------------------
+    if order_type == DOTA_UNIT_ORDER_ATTACK_TARGET or order_type == DOTA_UNIT_ORDER_MOVE_TO_POSITION or order_type == DOTA_UNIT_ORDER_ATTACK_MOVE then
+        local target = EntIndexToHScript(targetIndex)
+        --print("target order")
+       -- if not target then print("ERROR, ATTACK WITHOUT TARGET") return true end
+
+        for n, unit_index in pairs(units) do
+            local unit = EntIndexToHScript(unit_index)
+            if unit then
+                unit.MoveOrder = point
+
+                unit.TargetOrder = target
+
+                unit.MoveOrderTime = GameRules:GetGameTime()
+                unit.MoveOrderPickedUpGlyph = false
+                unit.skip = true
+
+                --print("before process")
+                self:UnitProcessMovement(unit)
+            end
+        end
+       return false
+    end
+
+   return true
+    --return false
+end
+
+
+ORDERS = {
+    [0] = "DOTA_UNIT_ORDER_NONE",
+    [1] = "DOTA_UNIT_ORDER_MOVE_TO_POSITION",
+    [2] = "DOTA_UNIT_ORDER_MOVE_TO_TARGET",
+    [3] = "DOTA_UNIT_ORDER_ATTACK_MOVE",
+    [4] = "DOTA_UNIT_ORDER_ATTACK_TARGET",
+    [5] = "DOTA_UNIT_ORDER_CAST_POSITION",
+    [6] = "DOTA_UNIT_ORDER_CAST_TARGET",
+    [7] = "DOTA_UNIT_ORDER_CAST_TARGET_TREE",
+    [8] = "DOTA_UNIT_ORDER_CAST_NO_TARGET",
+    [9] = "DOTA_UNIT_ORDER_CAST_TOGGLE",
+    [10] = "DOTA_UNIT_ORDER_HOLD_POSITION",
+    [11] = "DOTA_UNIT_ORDER_TRAIN_ABILITY",
+    [12] = "DOTA_UNIT_ORDER_DROP_ITEM",
+    [13] = "DOTA_UNIT_ORDER_GIVE_ITEM",
+    [14] = "DOTA_UNIT_ORDER_PICKUP_ITEM",
+    [15] = "DOTA_UNIT_ORDER_PICKUP_RUNE",
+    [16] = "DOTA_UNIT_ORDER_PURCHASE_ITEM",
+    [17] = "DOTA_UNIT_ORDER_SELL_ITEM",
+    [18] = "DOTA_UNIT_ORDER_DISASSEMBLE_ITEM",
+    [19] = "DOTA_UNIT_ORDER_MOVE_ITEM",
+    [20] = "DOTA_UNIT_ORDER_CAST_TOGGLE_AUTO",
+    [21] = "DOTA_UNIT_ORDER_STOP",
+    [22] = "DOTA_UNIT_ORDER_TAUNT",
+    [23] = "DOTA_UNIT_ORDER_BUYBACK",
+    [24] = "DOTA_UNIT_ORDER_GLYPH",
+    [25] = "DOTA_UNIT_ORDER_EJECT_ITEM_FROM_STASH",
+    [26] = "DOTA_UNIT_ORDER_CAST_RUNE",
+    [27] = "DOTA_UNIT_ORDER_PING_ABILITY",
+    [28] = "DOTA_UNIT_ORDER_MOVE_TO_DIRECTION",
+    [29] = "DOTA_UNIT_ORDER_PATROL",
+}

@@ -40,7 +40,7 @@ end
 
 
 function OnRadiantGoalEnter(trigger)
-	print(trigger.activator)
+	--print(trigger.activator)
 	local u = trigger.activator
 	GameRules.holdOut:OnUnitEntersGoal(u, DOTA_TEAM_GOODGUYS)
 end
@@ -81,7 +81,7 @@ function TeleportStart(event)
 				Timers:CreateTimer(0.1, function()
 					UnitTeleportToPosition(unit, point, true)
 					if unit.UseTeleporter == nil then
-						unit.MoveOrder = nil
+						unit.TeleportOrder = nil
 					end
 					
 					if unit.TeleportOrder ~= nil then
@@ -125,8 +125,8 @@ function BottleWaterEnter(event)
 		if trigger.Moonwell ~= nil then
 			--print("moonwell enter")
 			trigger.Moonwell:AddBottleUnit(unit)
-			DebugDrawLine(trigger:GetAbsOrigin(), unit:GetAbsOrigin(), 0, 255, 0, true, 4)
-			DebugDrawText(unit:GetAbsOrigin(), string.format("dist: %f", (trigger:GetAbsOrigin() - unit:GetAbsOrigin()):Length()), true, 4)
+			--DebugDrawLine(trigger:GetAbsOrigin(), unit:GetAbsOrigin(), 0, 255, 0, true, 4)
+			--DebugDrawText(unit:GetAbsOrigin(), string.format("dist: %f", (trigger:GetAbsOrigin() - unit:GetAbsOrigin()):Length()), true, 4)
 		end
 	end
 end
@@ -139,8 +139,8 @@ function BottleWaterLeave(event)
 		if trigger.Moonwell ~= nil then
 			--print("moonwell leave")
 			trigger.Moonwell:RemoveBottleUnit(unit)
-			DebugDrawLine(trigger:GetAbsOrigin(), unit:GetAbsOrigin(), 0, 255, 0, true, 4)
-			DebugDrawText(unit:GetAbsOrigin(), string.format("dist: %f", (trigger:GetAbsOrigin() - unit:GetAbsOrigin()):Length()), true, 4)
+			--DebugDrawLine(trigger:GetAbsOrigin(), unit:GetAbsOrigin(), 0, 255, 0, true, 4)
+			--DebugDrawText(unit:GetAbsOrigin(), string.format("dist: %f", (trigger:GetAbsOrigin() - unit:GetAbsOrigin()):Length()), true, 4)
 		end
 	end
 end

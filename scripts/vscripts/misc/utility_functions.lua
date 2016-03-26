@@ -4,6 +4,36 @@
 -- Handle messages
 ---------------------------------------------------------------------------
 
+
+_BoundingBox = {
+    {
+        Vector(-7729, 25, 129),
+        Vector(-1290, -7550, 129),
+    },
+
+    {
+        Vector(-7833, 7601, 0),
+        Vector(-1209, -1814, 0),
+    },
+}
+
+_vecTeleporter = 
+{
+    {
+        Vector(-6308, -3175, 0),
+        Vector(-2649, -3200, 0),    
+    },
+
+    {
+        Vector(-7471, 2111, 0),
+        Vector(-1479, 2094, 0),
+    },
+}
+
+_VecArena2 = Vector(-4485, -6108, 0)
+
+
+
 ItemModifierApllier = CreateItem("item_modifier_applier", nil, nil)
 
 function ApplyModifier(source, target, modifier_name, modifierArgs, overwrite)
@@ -263,7 +293,7 @@ function SafeSpawnCreature(name, pos, aoeMin, aoeMax, height, distMax, npcOwner,
 end
 
 function UnitSpawnAdd( unit, name, aoeMin, aoeMax, distMax, npcOwner, unitOwner )
-    if unit then
+    if UnitAlive(unit) then
         local unitPos = unit:GetAbsOrigin()
 
         return SafeSpawnCreature(name, unitPos, aoeMin, aoeMax, unitPos.z, distMax, npsOwner, unitOwner, unit:GetTeamNumber())
@@ -596,7 +626,7 @@ end
 
 
 function SetPhasing(unit, time)
-    if unit:IsNull() or not unit:IsAlive() then
+    if not UnitAlive(unit) then
         return
     end
     
@@ -604,6 +634,19 @@ function SetPhasing(unit, time)
         unit:RemoveModifierByName("modifier_phasing_passive")
     else
         ApplyModifier(unit, unit, "modifier_phasing_passive", {duration=time})
+    end
+end
+
+
+function DisarmUnit(unit, time)
+    if not UnitAlive(unit) then
+        return
+    end
+
+    if time == 0 then
+        unit:RemoveModifierByName("modifier_disarmed")
+    else
+        ApplyModifier(unit, unit, "modifier_disarmed", {duration=time})
     end
 end
 
@@ -648,11 +691,19 @@ end
 
 function TestSpawn(name, spawner, player, team)
 	local entSpawn = Entities:FindByName(nil, spawner)		
-		if entSpawn ~= nil then
-			local point = entSpawn:GetOrigin()
-			local unit = CreateUnitByName(name, point, true, nil, nil, team)
-			unit:SetControllableByPlayer(player, false)
-		else 
-			--print("Error: No Spawner found!")
-		end
+	if entSpawn ~= nil then
+		local point = entSpawn:GetOrigin()
+		local unit = CreateUnitByName(name, point, true, nil, nil, team)
+		unit:SetControllableByPlayer(player, false)
+	else 
+		--print("Error: No Spawner found!")
+	end
+end
+
+function tobool(s)
+    if s=="true" or s=="1" or s==1 then
+        return true
+    else --nil "false" "0"
+        return false
+    end
 end
